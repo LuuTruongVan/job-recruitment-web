@@ -5,9 +5,10 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PostJob from './components/PostJob';
 import JobList from './components/JobList';
+import ManageJobs from './components/ManageJobs';
 import Home from './components/Home'; // Import Home component
 import axios from 'axios';
-
+import logo from './assets/img/logo.jpg';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -47,10 +48,9 @@ function App() {
 
   return (
     <div className="app">
-      <nav className="navbar navbar-expand-lg navbar-light">
+      <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container-fluid">
-        <img className="logo" src="/assets/img/logo.jpg" alt="Logo" style={{ width: '100px' }} />
-
+          <img src={logo} alt="Logo" style={{ width: '50px' }} />
           <div className="navbar-nav ms-auto">
             {user ? (
               <>
@@ -81,7 +81,7 @@ function App() {
           </div>
         </div>
       </nav>
-      <div className="container"> {/* Loại bỏ mt-4 */}
+      <div className="container mt-4">
         <Routes>
           <Route path="/" element={<Home />} /> {/* Trang Home làm trang mặc định */}
           <Route path="/home" element={<Home />} />

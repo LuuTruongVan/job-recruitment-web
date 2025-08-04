@@ -1,58 +1,62 @@
 import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import '../componentCss/Login.css';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setCredentials({ ...credentials, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic mẫu (thay bằng API sau)
-    if (email === 'test@example.com' && password === '123456') {
-      alert('Đăng nhập thành công! (Mẫu)');
-    } else {
-      setError('Email hoặc mật khẩu không đúng');
+    setMessage('');
+    try {
+      console.log('Sending login request to /users/get:', credentials);
+      const response = await axios.post('/users/get', credentials);
+      if (response.data.token) {
+        localStorage.setItem('employer_token', response.data.token);
+        setMessage('Đăng nhập thành công!');
+        navigate('/');
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'Lỗi đăng nhập!');
+      console.error('Login error:', error.response?.data || error.message);
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="card p-4 shadow-sm" style={{ maxWidth: '400px', width: '100%' }}>
-        <div className="text-center mb-4">
-          <img src="https://via.placeholder.com/100?text=HRM+Logo" alt="HRM Logo" className="img-fluid" />
-          <h2 className="mt-3 text-primary">Đăng nhập</h2>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email hoặc Số điện thoại</label>
-            <input
-              type="text"
-              className="form-control"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Mật khẩu</label>
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button type="submit" className="btn btn-primary w-100 mb-3">Đăng nhập</button>
-          <div className="d-flex justify-content-between">
-            <a href="#" className="text-decoration-none text-primary">Quên mật khẩu?</a>
-            <a href="/register" className="text-decoration-none text-primary">Đăng ký</a>
-          </div>
-        </form>
-        {error && <div className="text-danger mt-2">{error}</div>}
-      </div>
+    <div className="container mt-4">
+      <h2>Đăng Nhập</h2>
+      {message && <Alert variant="danger">{message}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            name="email"
+            value={credentials.email}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Mật khẩu</Form.Label>
+          <Form.Control
+            type="password"
+            name="password"
+            value={credentials.password} // Sửa typo từ credentials.credentials
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Button variant="primary" type="submit">Đăng Nhập</Button>
+      </Form>
     </div>
   );
 };

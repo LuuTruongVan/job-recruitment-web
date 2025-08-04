@@ -1,71 +1,71 @@
 import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
+import axios from 'axios';
 
 const Register = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [role, setRole] = useState('candidate');
-  const [error, setError] = useState('');
+  const [userData, setUserData] = useState({ email: '', password: '', role: 'candidate' });
+  const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setUserData({ ...userData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Logic mẫu
-    if (email && password.length >= 6) {
-      alert(`Đăng ký thành công với vai trò ${role}! (Mẫu)`);
-    } else {
-      setError('Email và mật khẩu (tối thiểu 6 ký tự) là bắt buộc');
+    setMessage('');
+    try {
+      console.log('Sending register request to /users/add:', userData); // Log để debug
+      const response = await axios.post('/users/add', userData);
+      if (response.status === 201) {
+        setMessage('Đăng ký thành công!');
+        setUserData({ email: '', password: '', role: 'candidate' });
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || 'Lỗi đăng ký!');
+      console.error('Register error:', error.response?.data || error.message); // Log lỗi
     }
   };
 
   return (
-    <div className="container d-flex justify-content-center align-items-center min-vh-100">
-      <div className="card p-4 shadow-sm" style={{ maxWidth: '400px', width: '100%' }}>
-        <div className="text-center mb-4">
-          <img src="https://via.placeholder.com/100?text=HRM+Logo" alt="HRM Logo" className="img-fluid" />
-          <h2 className="mt-3 text-primary">Đăng ký</h2>
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="email" className="form-label">Email</label>
-            <input
-              type="text"
-              className="form-control"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="password" className="form-label">Mật khẩu</label>
-            <input
-              type="password"
-              className="form-control"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="role" className="form-label">Vai trò</label>
-            <select
-              className="form-select"
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              required
-            >
-              <option value="candidate">Ứng viên</option>
-              <option value="employer">Nhà tuyển dụng</option>
-            </select>
-          </div>
-          <button type="submit" className="btn btn-primary w-100 mb-3">Đăng ký</button>
-          <div className="text-center">
-            <a href="/login" className="text-decoration-none text-primary">Đăng nhập</a>
-          </div>
-        </form>
-        {error && <div className="text-danger mt-2">{error}</div>}
-      </div>
+    <div className="container mt-4">
+      <h2>Đăng Ký</h2>
+      {message && <Alert variant="danger">{message}</Alert>}
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Email</Form.Label>
+          <Form.Control
+            type="email"
+            name="email"
+            value={userData.email}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Mật khẩu</Form.Label>
+          <Form.Control
+            type="password"
+            name="password"
+            value={userData.password}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Role</Form.Label>
+          <Form.Control
+            as="select"
+            name="role"
+            value={userData.role}
+            onChange={handleChange}
+            required
+          >
+            <option value="candidate">Candidate</option>
+            <option value="employer">Employer</option>
+          </Form.Control>
+        </Form.Group>
+        <Button variant="primary" type="submit">Đăng Ký</Button>
+      </Form>
     </div>
   );
 };

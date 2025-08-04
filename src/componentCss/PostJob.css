@@ -1,0 +1,65 @@
+/* src/components/PostJob.css */
+.post-job {
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    max-width: 600px;
+    margin: 20px auto; /* Căn giữa form */
+  }
+  
+  .post-job h2 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .success-message {
+    color: #28a745; /* Màu xanh cho thành công */
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .error-message {
+    color: #dc3545; /* Màu đỏ cho lỗi */
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .post-job .form-group {
+    margin-bottom: 1.5rem;
+  }
+  
+  .post-job .form-label {
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .post-job .form-control {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 1rem;
+  }
+  
+  .post-job .form-control:focus {
+    border-color: #000000; /* Màu viền khi focus */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .post-job textarea.form-control {
+    min-height: 100px; /* Chiều cao tối thiểu cho textarea */
+  }
+  
+  .post-job .btn-primary {
+    background-color: #000000;
+    border-color: #000000;
+    padding: 10px 20px;
+    font-size: 1rem;
+    width: 100%; /* Nút chiếm toàn bộ chiều rộng */
+  }
+  
+  .post-job .btn-primary:hover {
+    background-color: #333333;
+    border-color: #333333;
+  }
