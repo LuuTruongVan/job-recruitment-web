@@ -5,24 +5,43 @@ const jwt = require('jsonwebtoken');
 const pool = require('../db');
 
 router.post('/add', async (req, res) => {
-  const { email, password, role } = req.body;
-  console.log('Received /users/add request:', { email, role }); // Log request
+  const { name, email, password, role } = req.body;
+  console.log('Received /users/add request:', { name, email, role });
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const [result] = await pool.query(
-      'INSERT INTO users (email, password, role) VALUES (?, ?, ?)',
-      [email, hashedPassword, role]
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    const [result] = await connection.execute(
+      'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
+      [name, email, hashedPassword, role]
     );
+    const userId = result.insertId;
+
+    if (role === 'candidate') {
+      await connection.execute(
+        'INSERT INTO candidates (user_id, full_name, phone, address, resume, skills) VALUES (?, ?, ?, ?, ?, ?)',
+        [userId, name, '', '', '', '']
+      );
+    } else if (role === 'employer') {
+      await connection.execute(
+        'INSERT INTO employers (user_id, name, address, email, website) VALUES (?, ?, ?, ?, ?)',
+        [userId, name, '', email, '']
+      );
+    }
+
+    await connection.commit();
     res.status(201).json({ message: 'User added successfully' });
   } catch (error) {
-    console.error('Error in /users/add:', error); // Log lỗi
+    await connection.rollback();
+    console.error('Error in /users/add:', error);
     res.status(500).json({ message: 'Error adding user' });
   }
 });
 
 router.post('/get', async (req, res) => {
   const { email, password } = req.body;
-  console.log('Received /users/get request:', { email }); // Log request
+  console.log('Received /users/get request:', { email });
   try {
     const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
     if (users.length === 0) return res.status(400).json({ message: 'User not found' });
@@ -34,7 +53,7 @@ router.post('/get', async (req, res) => {
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (error) {
-    console.error('Error in /users/get:', error); // Log lỗi
+    console.error('Error in /users/get:', error);
     res.status(500).json({ message: 'Error getting user' });
   }
 });
@@ -74,7 +93,6 @@ router.put('/update/:id/toggle', async (req, res) => {
   }
 });
 
-// Thêm route mới cho /get-profile
 router.get('/get-profile', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -83,10 +101,57 @@ router.get('/get-profile', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const [users] = await pool.query('SELECT id, email, role FROM users WHERE id = ?', [decoded.id]);
     if (users.length === 0) return res.status(404).json({ message: 'User not found' });
-    res.json(users[0]); // Trả về { id, email, role }
+
+    let profile = users[0];
+    if (profile.role === 'candidate') {
+      const [candidate] = await pool.query('SELECT full_name FROM candidates WHERE user_id = ?', [decoded.id]);
+      if (candidate.length > 0) profile.full_name = candidate[0].full_name;
+    } else if (profile.role === 'employer') {
+      const [employer] = await pool.query('SELECT name FROM employers WHERE user_id = ?', [decoded.id]);
+      if (employer.length > 0) profile.name = employer[0].name;
+    }
+
+    res.json(profile); // Trả về { id, email, role, full_name, name }
   } catch (error) {
     console.error('Error in /get-profile:', error);
     res.status(500).json({ message: 'Error fetching profile' });
+  }
+});
+
+router.put('/update-profile', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const { full_name, phone, address, resume, skills, name: company_name, email, website } = req.body;
+    const connection = await pool.getConnection();
+    await connection.beginTransaction();
+
+    if (decoded.role === 'candidate') {
+      await connection.execute(
+        'UPDATE candidates SET full_name = ?, phone = ?, address = ?, resume = ?, skills = ? WHERE user_id = ?',
+        [full_name, phone, address, resume, skills, decoded.id]
+      );
+      await connection.execute(
+        'UPDATE users SET name = ? WHERE id = ?', [full_name, decoded.id]
+      ); // Cập nhật name trong users
+    } else if (decoded.role === 'employer') {
+      await connection.execute(
+        'UPDATE employers SET name = ?, address = ?, email = ?, website = ? WHERE user_id = ?',
+        [company_name, address, email, website, decoded.id]
+      );
+      await connection.execute(
+        'UPDATE users SET name = ? WHERE id = ?', [company_name, decoded.id]
+      ); // Cập nhật name trong users
+    }
+
+    await connection.commit();
+    res.json({ message: 'Profile updated successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error in /update-profile:', error);
+    res.status(500).json({ message: 'Error updating profile' });
   }
 });
 

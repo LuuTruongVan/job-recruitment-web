@@ -1,24 +1,32 @@
 const express = require('express');
-const cors = require('cors');
-const userRoutes = require('./routes/users');
-const employerRoutes = require('./routes/employers');
-const jobpostRoutes = require('./routes/jobposts');
-const candidateRoutes = require('./routes/candidates');
-const applicationRoutes = require('./routes/applications');
-
 const app = express();
-require('dotenv').config();
+const pool = require('./db');
+const usersRouter = require('./routes/users');
+const candidatesRouter = require('./routes/candidates');
+const employersRouter = require('./routes/employers');
+const jobpostsRouter = require('./routes/jobposts');
+const applicationsRouter = require('./routes/applications');
+const categoriesRouter = require('./routes/categories'); // Thêm route mới
 
-app.use(cors());
 app.use(express.json());
+app.use('/users', usersRouter);
+app.use('/candidates', candidatesRouter);
+app.use('/employers', employersRouter);
+app.use('/jobposts', jobpostsRouter);
+app.use('/applications', applicationsRouter);
+app.use('/categories', categoriesRouter); // Đăng ký route
 
-app.use('/users', userRoutes);
-app.use('/employers', employerRoutes);
-app.use('/jobposts', jobpostRoutes);
-app.use('/candidates', candidateRoutes);
-app.use('/applications', applicationRoutes);
+// Middleware multer
+const multer = require('multer');
+const path = require('path');
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(3000, () => {
+  console.log('Server running on port 3000');
 });

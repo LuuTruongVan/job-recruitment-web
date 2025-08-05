@@ -5,23 +5,103 @@ const jwt = require('jsonwebtoken');
 
 router.post('/', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
+  console.log('Received token:', token);
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
-  const { title, description, salary, category, location } = req.body;
-  if (!title || !description || !salary || !category || !location) {
+  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name } = req.body;
+  console.log('Received job data:', req.body);
+  if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token:', decoded);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+
     const [result] = await pool.query(
-      'INSERT INTO jobposts (title, description, salary, category, location, employer_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())',
-      [title, description, salary, category, location, decoded.id]
+      'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
+      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '']
     );
-    res.status(201).json({ message: 'Job posted successfully' });
+    res.status(201).json({ message: 'Job posted successfully', insertId: result.insertId });
   } catch (error) {
     console.error('Error posting job:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    } else if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(500).json({ message: 'Employer ID not found in employers table' });
+    }
     res.status(500).json({ message: 'Error posting job' });
+  }
+});
+
+// Thêm route PUT /:id để cập nhật công việc
+router.put('/:id', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  console.log('Received token for update:', token);
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { id } = req.params;
+  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name } = req.body;
+  console.log('Received update data:', req.body);
+
+  if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+
+    // Kiểm tra xem job có thuộc về employer này không
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
+    if (job.length === 0) {
+      return res.status(403).json({ message: 'Unauthorized or job not found' });
+    }
+
+    await pool.query(
+      'UPDATE jobposts SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, company_name = ? WHERE id = ?',
+      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', expiry_date || null, company_name || '', id]
+    );
+
+    res.json({ message: 'Job updated successfully' });
+  } catch (error) {
+    console.error('Error updating job:', error);
+    if (error.name === 'JsonWebTokenError') {
+      return res.status(401).json({ message: 'Invalid token' });
+    }
+    res.status(500).json({ message: 'Error updating job' });
+  }
+});
+
+// Các route khác giữ nguyên
+router.get('/job-positions', async (req, res) => {
+  const { category } = req.query;
+  try {
+    let query = 'SELECT jp.id, jp.name FROM job_positions jp JOIN categories c ON jp.category_id = c.id';
+    const params = [];
+    if (category) {
+      query += ' WHERE c.name = ?';
+      params.push(category);
+    }
+    console.log('Executing query:', query, 'with params:', params);
+    const [positions] = await pool.query(query, params);
+    console.log('Fetched job positions:', positions);
+    if (positions.length === 0) {
+      console.log('No positions found for category:', category);
+    }
+    res.json(positions);
+  } catch (error) {
+    console.error('Error fetching job positions:', error);
+    res.status(500).json({ message: 'Error fetching job positions' });
   }
 });
 
@@ -62,10 +142,30 @@ router.get('/my-jobs', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const [jobs] = await pool.query('SELECT * FROM jobposts WHERE employer_id = ?', [decoded.id]);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+    const [jobs] = await pool.query('SELECT * FROM jobposts WHERE employer_id = ?', [employerId]);
     res.json(jobs);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching user jobs' });
+  }
+});
+
+router.get('/:id', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const { id } = req.params;
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ?', [id]);
+    if (job.length === 0) return res.status(404).json({ message: 'Job not found' });
+    res.json(job[0]);
+  } catch (error) {
+    console.error('Error fetching job detail:', error);
+    res.status(500).json({ message: 'Error fetching job detail' });
   }
 });
 
@@ -76,12 +176,145 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, decoded.id]);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
     if (job.length === 0) return res.status(403).json({ message: 'Unauthorized or job not found' });
     await pool.query('DELETE FROM jobposts WHERE id = ?', [id]);
     res.json({ message: 'Job deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting job' });
+  }
+});
+
+router.post('/job-positions', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { name, category } = req.body;
+  if (!name || !category) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [categoryRow] = await pool.query('SELECT id FROM categories WHERE name = ?', [category]);
+    if (categoryRow.length === 0) {
+      return res.status(400).json({ message: 'Category not found' });
+    }
+    const categoryId = categoryRow[0].id;
+
+    const [result] = await pool.query(
+      'INSERT INTO job_positions (category_id, name) VALUES (?, ?)',
+      [categoryId, name]
+    );
+    res.status(201).json({ message: 'Job position added successfully', id: result.insertId });
+  } catch (error) {
+    console.error('Error adding job position:', error);
+    res.status(500).json({ message: 'Error adding job position' });
+  }
+});
+
+router.get('/job-positions/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const [position] = await pool.query('SELECT name FROM job_positions WHERE id = ?', [id]);
+    if (position.length === 0) {
+      return res.status(404).json({ message: 'Job position not found' });
+    }
+    res.json({ name: position[0].name });
+  } catch (error) {
+    console.error('Error fetching job position:', error);
+    res.status(500).json({ message: 'Error fetching job position' });
+  }
+});
+
+// Thêm vào cuối file jobposts.js
+router.get('/:id/applications', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  console.log('Received token for applications:', token);
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { id } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
+    if (job.length === 0) {
+      return res.status(403).json({ message: 'Unauthorized or job not found' });
+    }
+
+    const [applications] = await pool.query(
+      'SELECT a.id, a.candidate_name, a.email, a.resume_url, a.status FROM applications a WHERE a.job_id = ?',
+      [id]
+    );
+    res.json(applications);
+  } catch (error) {
+    console.error('Error fetching applications:', error);
+    res.status(500).json({ message: 'Error fetching applications' });
+  }
+});
+
+router.put('/:id/applications/:applicationId/approve', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { id, applicationId } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
+    if (job.length === 0) {
+      return res.status(403).json({ message: 'Unauthorized or job not found' });
+    }
+
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND job_id = ?', ['approved', applicationId, id]);
+    res.json({ message: 'Application approved' });
+  } catch (error) {
+    console.error('Error approving application:', error);
+    res.status(500).json({ message: 'Error approving application' });
+  }
+});
+
+router.put('/:id/applications/:applicationId/reject', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { id, applicationId } = req.params;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [employer] = await pool.query('SELECT id FROM employers WHERE user_id = ?', [decoded.id]);
+    if (employer.length === 0) {
+      return res.status(400).json({ message: 'No employer record found for this user' });
+    }
+    const employerId = employer[0].id;
+
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
+    if (job.length === 0) {
+      return res.status(403).json({ message: 'Unauthorized or job not found' });
+    }
+
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND job_id = ?', ['rejected', applicationId, id]);
+    res.json({ message: 'Application rejected' });
+  } catch (error) {
+    console.error('Error rejecting application:', error);
+    res.status(500).json({ message: 'Error rejecting application' });
   }
 });
 

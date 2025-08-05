@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Carousel, Button, Card } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../componentCss/Home.css'; // Đã sửa đường dẫn
+import '../componentCss/Home.css';
 
 const Home = () => {
   const [jobs, setJobs] = useState([]);
   const [filters, setFilters] = useState({ category: '', location: '', minSalary: '' });
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -15,7 +18,21 @@ const Home = () => {
       if (filters.minSalary) params.salary = `>= ${filters.minSalary}`;
 
       const response = await axios.get('/jobposts', { params });
-      setJobs(response.data);
+      const jobsWithPositions = await Promise.all(response.data.map(async (job) => {
+        if (job.job_position_id) {
+          try {
+            const positionResponse = await axios.get(`/jobposts/job-positions/${job.job_position_id}`);
+            job.job_position = positionResponse.data.name || 'Chưa có vị trí';
+          } catch (error) {
+            console.error('Error fetching job position:', error);
+            job.job_position = 'Chưa có vị trí';
+          }
+        } else {
+          job.job_position = 'Chưa có vị trí';
+        }
+        return job;
+      }));
+      setJobs(jobsWithPositions);
     } catch (error) {
       console.error('Error fetching jobs:', error);
     }
@@ -23,10 +40,36 @@ const Home = () => {
 
   useEffect(() => {
     fetchJobs();
+    const token = localStorage.getItem('employer_token');
+    if (token) {
+      axios.get('/users/get-profile', {
+        headers: { Authorization: `Bearer ${token}` }
+      }).then(response => {
+        setUser(response.data);
+      }).catch(error => {
+        console.error('Error fetching user:', error);
+      });
+    }
   }, [fetchJobs]);
 
   const handleFilterChange = (e) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
+  };
+
+  const handleViewDetail = (jobId) => {
+    navigate(`/job-detail/${jobId}`);
+  };
+
+  const handleApply = (jobId) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.role === 'employer') {
+      alert('Tài khoản công ty không thể ứng tuyển!');
+      return;
+    }
+    navigate(`/apply-job/${jobId}`);
   };
 
   return (
@@ -103,13 +146,18 @@ const Home = () => {
           <div className="col-md-4 mb-3" key={job.id}>
             <Card>
               <Card.Body>
-                <Card.Title>{job.title}</Card.Title>
+                <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title> {/* Tiêu đề ở giữa box */}
                 <Card.Text>
-                  Mô tả: {job.description}<br />
-                  Lương: {job.salary} VND<br />
-                  Phân loại: {job.category}<br />
-                  Địa điểm: {job.location}
+                  <strong>Vị trí công việc:</strong> {job.job_position}<br />
+                  <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}<br />
+                  <strong>Địa chỉ:</strong> {job.location}<br />
+                  <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}<br />
+                  <strong>Ngày hết hạn:</strong> {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
                 </Card.Text>
+                <div className="d-flex gap-2">
+                  <Button variant="info" onClick={() => handleViewDetail(job.id)}>Xem chi tiết</Button>
+                  <Button variant="success" onClick={() => handleApply(job.id)}>Ứng tuyển</Button>
+                </div>
               </Card.Body>
             </Card>
           </div>

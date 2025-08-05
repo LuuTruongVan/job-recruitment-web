@@ -25,7 +25,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.get('/get', async (req, res) => {
+router.get('/:id', async (req, res) => { // Thay /get bằng /:id
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
@@ -34,7 +34,8 @@ router.get('/get', async (req, res) => {
     if (decoded.role !== 'employer') return res.status(403).json({ message: 'Access denied' });
 
     const [profile] = await pool.query('SELECT * FROM employers WHERE user_id = ?', [decoded.id]);
-    res.json(profile[0] || {});
+    if (!profile.length) return res.status(404).json({ message: 'Employer profile not found' });
+    res.json(profile[0]);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching employer profile' });
   }
@@ -57,29 +58,7 @@ router.get('/get-all', async (req, res) => {
   }
 });
 
-router.put('/update/:id', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'employer') return res.status(403).json({ message: 'Access denied' });
-
-    const { id } = req.params;
-    const { name, address, email, website } = req.body;
-    const [employer] = await pool.query('SELECT * FROM employers WHERE id = ? AND user_id = ?', [id, decoded.id]);
-    if (employer.length === 0) return res.status(404).json({ message: 'Employer profile not found' });
-
-    await pool.query(
-      'UPDATE employers SET name = ?, address = ?, email = ?, website = ? WHERE id = ?',
-      [name, address, email, website, id]
-    );
-    res.json({ message: 'Employer profile updated successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating employer profile' });
-  }
-});
-
+// Xóa hoặc không sử dụng /update/:id, thay bằng logic trong /users/update-profile
 router.delete('/delete/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });

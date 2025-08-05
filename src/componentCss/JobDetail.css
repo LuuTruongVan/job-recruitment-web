@@ -1,0 +1,22 @@
+.job-detail-container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+  
+  .job-detail-container h2 {
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  .job-detail-container p {
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+  
+  .job-detail-container .btn {
+    margin-top: 20px;
+  }

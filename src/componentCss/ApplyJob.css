@@ -1,0 +1,21 @@
+.apply-job-container {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+  }
+  
+  .apply-job-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  .apply-job-container .form-group {
+    margin-bottom: 15px;
+  }
+  
+  .apply-job-container .btn {
+    width: 100%;
+  }

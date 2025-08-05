@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import '../componentCss/Register.css';
 
 const Register = () => {
-  const [userData, setUserData] = useState({ email: '', password: '', role: 'candidate' });
+  const [userData, setUserData] = useState({ name: '', email: '', password: '', role: 'candidate' });
   const [message, setMessage] = useState('');
 
   const handleChange = (e) => {
@@ -18,7 +19,7 @@ const Register = () => {
       const response = await axios.post('/users/add', userData);
       if (response.status === 201) {
         setMessage('Đăng ký thành công!');
-        setUserData({ email: '', password: '', role: 'candidate' });
+        setUserData({ name: '', email: '', password: '', role: 'candidate' });
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Lỗi đăng ký!');
@@ -27,10 +28,20 @@ const Register = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="register-container">
       <h2>Đăng Ký</h2>
-      {message && <Alert variant="danger">{message}</Alert>}
+      {message && <Alert variant={message.includes('thành công') ? 'success' : 'danger'}>{message}</Alert>}
       <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Tên</Form.Label>
+          <Form.Control
+            type="text"
+            name="name"
+            value={userData.name}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Email</Form.Label>
           <Form.Control

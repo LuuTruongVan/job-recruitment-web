@@ -2,8 +2,18 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
+const multer = require('multer'); // Thêm multer để xử lý file
+const path = require('path');
 
-router.post('/add', async (req, res) => {
+const storage = multer.diskStorage({
+  destination: './uploads/',
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+});
+const upload = multer({ storage: storage });
+
+router.post('/add', upload.single('cv'), async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
@@ -11,19 +21,22 @@ router.post('/add', async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (decoded.role !== 'candidate') return res.status(403).json({ message: 'Access denied' });
 
-    const { jobpost_id } = req.body;
+    const { full_name, phone, email, address, skills, introduction, job_id } = req.body;
+    const cvPath = req.file ? `/uploads/${req.file.filename}` : null;
+
     const [existing] = await pool.query(
       'SELECT * FROM applications WHERE user_id = ? AND jobpost_id = ?',
-      [decoded.id, jobpost_id]
+      [decoded.id, job_id]
     );
     if (existing.length > 0) return res.status(400).json({ message: 'Already applied' });
 
     await pool.query(
-      'INSERT INTO applications (jobpost_id, user_id) VALUES (?, ?)',
-      [jobpost_id, decoded.id]
+      'INSERT INTO applications (jobpost_id, user_id, full_name, phone, email, address, skills, introduction, cv_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [job_id, decoded.id, full_name, phone, email, address, skills, introduction, cvPath, 'pending']
     );
     res.status(201).json({ message: 'Application added successfully' });
   } catch (error) {
+    console.error('Error adding application:', error);
     res.status(500).json({ message: 'Error adding application' });
   }
 });
@@ -64,7 +77,7 @@ router.put('/update/:id', async (req, res) => {
 
     const employerId = application[0].employer_id;
     const [employers] = await pool.query('SELECT user_id FROM employers WHERE id = ?', [employerId]);
-    if (employers[0].user_id !== decoded.id) return res.status(403).json({ message: 'Unauthorized' });
+    if (employers.length === 0 || employers[0].user_id !== decoded.id) return res.status(403).json({ message: 'Unauthorized' });
 
     await pool.query(
       'UPDATE applications SET status = ?, feedback = ? WHERE id = ?',

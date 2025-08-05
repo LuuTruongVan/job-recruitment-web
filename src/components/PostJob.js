@@ -1,37 +1,195 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
 import '../componentCss/PostJob.css';
 
 const PostJob = () => {
-  const [job, setJob] = useState({ title: '', description: '', salary: '', category: '', location: '' });
+  const [job, setJob] = useState({
+    title: '',
+    company_name: '', // Đặt dưới tiêu đề
+    jobInfo: '',
+    jobPositionId: '',
+    jobRequirements: '',
+    benefits: '',
+    location: '',
+    emailContact: '',
+    salary: '',
+    category: '',
+    expiry_date: ''
+  });
   const [message, setMessage] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [searchTermCategory, setSearchTermCategory] = useState('');
+  const [jobPositions, setJobPositions] = useState([]);
+  const [searchTermPosition, setSearchTermPosition] = useState('');
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setJob({ ...job, [e.target.name]: e.target.value });
+    if (e.target) {
+      setJob((prevJob) => ({ ...prevJob, [e.target.name]: e.target.value }));
+    }
+  };
+
+  const handleCategoryChange = (selectedOption) => {
+    setJob((prevJob) => ({ ...prevJob, category: selectedOption ? selectedOption.value : '', jobPositionId: '' }));
+    setJobPositions([]);
+    if (selectedOption) {
+      fetchJobPositions(selectedOption.value);
+    }
+  };
+
+  const handlePositionChange = (selectedOption) => {
+    setJob((prevJob) => ({ ...prevJob, jobPositionId: selectedOption ? selectedOption.value : '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('employer_token');
-    console.log('Sending job data:', job); // Log dữ liệu gửi lên
+    if (!token) {
+      setMessage('Vui lòng đăng nhập với vai trò employer!');
+      return;
+    }
+    const jobDataToSave = {
+      title: job.title || '',
+      company_name: job.company_name || '', // Đảm bảo gửi trường này
+      jobInfo: job.jobInfo || '',
+      jobPositionId: job.jobPositionId || null,
+      jobRequirements: job.jobRequirements || '',
+      benefits: job.benefits || '',
+      salary: job.salary ? parseFloat(job.salary) : 0,
+      category: job.category || '',
+      location: job.location || '',
+      emailContact: job.emailContact || '',
+      expiry_date: job.expiry_date || null
+    };
+    console.log('Sending job data:', jobDataToSave); // Kiểm tra dữ liệu gửi đi
     try {
-      await axios.post('/jobposts', job, {
+      const response = await axios.post('/jobposts', jobDataToSave, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Response from server:', response.data);
       setMessage('Đăng tin thành công!');
-      setJob({ title: '', description: '', salary: '', category: '', location: '' }); // Reset form
+      navigate('/home');
+      setJob({
+        title: '',
+        company_name: '',
+        jobInfo: '',
+        jobPositionId: '',
+        jobRequirements: '',
+        benefits: '',
+        location: '',
+        emailContact: '',
+        salary: '',
+        category: '',
+        expiry_date: ''
+      });
     } catch (error) {
-      setMessage('Lỗi khi đăng tin: ' + error.response?.data?.message || error.message);
-      console.error('Post job error:', error.response?.data || error.message); // Log lỗi chi tiết
+      setMessage('Lỗi khi đăng tin: ' + (error.response?.data?.message || error.message));
+      console.error('Post job error:', error.response?.data || error.message);
     }
   };
+
+  const fetchJobPositions = async (categoryName) => {
+    try {
+      const response = await axios.get(`/jobposts/job-positions?category=${encodeURIComponent(categoryName)}`);
+      console.log('Fetched job positions:', response.data);
+      setJobPositions(response.data.map(pos => ({ value: pos.id, label: pos.name })));
+    } catch (error) {
+      console.error('Error fetching job positions:', error);
+    }
+  };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/categories');
+        setCategories(response.data.map(cat => ({ value: cat.name, label: cat.name })));
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleAddNewCategory = async () => {
+    if (!searchTermCategory || categories.some(cat => cat.value.toLowerCase() === searchTermCategory.toLowerCase())) return;
+    try {
+      await axios.post('/categories', { name: searchTermCategory }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('employer_token')}` }
+      });
+      setCategories([...categories, { value: searchTermCategory, label: searchTermCategory }]);
+      setJob((prevJob) => ({ ...prevJob, category: searchTermCategory }));
+      setSearchTermCategory('');
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  const handleAddNewPosition = async () => {
+    if (!searchTermPosition || jobPositions.some(pos => pos.label.toLowerCase() === searchTermPosition.toLowerCase())) return;
+    const currentCategory = job.category;
+    if (!currentCategory) {
+      console.error('Please select a category first');
+      return;
+    }
+    try {
+      const response = await axios.post('/jobposts/job-positions', { name: searchTermPosition, category: currentCategory }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('employer_token')}` }
+      });
+      setJobPositions([...jobPositions, { value: response.data.id, label: searchTermPosition }]);
+      setJob((prevJob) => ({ ...prevJob, jobPositionId: response.data.id }));
+      setSearchTermPosition('');
+    } catch (error) {
+      console.error('Error adding job position:', error);
+    }
+  };
+
+  const filteredCategories = categories.filter(cat =>
+    cat.label.toLowerCase().includes(searchTermCategory.toLowerCase())
+  );
+  const filteredJobPositions = jobPositions.filter(pos =>
+    pos.label.toLowerCase().includes(searchTermPosition.toLowerCase())
+  );
 
   return (
     <div className="post-job">
       <h2>Đăng tin tuyển dụng</h2>
-      {message && <p>{message}</p>}
+      {message && <p className={message.includes('thành công') ? 'success-message' : 'error-message'}>{message}</p>}
       <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3">
+          <Form.Label>Phân loại</Form.Label>
+          <Select
+            value={categories.find(cat => cat.value === job.category) || null}
+            onChange={handleCategoryChange}
+            onInputChange={setSearchTermCategory}
+            options={filteredCategories}
+            placeholder="Tìm hoặc thêm phân loại..."
+            isClearable
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchTermCategory) {
+                handleAddNewCategory();
+              }
+            }}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Vị trí công việc</Form.Label>
+          <Select
+            value={jobPositions.find(pos => pos.value === job.jobPositionId) || null}
+            onChange={handlePositionChange}
+            onInputChange={setSearchTermPosition}
+            options={filteredJobPositions}
+            placeholder="Chọn hoặc thêm vị trí công việc..."
+            isClearable
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && searchTermPosition) {
+                handleAddNewPosition();
+              }
+            }}
+          />
+        </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Tiêu đề</Form.Label>
           <Form.Control
@@ -43,11 +201,41 @@ const PostJob = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Mô tả</Form.Label>
+          <Form.Label>Tên công ty</Form.Label>
+          <Form.Control
+            type="text"
+            name="company_name"
+            value={job.company_name}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Thông tin công việc</Form.Label>
           <Form.Control
             as="textarea"
-            name="description"
-            value={job.description}
+            name="jobInfo"
+            value={job.jobInfo}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Yêu cầu công việc</Form.Label>
+          <Form.Control
+            as="textarea"
+            name="jobRequirements"
+            value={job.jobRequirements}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Quyền lợi</Form.Label>
+          <Form.Control
+            as="textarea"
+            name="benefits"
+            value={job.benefits}
             onChange={handleChange}
             required
           />
@@ -63,21 +251,31 @@ const PostJob = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Phân loại</Form.Label>
+          <Form.Label>Địa chỉ</Form.Label>
           <Form.Control
             type="text"
-            name="category"
-            value={job.category}
+            name="location"
+            value={job.location}
             onChange={handleChange}
             required
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Địa điểm</Form.Label>
+          <Form.Label>Email liên hệ</Form.Label>
           <Form.Control
-            type="text"
-            name="location"
-            value={job.location}
+            type="email"
+            name="emailContact"
+            value={job.emailContact}
+            onChange={handleChange}
+            required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Ngày hết hạn</Form.Label>
+          <Form.Control
+            type="date"
+            name="expiry_date"
+            value={job.expiry_date}
             onChange={handleChange}
             required
           />

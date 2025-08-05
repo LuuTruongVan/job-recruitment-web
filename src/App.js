@@ -5,9 +5,13 @@ import Login from './components/Login';
 import Register from './components/Register';
 import PostJob from './components/PostJob';
 import JobList from './components/JobList';
-import Home from './components/Home'; // Import Home component
+import Home from './components/Home';
 import axios from 'axios';
-
+import UpdateProfile from './components/UpdateProfile';
+import JobDetail from './components/JobDetail';
+import ApplyJob from './components/ApplyJob';
+import ManageJobs from './components/ManageJobs';
+import EditJob from './components/EditJob';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -49,8 +53,10 @@ function App() {
     <div className="app">
       <nav className="navbar navbar-expand-lg navbar-light">
         <div className="container-fluid">
-        <img className="logo" src="/assets/img/logo.jpg" alt="Logo" style={{ width: '100px' }} />
-
+          <div className="navbar-nav me-auto">
+            <img className="logo" src="/assets/img/logo.jpg" alt="Logo" style={{ width: '100px' }} />
+            <Link className="nav-link" to="/home">Trang chủ</Link>
+          </div>
           <div className="navbar-nav ms-auto">
             {user ? (
               <>
@@ -62,14 +68,21 @@ function App() {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    Xin chào, {user.email || 'Người dùng'}
+                    Xin chào, {user.role === 'candidate' ? (user.full_name || 'Người dùng') : (user.name || 'Công ty')}
                   </span>
                   <ul className="dropdown-menu" aria-labelledby="userDropdown">
                     <li><button className="dropdown-item" onClick={handleLogout}>Đăng xuất</button></li>
+                    <li><Link className="dropdown-item" to="/update-profile">Cập nhật thông tin</Link></li>
                   </ul>
                 </div>
                 {user.role === 'employer' && (
                   <Link className="nav-link" to="/post-job">Đăng tin</Link>
+                )}
+                {user.role === 'employer' && (
+                  <Link className="nav-link" to="/manage-posts">Quản lý bài đăng</Link>
+                )}
+                {user.role === 'candidate' && (
+                  <Link className="nav-link" to="/manage-applications">Quản lý ứng tuyển</Link>
                 )}
               </>
             ) : (
@@ -81,13 +94,19 @@ function App() {
           </div>
         </div>
       </nav>
-      <div className="container"> {/* Loại bỏ mt-4 */}
+      <div className="container">
         <Routes>
-          <Route path="/" element={<Home />} /> {/* Trang Home làm trang mặc định */}
+          <Route path="/" element={<Home />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/post-job" element={user?.role === 'employer' ? <PostJob /> : <JobList />} />
+          <Route path="/update-profile" element={<UpdateProfile />} />
+          <Route path="/job-detail/:id" element={<JobDetail />} />
+          <Route path="/apply-job/:id" element={<ApplyJob />} />
+          <Route path="/manage-posts" element={user?.role === 'employer' ? <ManageJobs /> : <Home />} />
+          <Route path="/manage-applications" element={user?.role === 'candidate' ? <JobList /> : <Home />} />
+          <Route path="/edit-job/:id" element={user?.role === 'employer' ? <EditJob /> : <Home />} />
         </Routes>
       </div>
     </div>

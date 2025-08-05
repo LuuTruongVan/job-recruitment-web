@@ -25,7 +25,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.get('/get', async (req, res) => {
+router.get('/:id', async (req, res) => { // Đảm bảo endpoint này tồn tại
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
@@ -34,7 +34,8 @@ router.get('/get', async (req, res) => {
     if (decoded.role !== 'candidate') return res.status(403).json({ message: 'Access denied' });
 
     const [profile] = await pool.query('SELECT * FROM candidates WHERE user_id = ?', [decoded.id]);
-    res.json(profile[0] || {});
+    if (!profile.length) return res.status(404).json({ message: 'Candidate profile not found' });
+    res.json(profile[0]);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching candidate profile' });
   }
@@ -54,29 +55,6 @@ router.get('/get-all', async (req, res) => {
     res.json(profiles);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching all candidate profiles' });
-  }
-});
-
-router.put('/update/:id', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'candidate') return res.status(403).json({ message: 'Access denied' });
-
-    const { id } = req.params;
-    const { full_name, phone, address, resume, skills } = req.body;
-    const [candidate] = await pool.query('SELECT * FROM candidates WHERE id = ? AND user_id = ?', [id, decoded.id]);
-    if (candidate.length === 0) return res.status(404).json({ message: 'Candidate profile not found' });
-
-    await pool.query(
-      'UPDATE candidates SET full_name = ?, phone = ?, address = ?, resume = ?, skills = ? WHERE id = ?',
-      [full_name, phone, address, resume, skills, id]
-    );
-    res.json({ message: 'Candidate profile updated successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating candidate profile' });
   }
 });
 
