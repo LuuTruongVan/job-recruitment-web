@@ -82,9 +82,15 @@ const ManageJobs = () => {
               <td>{new Date(job.created_at).toLocaleDateString()}</td>
               <td>{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
               <td>
-                <Button variant="info" size="lg" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1 w-100">Xem chi tiết</Button>
-                <Button variant="warning" onClick={() => handleEdit(job.id)} className="me-2 mb-1 w-50">Sửa</Button>
-                <Button variant="danger" onClick={() => handleDelete(job.id)} className="w-50">Xóa</Button>
+                <Button variant="info" size="sm" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1">
+                  Xem chi tiết
+                </Button>
+                <Button variant="warning" size="sm" onClick={() => handleEdit(job.id)} className="me-2 mb-1">
+                  Sửa
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => handleDelete(job.id)}>
+                  Xóa
+                </Button>
               </td>
             </tr>
           ))}
@@ -120,12 +126,18 @@ const ManageJobs = () => {
                   <td>{new Date(job.created_at).toLocaleDateString()}</td>
                   <td>{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
                   <td>
-                    <Button variant="info" size="lg" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1 w-100">Xem chi tiết</Button>
-                    <Button variant="warning" onClick={() => handleEdit(job.id)} className="me-2 mb-1 w-50">Sửa</Button>
-                    <Button variant="danger" onClick={() => handleDelete(job.id)} className="w-50">Xóa</Button>
+                    <Button variant="info" size="sm" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1">
+                      Xem chi tiết
+                    </Button>
+                    <Button variant="warning" size="sm" onClick={() => handleEdit(job.id)} className="me-2 mb-1">
+                      Sửa
+                    </Button>
+                    <Button variant="danger" size="sm" onClick={() => handleDelete(job.id)}>
+                      Xóa
+                    </Button>
                   </td>
                 </tr>
-              ))}
+                ))}
             </tbody>
           </Table>
         </div>

@@ -6,28 +6,16 @@
 }
 
 body {
-  margin: 0; /* Loại bỏ margin mặc định của body */
-  padding: 0; /* Loại bỏ padding mặc định của body */
-}
-
-nav {
-  position: fixed;
   margin: 0;
   padding: 0;
-  background-color: #000000;
-  height: 70px;
 }
 
-.navbar {
-  background-color: #000000;
-}
+
+
 
 .logo {
   border-radius: 50%;
-  
 }
-
-
 
 .navbar-brand, .navbar-nav .nav-link {
   color: #ffffff !important;
@@ -89,10 +77,6 @@ th, td {
   border-color: #9a2c2c;
 }
 
-header {
-  background-color: #000000;
-  color: #ffffff;
-}
 
 .carousel-caption {
   background-color: rgba(0, 0, 0, 0.5);

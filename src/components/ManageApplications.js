@@ -1,0 +1,85 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { Table, Button } from 'react-bootstrap';
+import '../componentCss/JobDetail.css';
+
+const ManageApplications = () => {
+  const [applications, setApplications] = useState([]);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const employerToken = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    const token = candidateToken || employerToken; // Ưu tiên candidate_token, fallback sang employer_token
+    console.log('Token in ManageApplications:', token);
+    if (!token) {
+      setError('Vui lòng đăng nhập.');
+      return;
+    }
+
+    axios.get('http://localhost:3000/applications/get', {
+      headers: { Authorization: `Bearer ${token}` }
+    }).then((response) => {
+      console.log('Response from /applications/get:', response.data);
+      setApplications(response.data);
+    }).catch((error) => {
+      console.error('Error fetching applications:', error.response?.status, error.response?.data || error.message);
+      setError('Không thể tải danh sách ứng tuyển. Vui lòng kiểm tra console.');
+    });
+  }, []);
+
+  return (
+    <div className="job-detail-container" style={{ maxWidth: '100%', width: '1200px', margin: '0 auto' }}>
+      <div className="applications-content">
+        <h3>Danh sách ứng tuyển của bạn</h3>
+        {error ? (
+          <p>{error}</p>
+        ) : applications.length > 0 ? (
+          <div className="mt-4">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Tiêu đề công việc</th>
+                  <th>Tên ứng viên</th>
+                  <th>Email</th>
+                  <th>Số điện thoại</th>
+                  <th>Kỹ năng</th>
+                  <th>Giới thiệu</th>
+                  <th>CV</th>
+                  <th>Trạng thái</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map((app) => (
+                  <tr key={app.id}>
+                    <td>{app.title || 'Chưa có tiêu đề'}</td>
+                    <td>{app.candidate_name || 'Không có tên'}</td>
+                    <td>{app.email || 'Không có email'}</td>
+                    <td>{app.phone || 'Không có số điện thoại'}</td>
+                    <td>{app.skills || 'Không có kỹ năng'}</td>
+                    <td>{app.introduction || 'Không có giới thiệu'}</td>
+                    <td>
+                      {app.cv_path ? (
+                        <a href={`http://localhost:3000${app.cv_path}`} target="_blank" rel="noopener noreferrer">Xem CV</a>
+                      ) : 'Không có CV'}
+                    </td>
+                    <td>{app.status || 'pending'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        ) : (
+          <p>Bạn chưa ứng tuyển vào công việc nào.</p>
+        )}
+        <Button variant="secondary" onClick={() => navigate('/home')} className="mt-3">
+          Quay lại
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default ManageApplications;

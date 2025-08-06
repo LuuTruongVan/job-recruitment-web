@@ -8,7 +8,7 @@ import '../componentCss/PostJob.css';
 const PostJob = () => {
   const [job, setJob] = useState({
     title: '',
-    company_name: '', // Đặt dưới tiêu đề
+    company_name: '',
     jobInfo: '',
     jobPositionId: '',
     jobRequirements: '',
@@ -17,7 +17,8 @@ const PostJob = () => {
     emailContact: '',
     salary: '',
     category: '',
-    expiry_date: ''
+    expiry_date: '',
+    employmentType: '' // Thêm trường mới
   });
   const [message, setMessage] = useState('');
   const [categories, setCategories] = useState([]);
@@ -44,6 +45,10 @@ const PostJob = () => {
     setJob((prevJob) => ({ ...prevJob, jobPositionId: selectedOption ? selectedOption.value : '' }));
   };
 
+  const handleEmploymentTypeChange = (selectedOption) => {
+    setJob((prevJob) => ({ ...prevJob, employmentType: selectedOption ? selectedOption.value : '' }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('employer_token');
@@ -53,7 +58,7 @@ const PostJob = () => {
     }
     const jobDataToSave = {
       title: job.title || '',
-      company_name: job.company_name || '', // Đảm bảo gửi trường này
+      company_name: job.company_name || '',
       jobInfo: job.jobInfo || '',
       jobPositionId: job.jobPositionId || null,
       jobRequirements: job.jobRequirements || '',
@@ -62,9 +67,10 @@ const PostJob = () => {
       category: job.category || '',
       location: job.location || '',
       emailContact: job.emailContact || '',
-      expiry_date: job.expiry_date || null
+      expiry_date: job.expiry_date || null,
+      employmentType: job.employmentType || '' // Thêm trường này
     };
-    console.log('Sending job data:', jobDataToSave); // Kiểm tra dữ liệu gửi đi
+    console.log('Sending job data:', jobDataToSave);
     try {
       const response = await axios.post('/jobposts', jobDataToSave, {
         headers: { Authorization: `Bearer ${token}` }
@@ -83,7 +89,8 @@ const PostJob = () => {
         emailContact: '',
         salary: '',
         category: '',
-        expiry_date: ''
+        expiry_date: '',
+        employmentType: '' // Reset trường mới
       });
     } catch (error) {
       setMessage('Lỗi khi đăng tin: ' + (error.response?.data?.message || error.message));
@@ -152,6 +159,12 @@ const PostJob = () => {
   const filteredJobPositions = jobPositions.filter(pos =>
     pos.label.toLowerCase().includes(searchTermPosition.toLowerCase())
   );
+
+  const employmentTypeOptions = [
+    { value: 'Full-time', label: 'Toàn thời gian' },
+    { value: 'Part-time', label: 'Bán thời gian' },
+    { value: 'Internship', label: 'Thực tập sinh' }
+  ];
 
   return (
     <div className="post-job">
@@ -268,6 +281,16 @@ const PostJob = () => {
             value={job.emailContact}
             onChange={handleChange}
             required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Trạng thái làm việc</Form.Label>
+          <Select
+            value={employmentTypeOptions.find(opt => opt.value === job.employmentType) || null}
+            onChange={handleEmploymentTypeChange}
+            options={employmentTypeOptions}
+            placeholder="Chọn trạng thái làm việc..."
+            isClearable
           />
         </Form.Group>
         <Form.Group className="mb-3">

@@ -42,10 +42,10 @@ const JobDetail = () => {
 
   return (
     <div className="job-detail-container">
-        <h2>{job.title}</h2>
+      <h2>{job.title}</h2>
       <p><strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}</p> 
-      
       <p><strong>Vị trí công việc:</strong> {job.job_position || 'Chưa có vị trí'}</p> 
+      <p><strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'} </p> {/* Thêm trạng thái làm việc */}
       <p><strong>Thông tin công việc:</strong> {job.job_info || 'Chưa có thông tin'}</p>
       <p><strong>Yêu cầu công việc:</strong> {job.job_requirements || 'Chưa có yêu cầu'}</p>
       <p><strong>Quyền lợi:</strong> {job.benefits || 'Chưa có quyền lợi'}</p>

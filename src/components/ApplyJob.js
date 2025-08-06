@@ -7,7 +7,7 @@ import '../componentCss/ApplyJob.css';
 const ApplyJob = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    full_name: '',
+    candidate_name: '', // Thay full_name thành candidate_name
     phone: '',
     email: '',
     address: '',
@@ -33,15 +33,23 @@ const ApplyJob = () => {
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     data.append('job_id', id);
 
+    for (let [key, value] of data.entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
     try {
-      await axios.post('/applications/add', data, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+      const response = await axios.post('/applications/add', data, {
+        headers: { 
+          Authorization: `Bearer ${token}`, 
+          'Content-Type': 'multipart/form-data' 
+        }
       });
+      console.log('Response from server:', response.data);
       setMessage('Ứng tuyển thành công!');
       setTimeout(() => navigate('/'), 2000);
     } catch (error) {
-      console.error('Error applying job:', error);
-      setMessage('Lỗi ứng tuyển!');
+      console.error('Error applying job:', error.response ? error.response.data : error.message);
+      setMessage(`Lỗi ứng tuyển: ${error.response?.data?.message || 'Vui lòng thử lại.'}`);
     }
   };
 
@@ -51,11 +59,11 @@ const ApplyJob = () => {
       {message && <Alert variant={message.includes('thành công') ? 'success' : 'danger'}>{message}</Alert>}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>Họ và tên</Form.Label>
+          <Form.Label>Tên ứng viên</Form.Label> {/* Cập nhật nhãn */}
           <Form.Control
             type="text"
-            name="full_name"
-            value={formData.full_name}
+            name="candidate_name" // Thay full_name thành candidate_name
+            value={formData.candidate_name}
             onChange={handleChange}
             required
           />

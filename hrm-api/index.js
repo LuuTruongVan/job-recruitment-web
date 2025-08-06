@@ -6,17 +6,13 @@ const candidatesRouter = require('./routes/candidates');
 const employersRouter = require('./routes/employers');
 const jobpostsRouter = require('./routes/jobposts');
 const applicationsRouter = require('./routes/applications');
-const categoriesRouter = require('./routes/categories'); // Thêm route mới
+const categoriesRouter = require('./routes/categories');
 
+const cors = require('cors');
+app.use(cors());
 app.use(express.json());
-app.use('/users', usersRouter);
-app.use('/candidates', candidatesRouter);
-app.use('/employers', employersRouter);
-app.use('/jobposts', jobpostsRouter);
-app.use('/applications', applicationsRouter);
-app.use('/categories', categoriesRouter); // Đăng ký route
+app.use(express.urlencoded({ extended: true }));
 
-// Middleware multer
 const multer = require('multer');
 const path = require('path');
 const storage = multer.diskStorage({
@@ -27,6 +23,16 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage: storage });
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
+app.use('/uploads', express.static('uploads'));
+
+app.use('/users', usersRouter);
+app.use('/candidates', candidatesRouter);
+app.use('/employers', employersRouter);
+app.use('/jobposts', jobpostsRouter);
+app.use('/applications', applicationsRouter);
+app.use('/categories', categoriesRouter);
+
+const PORT = 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

@@ -8,6 +8,7 @@ const Home = () => {
   const [jobs, setJobs] = useState([]);
   const [filters, setFilters] = useState({ category: '', location: '', minSalary: '' });
   const [user, setUser] = useState(null);
+  const [favoriteJobs, setFavoriteJobs] = useState([]);
   const navigate = useNavigate();
 
   const fetchJobs = useCallback(async () => {
@@ -50,6 +51,11 @@ const Home = () => {
         console.error('Error fetching user:', error);
       });
     }
+    // Load danh sách yêu thích từ localStorage
+    const savedFavorites = localStorage.getItem('favoriteJobs');
+    if (savedFavorites) {
+      setFavoriteJobs(JSON.parse(savedFavorites));
+    }
   }, [fetchJobs]);
 
   const handleFilterChange = (e) => {
@@ -70,6 +76,17 @@ const Home = () => {
       return;
     }
     navigate(`/apply-job/${jobId}`);
+  };
+
+  const toggleFavorite = (jobId) => {
+    let updatedFavorites = [...favoriteJobs];
+    if (favoriteJobs.includes(jobId)) {
+      updatedFavorites = updatedFavorites.filter(id => id !== jobId);
+    } else {
+      updatedFavorites.push(jobId);
+    }
+    setFavoriteJobs(updatedFavorites);
+    localStorage.setItem('favoriteJobs', JSON.stringify(updatedFavorites));
   };
 
   return (
@@ -146,9 +163,10 @@ const Home = () => {
           <div className="col-md-4 mb-3" key={job.id}>
             <Card>
               <Card.Body>
-                <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title> {/* Tiêu đề ở giữa box */}
+                <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
                 <Card.Text>
                   <strong>Vị trí công việc:</strong> {job.job_position}<br />
+                  <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}<br />
                   <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}<br />
                   <strong>Địa chỉ:</strong> {job.location}<br />
                   <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}<br />
@@ -157,6 +175,12 @@ const Home = () => {
                 <div className="d-flex gap-2">
                   <Button variant="info" onClick={() => handleViewDetail(job.id)}>Xem chi tiết</Button>
                   <Button variant="success" onClick={() => handleApply(job.id)}>Ứng tuyển</Button>
+                  <Button
+                    variant={favoriteJobs.includes(job.id) ? 'warning' : 'outline-warning'}
+                    onClick={() => toggleFavorite(job.id)}
+                  >
+                    {favoriteJobs.includes(job.id) ? 'Bỏ yêu thích' : 'Yêu thích'}
+                  </Button>
                 </div>
               </Card.Body>
             </Card>

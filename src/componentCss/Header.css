@@ -1,0 +1,115 @@
+/* src/componentCss/Header.css */
+header {
+    background-color: #000000;
+    color: #ffffff;
+    padding: 0px 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between; /* Phân chia không gian, đẩy logo trái và nav-container phải */
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 40px;
+    padding: 0 0px;
+  }
+  
+  .logo-container {
+    flex-shrink: 0; /* Ngăn logo co lại */
+  }
+  
+  .logo-container .logo {
+    border-radius: 50%;
+    width: 100px;
+    height: auto;
+  }
+  
+  .nav-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto; /* Đẩy nav-container sát vào bên phải */
+  }
+  
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  
+  .nav-link {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 5px 15px;
+    font-size: 16px;
+    white-space: nowrap;
+    transition: color 0.3s, background-color 0.3s;
+  }
+  
+  .nav-link:hover {
+    color: #cccccc;
+    background-color: #333333;
+    border-radius: 5px;
+  }
+  
+  .dropdown {
+    position: relative;
+  }
+  
+  .dropdown-toggle {
+    color: #ffffff;
+    text-decoration: none;
+    padding: 5px 15px;
+    font-size: 16px;
+    white-space: nowrap;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.3s, background-color 0.3s;
+  }
+  
+  .dropdown-toggle:hover {
+    color: #cccccc;
+    background-color: #333333;
+    border-radius: 5px;
+  }
+  
+  .dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #333333;
+    border-radius: 0;
+    min-width: 200px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+  }
+  
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+  
+  .dropdown-item {
+    color: #ffffff;
+    padding: 10px 15px;
+    font-size: 14px;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    display: block;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #555555;
+    color: #ffffff;
+  }

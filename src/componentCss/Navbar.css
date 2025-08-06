@@ -1,0 +1,47 @@
+/* src/components/Navbar.css */
+.navbar {
+    background-color: #646262;
+    padding: 6px 0;
+    position: sticky; /* Hoặc fixed nếu muốn cố định */
+    top: 70px; /* Dính ngay dưới header (chiều cao header là 70px) */
+    z-index: 900;
+    margin-bottom: 70px;
+    
+  }
+
+ 
+  
+  .navbar .container-fluid {
+    display: flex;
+    justify-content: flex-start; /* Thay đổi để lệch về bên trái */
+  }
+  
+  .breadcrumb-wrapper {
+    margin-left: 20px; /* Điều chỉnh khoảng cách từ bên trái */
+  }
+  
+  .breadcrumb-nav .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .breadcrumb-nav .breadcrumb-item + .breadcrumb-item::before {
+    content: "/";
+    color: #ffffff;
+    padding: 0 5px;
+  }
+  
+  .breadcrumb-nav .breadcrumb-item a {
+    color: #ffffff;
+    text-decoration: none;
+  }
+  
+  .breadcrumb-nav .breadcrumb-item a:hover {
+    color: #cccccc;
+  }
+  
+  .breadcrumb-nav .breadcrumb-item:last-child a {
+    pointer-events: none;
+    color: #cccccc;
+  }

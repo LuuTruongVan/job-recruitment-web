@@ -155,4 +155,71 @@ router.put('/update-profile', async (req, res) => {
   }
 });
 
+// Thêm route đổi mật khẩu
+router.put('/change-password', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  const { oldPassword, newPassword } = req.body;
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [user] = await pool.query('SELECT * FROM users WHERE id = ?', [decoded.id]);
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await bcrypt.compare(oldPassword, user[0].password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Mật khẩu cũ không đúng' });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, decoded.id]);
+    res.json({ message: 'Đổi mật khẩu thành công' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    res.status(500).json({ message: 'Lỗi đổi mật khẩu' });
+  }
+});
+
+router.get('/candidate-profile', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [candidate] = await pool.query(
+      'SELECT full_name, phone, address, resume, skills FROM candidates WHERE user_id = ?',
+      [decoded.id]
+    );
+    if (candidate.length === 0) return res.status(404).json({ message: 'Candidate not found' });
+    res.json(candidate[0]);
+  } catch (error) {
+    console.error('Error in /candidate-profile:', error);
+    res.status(500).json({ message: 'Error fetching candidate profile' });
+  }
+});
+
+router.get('/employer-profile', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const [employer] = await pool.query(
+      'SELECT name, address, email, website FROM employers WHERE user_id = ?',
+      [decoded.id]
+    );
+    if (employer.length === 0) return res.status(404).json({ message: 'Employer not found' });
+    res.json(employer[0]);
+  } catch (error) {
+    console.error('Error in /employer-profile:', error);
+    res.status(500).json({ message: 'Error fetching employer profile' });
+  }
+});
+
 module.exports = router;

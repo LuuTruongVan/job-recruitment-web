@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
-const multer = require('multer'); // Thêm multer để xử lý file
+const multer = require('multer');
 const path = require('path');
 
 const storage = multer.diskStorage({
@@ -19,10 +19,17 @@ router.post('/add', upload.single('cv'), async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /add:', decoded); // Log để kiểm tra vai trò
     if (decoded.role !== 'candidate') return res.status(403).json({ message: 'Access denied' });
 
-    const { full_name, phone, email, address, skills, introduction, job_id } = req.body;
+    const { candidate_name, phone, email, address, skills, introduction, job_id } = req.body;
+    console.log('Request body:', req.body);
+    console.log('Uploaded file:', req.file);
+
     const cvPath = req.file ? `/uploads/${req.file.filename}` : null;
+    if (!cvPath) {
+      return res.status(400).json({ message: 'No CV file uploaded' });
+    }
 
     const [existing] = await pool.query(
       'SELECT * FROM applications WHERE user_id = ? AND jobpost_id = ?',
@@ -31,8 +38,8 @@ router.post('/add', upload.single('cv'), async (req, res) => {
     if (existing.length > 0) return res.status(400).json({ message: 'Already applied' });
 
     await pool.query(
-      'INSERT INTO applications (jobpost_id, user_id, full_name, phone, email, address, skills, introduction, cv_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [job_id, decoded.id, full_name, phone, email, address, skills, introduction, cvPath, 'pending']
+      'INSERT INTO applications (jobpost_id, user_id, candidate_name, phone, email, address, skills, introduction, cv_path, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [job_id, decoded.id, candidate_name, phone, email, address, skills, introduction, cvPath, 'pending']
     );
     res.status(201).json({ message: 'Application added successfully' });
   } catch (error) {
@@ -47,14 +54,20 @@ router.get('/get', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'candidate') return res.status(403).json({ message: 'Access denied' });
+    console.log('Decoded token in /get:', decoded); // Log để kiểm tra vai trò
+    if (decoded.role !== 'candidate') {
+      console.log('Access denied due to role:', decoded.role);
+      return res.status(403).json({ message: 'Access denied' });
+    }
 
     const [applications] = await pool.query(
       'SELECT a.*, j.title FROM applications a JOIN jobposts j ON a.jobpost_id = j.id WHERE a.user_id = ?',
       [decoded.id]
     );
+    console.log('Fetched applications:', applications); // Log dữ liệu trả về
     res.json(applications);
   } catch (error) {
+    console.error('Error fetching applications:', error);
     res.status(500).json({ message: 'Error fetching applications' });
   }
 });
@@ -65,6 +78,7 @@ router.put('/update/:id', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /update:', decoded); // Log để kiểm tra vai trò
     if (decoded.role !== 'employer') return res.status(403).json({ message: 'Access denied' });
 
     const { id } = req.params;
@@ -85,6 +99,7 @@ router.put('/update/:id', async (req, res) => {
     );
     res.json({ message: 'Application updated successfully' });
   } catch (error) {
+    console.error('Error updating application:', error);
     res.status(500).json({ message: 'Error updating application' });
   }
 });
@@ -95,6 +110,7 @@ router.get('/get-all', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /get-all:', decoded); // Log để kiểm tra vai trò
     if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
     const [applications] = await pool.query(
@@ -112,6 +128,7 @@ router.delete('/delete/:id', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /delete:', decoded); // Log để kiểm tra vai trò
     if (decoded.role !== 'employer' && decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
     const { id } = req.params;

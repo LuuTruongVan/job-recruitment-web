@@ -7,7 +7,7 @@ import '../componentCss/Login.css';
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Giữ useNavigate
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -22,7 +22,9 @@ const Login = () => {
       if (response.data.token) {
         localStorage.setItem('employer_token', response.data.token);
         setMessage('Đăng nhập thành công!');
+        // Điều hướng và làm mới trang
         navigate('/');
+        window.location.reload(); // Reset trang
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Lỗi đăng nhập!');
@@ -50,7 +52,7 @@ const Login = () => {
           <Form.Control
             type="password"
             name="password"
-            value={credentials.password} // Sửa typo từ credentials.credentials
+            value={credentials.password}
             onChange={handleChange}
             required
           />

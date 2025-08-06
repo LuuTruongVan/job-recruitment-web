@@ -8,7 +8,7 @@ router.post('/', async (req, res) => {
   console.log('Received token:', token);
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
-  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name } = req.body;
+  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name, employmentType } = req.body;
   console.log('Received job data:', req.body);
   if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
     return res.status(400).json({ message: 'Missing required fields' });
@@ -24,8 +24,8 @@ router.post('/', async (req, res) => {
     const employerId = employer[0].id;
 
     const [result] = await pool.query(
-      'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)',
-      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '']
+      'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name, employment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)',
+      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '', employmentType || '']
     );
     res.status(201).json({ message: 'Job posted successfully', insertId: result.insertId });
   } catch (error) {
@@ -46,7 +46,7 @@ router.put('/:id', async (req, res) => {
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
   const { id } = req.params;
-  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name } = req.body;
+  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name, employmentType } = req.body;
   console.log('Received update data:', req.body);
 
   if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
@@ -68,8 +68,8 @@ router.put('/:id', async (req, res) => {
     }
 
     await pool.query(
-      'UPDATE jobposts SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, company_name = ? WHERE id = ?',
-      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', expiry_date || null, company_name || '', id]
+      'UPDATE jobposts SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, company_name = ?, employment_type = ? WHERE id = ?',
+      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', expiry_date || null, company_name || '', employmentType || '', id]
     );
 
     res.json({ message: 'Job updated successfully' });
@@ -254,7 +254,7 @@ router.get('/:id/applications', async (req, res) => {
     }
 
     const [applications] = await pool.query(
-      'SELECT a.id, a.candidate_name, a.email, a.resume_url, a.status FROM applications a WHERE a.job_id = ?',
+      'SELECT a.id, a.candidate_name, a.email, a.phone, a.skills, a.introduction, a.cv_path AS resume_url, a.status FROM applications a WHERE a.jobpost_id = ?',
       [id]
     );
     res.json(applications);
@@ -283,7 +283,7 @@ router.put('/:id/applications/:applicationId/approve', async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
-    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND job_id = ?', ['approved', applicationId, id]);
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['approved', applicationId, id]); // Thay job_id thành jobpost_id
     res.json({ message: 'Application approved' });
   } catch (error) {
     console.error('Error approving application:', error);
@@ -310,7 +310,7 @@ router.put('/:id/applications/:applicationId/reject', async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
-    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND job_id = ?', ['rejected', applicationId, id]);
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['rejected', applicationId, id]); // Thay job_id thành jobpost_id
     res.json({ message: 'Application rejected' });
   } catch (error) {
     console.error('Error rejecting application:', error);

@@ -1,0 +1,34 @@
+/* src/componentCss/JobDetail.css */
+.job-detail-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .job-detail-layout {
+    display: flex;
+    gap: 20px;
+    min-height: 400px; /* Đảm bảo chiều cao tối thiểu để tránh trống */
+  }
+  
+  .job-content {
+    flex: 1;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+  }
+  
+  .applications-content {
+    flex: 1;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+  }
+  
+  table {
+    width: 100%;
+  }
+  
+  button {
+    margin: 2px;
+  }
