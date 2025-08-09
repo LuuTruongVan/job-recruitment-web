@@ -7,7 +7,7 @@ const employersRouter = require('./routes/employers');
 const jobpostsRouter = require('./routes/jobposts');
 const applicationsRouter = require('./routes/applications');
 const categoriesRouter = require('./routes/categories');
-
+app.use(express.json()); // Thêm nếu chưa có
 const cors = require('cors');
 app.use(cors());
 app.use(express.json());
@@ -24,7 +24,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 app.use('/uploads', express.static('uploads'));
-
 app.use('/users', usersRouter);
 app.use('/candidates', candidatesRouter);
 app.use('/employers', employersRouter);

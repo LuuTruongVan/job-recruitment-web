@@ -9,42 +9,17 @@ const UpdateProfile = () => {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('employer_token');
+    const adminToken = localStorage.getItem('admin_token');
+    const employerToken = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    const token = candidateToken || employerToken || adminToken;
+
     if (token) {
-      axios.get('/users/get-profile', {
+      axios.get('http://localhost:3001/users/get-profile', {
         headers: { Authorization: `Bearer ${token}` }
       }).then(response => {
         setProfile(response.data);
         if (response.data.role === 'candidate') {
-          setFormData({
-            full_name: '',
-            phone: '',
-            address: '',
-            resume: '',
-            skills: ''
-          });
-        } else if (response.data.role === 'employer') {
-          setFormData({
-            name: '',
-            address: '',
-            email: '',
-            website: ''
-          });
-        }
-      }).catch(error => {
-        console.error('Error fetching profile:', error);
-        setMessage('Lỗi tải thông tin cá nhân!');
-      });
-    }
-  }, []);
-
-  useEffect(() => {
-    if (profile) {
-      const token = localStorage.getItem('employer_token');
-      if (profile.role === 'candidate') {
-        axios.get(`/candidates/${profile.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }).then(response => {
           setFormData({
             full_name: response.data.full_name || '',
             phone: response.data.phone || '',
@@ -52,35 +27,21 @@ const UpdateProfile = () => {
             resume: response.data.resume || '',
             skills: response.data.skills || ''
           });
-        }).catch(error => {
-          console.error('Error fetching candidate details:', error);
-          // Nếu 404, có thể profile chưa được tạo, để formData rỗng
-          if (error.response?.status === 404) {
-            setFormData({
-              full_name: '',
-              phone: '',
-              address: '',
-              resume: '',
-              skills: ''
-            });
-          }
-        });
-      } else if (profile.role === 'employer') {
-        axios.get(`/employers/${profile.id}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }).then(response => {
+        } else if (response.data.role === 'employer') {
           setFormData({
             name: response.data.name || '',
+            phone: response.data.phone || '',
             address: response.data.address || '',
             email: response.data.email || '',
             website: response.data.website || ''
           });
-        }).catch(error => {
-          console.error('Error fetching employer details:', error);
-        });
-      }
+        }
+      }).catch(error => {
+        console.error('Error fetching profile:', error.response?.data || error.message);
+        setMessage('Lỗi tải thông tin cá nhân!');
+      });
     }
-  }, [profile]);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -88,21 +49,31 @@ const UpdateProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('employer_token');
+    const adminToken = localStorage.getItem('admin_token');
+    const employerToken = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    const token = candidateToken || employerToken || adminToken;
+  
     if (profile.role === 'employer' && !formData.email) {
       setMessage('Email không được để trống!');
       return;
     }
     try {
-      await axios.put('/users/update-profile', formData, {
+      await axios.put('http://localhost:3001/users/update-profile', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMessage('Cập nhật thông tin thành công!');
+  
+      // ✅ Reload lại trang để header cập nhật
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000); // để user thấy thông báo thành công 1s rồi reload
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('Error updating profile:', error.response?.data || error.message);
       setMessage('Lỗi cập nhật thông tin!');
     }
   };
+  
 
   if (!profile) return <p>Đang tải...</p>;
 
@@ -132,6 +103,7 @@ const UpdateProfile = () => {
                 onChange={handleChange}
               />
             </Form.Group>
+
             <Form.Group className="mb-3">
               <Form.Label>Địa chỉ</Form.Label>
               <Form.Control
@@ -161,48 +133,58 @@ const UpdateProfile = () => {
             </Form.Group>
           </>
         )}
-        {profile.role === 'employer' && (
-          <>
-            <Form.Group className="mb-3">
-              <Form.Label>Tên công ty</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Địa chỉ</Form.Label>
-              <Form.Control
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Website</Form.Label>
-              <Form.Control
-                type="text"
-                name="website"
-                value={formData.website}
-                onChange={handleChange}
-              />
-            </Form.Group>
-          </>
-        )}
+       {profile.role === 'employer' && (
+  <>
+    <Form.Group className="mb-3">
+      <Form.Label>Tên công ty</Form.Label>
+      <Form.Control
+        type="text"
+        name="name"
+        value={formData.name}
+        onChange={handleChange}
+        required
+      />
+    </Form.Group>
+    <Form.Group className="mb-3">
+      <Form.Label>Địa chỉ</Form.Label>
+      <Form.Control
+        type="text"
+        name="address"
+        value={formData.address}
+        onChange={handleChange}
+      />
+    </Form.Group>
+    <Form.Group className="mb-3">
+      <Form.Label>Email</Form.Label>
+      <Form.Control
+        type="email"
+        name="email"
+        value={formData.email}
+        onChange={handleChange}
+        required
+      />
+    </Form.Group>
+    <Form.Group className="mb-3">
+      <Form.Label>Số điện thoại</Form.Label> {/* thêm input phone */}
+      <Form.Control
+        type="text"
+        name="phone"
+        value={formData.phone}
+        onChange={handleChange}
+      />
+    </Form.Group>
+    <Form.Group className="mb-3">
+      <Form.Label>Website</Form.Label>
+      <Form.Control
+        type="text"
+        name="website"
+        value={formData.website}
+        onChange={handleChange}
+      />
+    </Form.Group>
+  </>
+)}
+
         <Button variant="primary" type="submit">Lưu thay đổi</Button>
       </Form>
     </div>

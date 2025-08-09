@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import '../componentCss/Header.css';
 
 const Header = ({ user, handleLogout, setShowChangePassword }) => {
+  const handleLogoutClick = () => {
+    handleLogout(); // Gọi hàm logout từ prop
+  };
+
   return (
     <header className="header">
       <div className="header-container">
@@ -25,15 +29,27 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
             )}
             {user ? (
               <div className="dropdown">
-                <button className="dropdown-toggle">
-                  Xin chào, {user.role === 'candidate' ? (user.full_name || 'Người dùng') : (user.name || 'Công ty')}
-                </button>
-                <ul className="dropdown-menu">
-                  <li><Link className="dropdown-item" to="/profile">Xem hồ sơ</Link></li>
-                  <li><Link className="dropdown-item" to="/update-profile">Cập nhật thông tin</Link></li>
-                  <li><button className="dropdown-item" onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</button></li>
-                  <li><button className="dropdown-item" onClick={handleLogout}>Đăng xuất</button></li>
-                </ul>
+               <button className="dropdown-toggle">
+  Xin chào, {user.role === 'candidate'
+    ? (user.full_name || 'Người dùng')
+    : user.role === 'employer'
+      ? (user.name || 'Công ty')
+      : user.role === 'admin'
+        ? (user.username || user.email || 'Quản trị viên')
+        : 'Người dùng'}
+</button>
+<ul className="dropdown-menu">
+  {user.role !== 'admin' && (
+    <>
+      <li><Link className="dropdown-item" to="/profile">Xem hồ sơ</Link></li>
+      <li><Link className="dropdown-item" to="/update-profile">Cập nhật thông tin</Link></li>
+    </>
+  )}
+  <li><button className="dropdown-item" onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</button></li>
+  <li><button className="dropdown-item" onClick={handleLogoutClick}>Đăng xuất</button></li>
+</ul>
+
+
               </div>
             ) : (
               <>

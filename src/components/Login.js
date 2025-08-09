@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
@@ -7,7 +8,7 @@ import '../componentCss/Login.css';
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: '', password: '' });
   const [message, setMessage] = useState('');
-  const navigate = useNavigate(); // Giữ useNavigate
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -18,13 +19,16 @@ const Login = () => {
     setMessage('');
     try {
       console.log('Sending login request to /users/get:', credentials);
-      const response = await axios.post('/users/get', credentials);
+      const response = await axios.post('http://localhost:3001/users/get', credentials); // Đảm bảo port 3001
       if (response.data.token) {
-        localStorage.setItem('employer_token', response.data.token);
+        const { token } = response.data;
+        const decoded = jwt.decode(token);
+        console.log('Decoded token:', decoded); // Debug role
+        const tokenKey = decoded.role === 'admin' ? 'admin_token' : decoded.role === 'employer' ? 'employer_token' : 'candidate_token';
+        localStorage.setItem(tokenKey, token);
         setMessage('Đăng nhập thành công!');
-        // Điều hướng và làm mới trang
         navigate('/');
-        window.location.reload(); // Reset trang
+        window.location.reload();
       }
     } catch (error) {
       setMessage(error.response?.data?.message || 'Lỗi đăng nhập!');

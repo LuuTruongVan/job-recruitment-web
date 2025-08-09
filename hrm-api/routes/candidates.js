@@ -3,6 +3,39 @@ const router = express.Router();
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
 
+router.get('/get-all', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]; // Lấy token từ FE gửi lên
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    const [candidates] = await pool.query(
+      'SELECT c.*, u.email FROM candidates c LEFT JOIN users u ON c.user_id = u.id'
+    );
+    res.json(candidates);
+  } catch (err) {
+    console.error('GET /candidates/get-all error:', err);
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
+    res.status(500).json({ message: 'Error fetching all candidates' });
+  }
+});
+
+// Đặt ở trên cùng, trước middleware check token (nếu có)
+router.get('/count', async (_, res) => {
+  try {
+    const [result] = await pool.query('SELECT COUNT(*) as count FROM candidates');
+    res.json({ count: result[0].count });
+  } catch (error) {
+    console.error('Error fetching candidates count:', error);
+    res.status(500).json({ message: 'Error fetching candidates count' });
+  }
+});
+
+
 router.post('/add', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -25,7 +58,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => { // Đảm bảo endpoint này tồn tại
+router.get('/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
@@ -41,22 +74,8 @@ router.get('/:id', async (req, res) => { // Đảm bảo endpoint này tồn t�
   }
 });
 
-router.get('/get-all', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
-    const [profiles] = await pool.query(
-      'SELECT c.*, u.email FROM candidates c JOIN users u ON c.user_id = u.id'
-    );
-    res.json(profiles);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching all candidate profiles' });
-  }
-});
 
 router.delete('/delete/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -64,21 +83,36 @@ router.delete('/delete/:id', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'candidate' && decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    // Cho phép admin xóa bất kỳ candidate nào; candidate chỉ xóa hồ sơ của mình
+    if (decoded.role !== 'admin' && decoded.role !== 'candidate') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
 
     const { id } = req.params;
-    const [candidate] = await pool.query('SELECT * FROM candidates WHERE id = ? AND user_id = ?', [id, decoded.id]);
-    if (candidate.length === 0) return res.status(404).json({ message: 'Candidate profile not found' });
 
-    if (decoded.role === 'candidate' && candidate[0].user_id !== decoded.id) {
-      return res.status(403).json({ message: 'Unauthorized' });
+    if (decoded.role === 'candidate') {
+      // candidate chỉ được xóa profile của chính họ
+      const [candidate] = await pool.query('SELECT * FROM candidates WHERE id = ? AND user_id = ?', [id, decoded.id]);
+      if (candidate.length === 0) return res.status(404).json({ message: 'Candidate profile not found or unauthorized' });
+    } else {
+      // admin: optional check if exists
+      const [candidate] = await pool.query('SELECT * FROM candidates WHERE id = ?', [id]);
+      if (candidate.length === 0) return res.status(404).json({ message: 'Candidate profile not found' });
     }
 
     await pool.query('DELETE FROM candidates WHERE id = ?', [id]);
     res.json({ message: 'Candidate profile deleted successfully' });
-  } catch (error) {
+  } catch (err) {
+    console.error('DELETE /candidates/delete/:id error:', err);
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Invalid or expired token' });
+    }
     res.status(500).json({ message: 'Error deleting candidate profile' });
   }
 });
+
+
+
 
 module.exports = router;

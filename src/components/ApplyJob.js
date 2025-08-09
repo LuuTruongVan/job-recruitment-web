@@ -7,7 +7,7 @@ import '../componentCss/ApplyJob.css';
 const ApplyJob = () => {
   const { id } = useParams();
   const [formData, setFormData] = useState({
-    candidate_name: '', // Thay full_name thành candidate_name
+    candidate_name: '',
     phone: '',
     email: '',
     address: '',
@@ -28,17 +28,23 @@ const ApplyJob = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    const token = candidateToken;
+    if (!token) {
+      setMessage('Vui lòng đăng nhập với vai trò ứng viên.');
+      return;
+    }
+
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
-    data.append('job_id', id);
+    data.append('jobpost_id', id); // Sử dụng jobpost_id
 
     for (let [key, value] of data.entries()) {
       console.log(`${key}: ${value}`);
     }
 
     try {
-      const response = await axios.post('/applications/add', data, {
+      const response = await axios.post('http://localhost:3000/applications/add', data, {
         headers: { 
           Authorization: `Bearer ${token}`, 
           'Content-Type': 'multipart/form-data' 
@@ -59,10 +65,10 @@ const ApplyJob = () => {
       {message && <Alert variant={message.includes('thành công') ? 'success' : 'danger'}>{message}</Alert>}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>Tên ứng viên</Form.Label> {/* Cập nhật nhãn */}
+          <Form.Label>Tên ứng viên</Form.Label>
           <Form.Control
             type="text"
-            name="candidate_name" // Thay full_name thành candidate_name
+            name="candidate_name"
             value={formData.candidate_name}
             onChange={handleChange}
             required

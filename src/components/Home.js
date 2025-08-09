@@ -41,14 +41,20 @@ const Home = () => {
 
   useEffect(() => {
     fetchJobs();
-    const token = localStorage.getItem('employer_token');
-    if (token) {
-      axios.get('/users/get-profile', {
-        headers: { Authorization: `Bearer ${token}` }
+    const adminToken = localStorage.getItem('admin_token');
+    const employerToken = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    let currentToken = candidateToken || employerToken || adminToken; // Ưu tiên candidate, sau đó employer, admin
+
+    if (currentToken) {
+      axios.get('http://localhost:3001/users/get-profile', {
+        headers: { Authorization: `Bearer ${currentToken}` }
       }).then(response => {
         setUser(response.data);
+        console.log('User data in Home:', response.data); // Debug
       }).catch(error => {
-        console.error('Error fetching user:', error);
+        console.error('Error fetching user in Home:', error.response?.data || error.message);
+        setUser(null); // Đảm bảo set null nếu lỗi
       });
     }
     // Load danh sách yêu thích từ localStorage

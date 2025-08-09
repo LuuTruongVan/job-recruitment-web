@@ -18,6 +18,7 @@ import Header from './components/Header';
 import Navbar from './components/Navbar';
 import Favorites from './components/Favorites';
 import JobManagementDetail from './components/JobManagementDetail';
+import AdminDashboard from './Admin/AdminDashboard';
 
 // Tạo context để truyền token
 export const TokenContext = createContext();
@@ -26,33 +27,51 @@ function App() {
   const [user, setUser] = useState(null);
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [token, setToken] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const updateUser = () => {
+    const updateUser = async () => {
+      const adminToken = localStorage.getItem('admin_token');
       const employerToken = localStorage.getItem('employer_token');
       const candidateToken = localStorage.getItem('candidate_token');
-      const currentToken = employerToken || candidateToken;
-      console.log('Checking token in App.js:', currentToken);
+      let currentToken = null;
+
+      // Ưu tiên token cuối cùng (có thể cải thiện bằng cách theo dõi role đăng nhập)
+      if (candidateToken) currentToken = candidateToken;
+      else if (employerToken) currentToken = employerToken;
+      else if (adminToken) currentToken = adminToken;
+
+      console.log('Checking token in App.js:', { currentToken, adminToken, employerToken, candidateToken });
       setToken(currentToken);
       if (currentToken) {
-        axios.get('http://localhost:3000/users/get-profile', {
-          headers: { Authorization: `Bearer ${currentToken}` }
-        }).then(response => {
+        try {
+          const response = await axios.get('http://localhost:3001/users/get-profile', {
+            headers: { Authorization: `Bearer ${currentToken}` }
+          });
           const userData = response.data;
-          console.log('User data from API:', userData);
+          console.log('User data from API:', userData); // Debug chi tiết
           setUser(userData);
-        }).catch(error => {
-          console.error('Profile error:', error.response?.status, error.response?.data || error.message);
+          if (userData.role === 'admin' && window.location.pathname !== '/admin') {
+            window.location.href = '/admin';
+          }
+        } catch (error) {
+          console.error('Profile error:', {
+            status: error.response?.status,
+            data: error.response?.data || error.message,
+            token: currentToken
+          });
+          localStorage.removeItem('admin_token');
           localStorage.removeItem('employer_token');
           localStorage.removeItem('candidate_token');
           setUser(null);
           setToken(null);
-        });
+        }
       } else {
         console.log('No token found');
         setUser(null);
         setToken(null);
       }
+      setLoading(false);
     };
 
     updateUser();
@@ -62,12 +81,17 @@ function App() {
   }, []);
 
   const handleLogout = () => {
+    localStorage.removeItem('admin_token');
     localStorage.removeItem('employer_token');
     localStorage.removeItem('candidate_token');
     setUser(null);
     setToken(null);
     window.location.href = '/home';
   };
+
+  if (loading) {
+    return <div>Đang tải...</div>;
+  }
 
   return (
     <TokenContext.Provider value={token}>
@@ -91,6 +115,7 @@ function App() {
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/job-management-detail/:id" element={user?.role === 'employer' ? <JobManagementDetail /> : <Home />} />
             <Route path="/candidate-dashboard" element={user ? <Home /> : <Home />} />
+            <Route path="/admin/*" element={user?.role === 'admin' ? <AdminDashboard /> : <Home />} />
           </Routes>
         </div>
         <ChangePassword show={showChangePassword} onHide={() => setShowChangePassword(false)} />

@@ -8,26 +8,21 @@ const Profile = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('employer_token');
+    const adminToken = localStorage.getItem('admin_token');
+    const employerToken = localStorage.getItem('employer_token');
+    const candidateToken = localStorage.getItem('candidate_token');
+    const token = candidateToken || employerToken || adminToken;
+
     if (token) {
-      axios.get('/users/get-profile', {
+      axios.get('http://localhost:3001/users/get-profile', {
         headers: { Authorization: `Bearer ${token}` }
       }).then(response => {
         const userData = response.data;
         setUser(userData);
-
-        // Lấy thêm thông tin chi tiết từ candidates hoặc employers
-        axios.get(`/users/${userData.role === 'candidate' ? 'candidate' : 'employer'}-profile`, {
-          headers: { Authorization: `Bearer ${token}` }
-        }).then(profileResponse => {
-          setProfileData(profileResponse.data);
-        }).catch(profileError => {
-          setError('Không thể tải thông tin chi tiết.');
-          console.error('Profile detail error:', profileError);
-        });
+        setProfileData(userData); // Dùng trực tiếp dữ liệu từ get-profile
       }).catch(error => {
         setError('Không thể tải thông tin hồ sơ.');
-        console.error('Profile error:', error);
+        console.error('Profile error:', error.response?.data || error.message);
       });
     }
   }, []);
@@ -47,14 +42,18 @@ const Profile = () => {
           <p><strong>Kỹ năng:</strong> {profileData.skills || 'Chưa có'}</p>
         </>
       )}
-      {user.role === 'employer' && profileData && (
-        <>
-          <p><strong>Tên công ty:</strong> {profileData.name || 'Chưa có'}</p>
-          <p><strong>Địa chỉ:</strong> {profileData.address || 'Chưa có'}</p>
-          <p><strong>Email:</strong> {profileData.email || 'Chưa có'}</p>
-          <p><strong>Website:</strong> {profileData.website ? <a href={profileData.website} target="_blank" rel="noopener noreferrer">{profileData.website}</a> : 'Chưa có'}</p>
-        </>
-      )}
+ {user.role === 'employer' && profileData && (
+  <>
+    <p><strong>Tên công ty:</strong> {profileData.name || 'Chưa có'}</p>
+    <p><strong>Địa chỉ:</strong> {profileData.address || 'Chưa có'}</p>
+    <p><strong>Email:</strong> {profileData.email || 'Chưa có'}</p>
+    <p><strong>Số điện thoại:</strong> {profileData.phone || 'Chưa có'}</p> {/* thêm phone */}
+    <p><strong>Website:</strong> {profileData.website ? <a href={profileData.website} target="_blank" rel="noopener noreferrer">{profileData.website}</a> : 'Chưa có'}</p>
+  </>
+)}
+
+
+      
       <Button variant="secondary" onClick={() => window.history.back()}>Quay lại</Button>
     </div>
   );

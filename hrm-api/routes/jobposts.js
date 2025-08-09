@@ -3,6 +3,34 @@ const router = express.Router();
 const pool = require('../db');
 const jwt = require('jsonwebtoken');
 
+router.get('/count', async (_, res) => {
+  try {
+    const [result] = await pool.query('SELECT COUNT(*) as count FROM jobposts');
+    res.json({ count: result[0].count });
+  } catch (error) {
+    console.error('Error fetching jobposts count:', error);
+    res.status(500).json({ message: 'Error fetching jobposts count' });
+  }
+});
+
+
+router.get('/admin', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /jobposts/admin:', decoded);
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    const [jobPosts] = await pool.query('SELECT * FROM jobposts');
+    if (!jobPosts.length) return res.status(404).json({ message: 'No job posts found' });
+    res.json(jobPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching all job posts' });
+  }
+});
+
 router.post('/', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   console.log('Received token:', token);
@@ -108,33 +136,30 @@ router.get('/job-positions', async (req, res) => {
 router.get('/', async (req, res) => {
   try {
     const { category, location, salary } = req.query;
-    let query = 'SELECT * FROM jobposts';
+    let query = 'SELECT * FROM jobposts WHERE status = "approved" AND expiry_date > NOW()';
     const params = [];
 
-    if (category || location || salary) {
-      query += ' WHERE';
-      const conditions = [];
-      if (category) {
-        conditions.push('category = ?');
-        params.push(category);
-      }
-      if (location) {
-        conditions.push('location = ?');
-        params.push(location);
-      }
-      if (salary) {
-        conditions.push('salary >= ?');
-        params.push(parseFloat(salary));
-      }
-      query += ' ' + conditions.join(' AND ');
+    if (category) {
+      query += ' AND category = ?';
+      params.push(category);
+    }
+    if (location) {
+      query += ' AND location = ?';
+      params.push(location);
+    }
+    if (salary) {
+      query += ' AND salary >= ?';
+      params.push(parseFloat(salary));
     }
 
     const [jobs] = await pool.query(query, params);
     res.json(jobs);
   } catch (error) {
+    console.error('Error fetching jobs:', error);
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 });
+
 
 router.get('/my-jobs', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -317,5 +342,82 @@ router.put('/:id/applications/:applicationId/reject', async (req, res) => {
     res.status(500).json({ message: 'Error rejecting application' });
   }
 });
+
+router.get('/admin', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /jobposts/admin:', decoded); // Log để debug
+    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+
+    const [jobPosts] = await pool.query('SELECT * FROM jobposts');
+    if (!jobPosts.length) return res.status(404).json({ message: 'No job posts found' });
+    res.json(jobPosts);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching all job posts' });
+  }
+});
+
+// Admin cập nhật trạng thái bài đăng
+// Admin cập nhật trạng thái
+router.put('/admin/:id/status', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    console.log('Body nhận được khi duyệt:', req.body);
+    const { status } = req.body;
+    if (!status || !['approved', 'pending'].includes(status)) {
+      return res.status(400).json({ message: 'Invalid status value' });
+    }
+    
+
+    const [result] = await pool.query(
+      'UPDATE jobposts SET status = ? WHERE id = ?',
+      [status, req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Job post not found' });
+    }
+
+    res.json({ message: 'Status updated successfully' });
+  } catch (error) {
+    console.error('Error updating job post status:', error);
+    res.status(500).json({ message: 'Error updating job post status' });
+  }
+});
+
+
+// Admin xóa bài đăng
+router.delete('/admin/:id', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const [result] = await pool.query('DELETE FROM jobposts WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Job post not found' });
+
+    res.json({ message: 'Job post deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting job post:', error);
+    res.status(500).json({ message: 'Error deleting job post' });
+  }
+});
+
+
+
 
 module.exports = router;

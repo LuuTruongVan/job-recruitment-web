@@ -58,21 +58,6 @@ router.post('/get', async (req, res) => {
   }
 });
 
-router.get('/get-all', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
-
-    const [users] = await pool.query('SELECT id, email, role, is_active, created_at FROM users');
-    res.json(users);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching users' });
-  }
-});
-
 router.put('/update/:id/toggle', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -104,19 +89,26 @@ router.get('/get-profile', async (req, res) => {
 
     let profile = users[0];
     if (profile.role === 'candidate') {
-      const [candidate] = await pool.query('SELECT full_name FROM candidates WHERE user_id = ?', [decoded.id]);
-      if (candidate.length > 0) profile.full_name = candidate[0].full_name;
+      const [candidate] = await pool.query(
+        'SELECT full_name, phone, address, resume, skills FROM candidates WHERE user_id = ?',
+        [decoded.id]
+      );
+      profile = { ...profile, ...candidate[0] || { full_name: '', phone: '', address: '', resume: '', skills: '' } };
     } else if (profile.role === 'employer') {
-      const [employer] = await pool.query('SELECT name FROM employers WHERE user_id = ?', [decoded.id]);
-      if (employer.length > 0) profile.name = employer[0].name;
+      const [employer] = await pool.query(
+        'SELECT name, address, email, phone, website FROM employers WHERE user_id = ?',
+        [decoded.id]
+      );
+      profile = { ...profile, ...employer[0] || { name: '', address: '', email: '', phone: '', website: '' } };
     }
 
-    res.json(profile); // Trả về { id, email, role, full_name, name }
+    res.json(profile);
   } catch (error) {
     console.error('Error in /get-profile:', error);
     res.status(500).json({ message: 'Error fetching profile' });
   }
 });
+
 
 router.put('/update-profile', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -135,15 +127,15 @@ router.put('/update-profile', async (req, res) => {
       );
       await connection.execute(
         'UPDATE users SET name = ? WHERE id = ?', [full_name, decoded.id]
-      ); // Cập nhật name trong users
+      );
     } else if (decoded.role === 'employer') {
       await connection.execute(
-        'UPDATE employers SET name = ?, address = ?, email = ?, website = ? WHERE user_id = ?',
-        [company_name, address, email, website, decoded.id]
+        'UPDATE employers SET name = ?, address = ?, email = ?, phone = ?, website = ? WHERE user_id = ?',
+        [company_name, address, email, phone, website, decoded.id]
       );
       await connection.execute(
         'UPDATE users SET name = ? WHERE id = ?', [company_name, decoded.id]
-      ); // Cập nhật name trong users
+      );
     }
 
     await connection.commit();
@@ -154,6 +146,7 @@ router.put('/update-profile', async (req, res) => {
     res.status(500).json({ message: 'Error updating profile' });
   }
 });
+
 
 // Thêm route đổi mật khẩu
 router.put('/change-password', async (req, res) => {
@@ -219,6 +212,42 @@ router.get('/employer-profile', async (req, res) => {
   } catch (error) {
     console.error('Error in /employer-profile:', error);
     res.status(500).json({ message: 'Error fetching employer profile' });
+  }
+});
+
+router.get('/get-all', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /users/get-all:', decoded);
+    const [users] = await pool.query('SELECT id, name, email, role FROM users');
+    console.log('Fetched users:', users);
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching all users:', error);
+    res.status(500).json({ message: 'Error fetching all users' });
+  }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log('Decoded token in /users/delete:', decoded);
+    const { id } = req.params;
+
+    const [user] = await pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    if (user.length === 0) return res.status(404).json({ message: 'User not found' });
+
+    await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ message: 'Error deleting user' });
   }
 });
 

@@ -10,24 +10,25 @@ const ManageApplications = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const employerToken = localStorage.getItem('employer_token');
     const candidateToken = localStorage.getItem('candidate_token');
-    const token = candidateToken || employerToken; // Ưu tiên candidate_token, fallback sang employer_token
+    const token = candidateToken; // Chỉ dùng candidate_token
     console.log('Token in ManageApplications:', token);
     if (!token) {
-      setError('Vui lòng đăng nhập.');
+      setError('Vui lòng đăng nhập với vai trò ứng viên.');
       return;
     }
 
     axios.get('http://localhost:3000/applications/get', {
       headers: { Authorization: `Bearer ${token}` }
-    }).then((response) => {
-      console.log('Response from /applications/get:', response.data);
-      setApplications(response.data);
-    }).catch((error) => {
-      console.error('Error fetching applications:', error.response?.status, error.response?.data || error.message);
-      setError('Không thể tải danh sách ứng tuyển. Vui lòng kiểm tra console.');
-    });
+    })
+      .then((response) => {
+        console.log('Response from /applications/get:', response.data);
+        setApplications(response.data);
+      })
+      .catch((error) => {
+        console.error('Error fetching applications:', error.response?.status, error.response?.data || error.message);
+        setError('Không thể tải danh sách ứng tuyển. Vui lòng kiểm tra console.');
+      });
   }, []);
 
   return (
