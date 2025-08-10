@@ -1,36 +1,85 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button } from 'react-bootstrap';
 import axios from 'axios';
 
 const Favorites = () => {
   const [favoriteJobDetails, setFavoriteJobDetails] = useState([]);
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
-  const token = localStorage.getItem('employer_token');
 
-  useEffect(() => {
-    const loadFavorites = async () => {
-      const favoriteJobs = JSON.parse(localStorage.getItem('favoriteJobs') || '[]');
-      const details = await Promise.all(favoriteJobs.map(async (jobId) => {
-        try {
-          const response = await axios.get(`/jobposts/${jobId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          return response.data;
-        } catch (error) {
-          console.error('Error fetching job details:', error);
-          return null;
-        }
-      }));
-      setFavoriteJobDetails(details.filter(job => job !== null));
-    };
-    if (token) loadFavorites();
+  const token =
+    localStorage.getItem('candidate_token') ||
+    localStorage.getItem('employer_token') ||
+    localStorage.getItem('admin_token');
+
+  const fetchFavoriteCount = async (jobId) => {
+    try {
+      const res = await axios.get(`/favorites/count/${jobId}`);
+      return res.data.count || 0;
+    } catch {
+      return 0;
+    }
+  };
+
+  const loadFavorites = useCallback(async () => {
+    try {
+      const response = await axios.get('/favorites', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Lấy count cho từng job
+      const jobsWithCount = await Promise.all(
+        response.data.map(async (job) => ({
+          ...job,
+          favorite_count: await fetchFavoriteCount(job.id)
+        }))
+      );
+      setFavoriteJobDetails(jobsWithCount);
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
   }, [token]);
 
-  const toggleFavorite = (jobId) => {
-    let updatedFavorites = JSON.parse(localStorage.getItem('favoriteJobs') || '[]').filter(id => id !== jobId);
-    setFavoriteJobDetails(favoriteJobDetails.filter(job => job.id !== jobId));
-    localStorage.setItem('favoriteJobs', JSON.stringify(updatedFavorites));
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const response = await axios.get('/users/get-profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setUser(response.data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+
+    if (token) {
+      loadUser();
+      loadFavorites();
+    }
+  }, [token, loadFavorites]);
+
+  const toggleFavorite = async (jobId) => {
+    try {
+      await axios.delete(`/favorites/${jobId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      // Reload lại danh sách để đồng bộ count
+      loadFavorites();
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+    }
+  };
+
+  const handleApply = (jobId) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.role === 'employer') {
+      alert('Tài khoản công ty không thể ứng tuyển!');
+      return;
+    }
+    navigate(`/apply-job/${jobId}`);
   };
 
   return (
@@ -42,7 +91,27 @@ const Favorites = () => {
         <div className="row">
           {favoriteJobDetails.map(job => (
             <div className="col-md-4 mb-3" key={job.id}>
-              <Card>
+              <Card className="position-relative">
+                <div
+                  onClick={() => toggleFavorite(job.id)}
+                  style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    background: 'rgba(255,255,255,0.8)',
+                    padding: '3px 6px',
+                    borderRadius: '12px',
+                    fontSize: '14px'
+                  }}
+                >
+                  <i className="bi bi-heart-fill text-danger"></i>
+                  <span>{job.favorite_count || 0}</span>
+                </div>
+
                 <Card.Body>
                   <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
                   <Card.Text>
@@ -54,15 +123,10 @@ const Favorites = () => {
                   </Card.Text>
                   <div className="d-flex gap-2">
                     <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
-                    <Button
-                      variant="warning"
-                      className="ms-2"
-                      onClick={() => toggleFavorite(job.id)}
-                    >
-                      Bỏ yêu thích
-                    </Button>
+                    <Button variant="success" onClick={() => handleApply(job.id)}>Ứng tuyển</Button>
+             
                   </div>
-                </Card.Body> {/* Đóng thẻ Card.Body ở đây */}
+                </Card.Body>
               </Card>
             </div>
           ))}

@@ -133,10 +133,17 @@ router.get('/job-positions', async (req, res) => {
   }
 });
 
+// Lấy danh sách jobposts kèm số lượng yêu thích
 router.get('/', async (req, res) => {
   try {
-    const { category, location, salary } = req.query;
-    let query = 'SELECT * FROM jobposts WHERE status = "approved" AND expiry_date > NOW()';
+    const { category, location, salary, minFavorite } = req.query;
+
+    let query = `
+      SELECT jp.*,
+        (SELECT COUNT(*) FROM favorites f WHERE f.jobpost_id = jp.id) AS favorite_count
+      FROM jobposts jp
+      WHERE status = "approved" AND expiry_date > NOW()
+    `;
     const params = [];
 
     if (category) {
@@ -151,6 +158,10 @@ router.get('/', async (req, res) => {
       query += ' AND salary >= ?';
       params.push(parseFloat(salary));
     }
+    if (minFavorite) {
+      query += ' HAVING favorite_count >= ?';
+      params.push(parseInt(minFavorite));
+    }
 
     const [jobs] = await pool.query(query, params);
     res.json(jobs);
@@ -159,6 +170,8 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: 'Error fetching jobs' });
   }
 });
+
+
 
 
 router.get('/my-jobs', async (req, res) => {
