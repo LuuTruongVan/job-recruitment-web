@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Table, Button, Spinner, Alert } from 'react-bootstrap';
+import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
-import { TokenContext } from '../App'; // chỉnh đường dẫn nếu file khác
+import { TokenContext } from '../App';
 
 const ManageCandidates = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [searchName, setSearchName] = useState('');
+  const [searchPhone, setSearchPhone] = useState('');
 
   useEffect(() => {
     const fetchCandidates = async () => {
@@ -18,7 +21,6 @@ const ManageCandidates = () => {
         });
         setCandidates(res.data);
       } catch (err) {
-        console.error('Error fetching candidates:', err.response?.data || err.message);
         setError(err.response?.data?.message || 'Lỗi khi tải ứng viên');
       } finally {
         setLoading(false);
@@ -35,10 +37,16 @@ const ManageCandidates = () => {
       });
       setCandidates(prev => prev.filter(c => c.id !== id));
     } catch (err) {
-      console.error('Error deleting candidate:', err.response?.data || err.message);
       alert(err.response?.data?.message || 'Lỗi khi xóa ứng viên');
     }
   };
+
+  // Lọc danh sách
+  const filteredCandidates = candidates.filter(c => {
+    const matchName = c.full_name?.toLowerCase().includes(searchName.toLowerCase());
+    const matchPhone = c.phone?.toLowerCase().includes(searchPhone.toLowerCase());
+    return matchName && matchPhone;
+  });
 
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
@@ -46,6 +54,23 @@ const ManageCandidates = () => {
   return (
     <div>
       <h2>Quản lý ứng viên</h2>
+
+      {/* Bộ lọc */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+        <Form.Control
+          placeholder="Tìm theo tên..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          style={{ width: '250px' }}
+        />
+        <Form.Control
+          placeholder="Tìm theo số điện thoại..."
+          value={searchPhone}
+          onChange={(e) => setSearchPhone(e.target.value)}
+          style={{ width: '250px' }}
+        />
+      </div>
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -57,7 +82,7 @@ const ManageCandidates = () => {
           </tr>
         </thead>
         <tbody>
-          {candidates.map(candidate => (
+          {filteredCandidates.map(candidate => (
             <tr key={candidate.id}>
               <td>{candidate.id}</td>
               <td>{candidate.full_name}</td>
@@ -72,7 +97,7 @@ const ManageCandidates = () => {
           ))}
         </tbody>
       </Table>
-      {candidates.length === 0 && <p>Không có ứng viên nào.</p>}
+      {filteredCandidates.length === 0 && <p>Không tìm thấy ứng viên.</p>}
     </div>
   );
 };

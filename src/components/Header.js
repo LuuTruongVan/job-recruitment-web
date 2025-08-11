@@ -1,18 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import ProfileModal from './ProfileModal';
 import '../componentCss/Header.css';
 
 const Header = ({ user, handleLogout, setShowChangePassword }) => {
+  const [showProfileModal, setShowProfileModal] = useState(false);
+
   const handleLogoutClick = () => {
-    handleLogout(); // Gọi hàm logout từ prop
+    handleLogout();
   };
 
   return (
     <header className="header">
       <div className="header-container">
+        {/* Logo */}
         <div className="logo-container">
-          <img className="logo" src="/assets/img/logo.jpg" alt="Logo" style={{ width: '100px' }} />
+          <img
+            className="logo"
+            src="/assets/img/logo.jpg"
+            alt="Logo"
+            style={{ width: '100px' }}
+          />
         </div>
+
+        {/* Navigation */}
         <div className="nav-container">
           <div className="nav-links">
             {user && user.role === 'candidate' && (
@@ -27,29 +38,49 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
                 <Link className="nav-link" to="/manage-posts">Quản lý bài đăng</Link>
               </>
             )}
+
             {user ? (
               <div className="dropdown">
-               <button className="dropdown-toggle">
-  Xin chào, {user.role === 'candidate'
-    ? (user.full_name || 'Người dùng')
-    : user.role === 'employer'
-      ? (user.name || 'Công ty')
-      : user.role === 'admin'
-        ? (user.username || user.email || 'Quản trị viên')
-        : 'Người dùng'}
-</button>
-<ul className="dropdown-menu">
-  {user.role !== 'admin' && (
-    <>
-      <li><Link className="dropdown-item" to="/profile">Xem hồ sơ</Link></li>
-      <li><Link className="dropdown-item" to="/update-profile">Cập nhật thông tin</Link></li>
-    </>
-  )}
-  <li><button className="dropdown-item" onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</button></li>
-  <li><button className="dropdown-item" onClick={handleLogoutClick}>Đăng xuất</button></li>
-</ul>
-
-
+                <button className="dropdown-toggle">
+                  Xin chào, {user.role === 'candidate'
+                    ? (user.full_name || 'Người dùng')
+                    : user.role === 'employer'
+                      ? (user.name || 'Công ty')
+                      : user.role === 'admin'
+                        ? (user.username || user.email || 'Quản trị viên')
+                        : 'Người dùng'}
+                </button>
+                <ul className="dropdown-menu">
+                  {user.role !== 'admin' && (
+                    <>
+                      {/* Mở modal thay vì đi tới trang profile */}
+                      <li>
+                        <button
+                          className="dropdown-item"
+                          onClick={() => setShowProfileModal(true)}
+                        >
+                          Xem hồ sơ
+                        </button>
+                      </li>
+                    </>
+                  )}
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={() => setShowChangePassword(true)}
+                    >
+                      Đổi mật khẩu
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className="dropdown-item"
+                      onClick={handleLogoutClick}
+                    >
+                      Đăng xuất
+                    </button>
+                  </li>
+                </ul>
               </div>
             ) : (
               <>
@@ -60,6 +91,12 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
           </div>
         </div>
       </div>
+
+      {/* Modal hiển thị hồ sơ */}
+      <ProfileModal
+        show={showProfileModal}
+        onHide={() => setShowProfileModal(false)}
+      />
     </header>
   );
 };

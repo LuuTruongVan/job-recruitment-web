@@ -71,3 +71,27 @@
 .home-job-listings .card-text p {
   margin: 5px 0;
 }
+
+.home-filters {
+  display: flex;
+  flex-wrap: nowrap; /* Không cho xuống hàng */
+  gap: 10px;
+  align-items: center;
+}
+
+.home-filters .form-control {
+  width: 150px; /* Ô lương nhỏ lại */
+}
+
+.home-filters .css-13cymwt-control {
+  min-width: 200px; /* Select giữ kích thước vừa đủ */
+}
+
+.home-filters-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #007bff;
+  text-decoration: underline;
+  margin-bottom: 10px;
+}
+

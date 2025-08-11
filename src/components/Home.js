@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Carousel, Button, Card, Form } from 'react-bootstrap';
+import { Carousel, Button, Card, Form, Modal, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
@@ -21,6 +21,19 @@ const Home = () => {
   const [categories, setCategories] = useState([]);
   const [user, setUser] = useState(null);
   const [favorites, setFavorites] = useState([]);
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [applyMessage, setApplyMessage] = useState('');
+  const [formData, setFormData] = useState({
+    candidate_name: '',
+    phone: '',
+    email: '',
+    address: '',
+    skills: '',
+    introduction: '',
+    cv: null
+  });
+
   const navigate = useNavigate();
 
   const token =
@@ -29,7 +42,6 @@ const Home = () => {
     localStorage.getItem('admin_token') ||
     '';
 
-  // Lấy danh mục từ backend
   useEffect(() => {
     axios.get('/categories')
       .then(res => {
@@ -38,7 +50,6 @@ const Home = () => {
       .catch(err => console.error('Error fetching categories:', err));
   }, []);
 
-  // Fetch jobs
   const fetchJobs = useCallback(async () => {
     try {
       const params = {};
@@ -49,14 +60,12 @@ const Home = () => {
       const response = await axios.get('/jobposts', { params });
       let jobsData = response.data;
 
-      // Sắp xếp theo favorite
       if (filters.favoriteSort === 'desc') {
         jobsData.sort((a, b) => (b.favorite_count || 0) - (a.favorite_count || 0));
       } else if (filters.favoriteSort === 'asc') {
         jobsData.sort((a, b) => (a.favorite_count || 0) - (b.favorite_count || 0));
       }
 
-      // Lấy tên vị trí công việc
       const jobsWithPositions = await Promise.all(
         jobsData.map(async (job) => {
           if (job.job_position_id) {
@@ -79,7 +88,6 @@ const Home = () => {
     }
   }, [filters]);
 
-  // Lấy favorites của user
   const fetchFavorites = useCallback(async () => {
     if (!token) return;
     try {
@@ -111,9 +119,7 @@ const Home = () => {
     setFilters({ ...filters, [name]: value });
   };
 
-  const handleViewDetail = (jobId) => navigate(`/job-detail/${jobId}`);
-
-  const handleApply = (jobId) => {
+  const handleApplyClick = (job) => {
     if (!user) {
       navigate('/login');
       return;
@@ -122,7 +128,46 @@ const Home = () => {
       alert('Tài khoản công ty không thể ứng tuyển!');
       return;
     }
-    navigate(`/apply-job/${jobId}`);
+    setSelectedJob(job);
+    setShowApplyModal(true);
+  };
+
+  const handleFormChange = (e) => {
+    if (e.target.name === 'cv') {
+      setFormData({ ...formData, cv: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
+
+  const submitApplication = async (e) => {
+    e.preventDefault();
+    const candidateToken = localStorage.getItem('candidate_token');
+    if (!candidateToken) {
+      setApplyMessage('Vui lòng đăng nhập với vai trò ứng viên.');
+      return;
+    }
+
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    data.append('jobpost_id', selectedJob.id);
+
+    try {
+      await axios.post('http://localhost:3000/applications/add', data, {
+        headers: {
+          Authorization: `Bearer ${candidateToken}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setApplyMessage('Ứng tuyển thành công!');
+      setTimeout(() => {
+        setShowApplyModal(false);
+        setApplyMessage('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error applying job:', error.response ? error.response.data : error.message);
+      setApplyMessage(`Lỗi ứng tuyển: ${error.response?.data?.message || 'Vui lòng thử lại.'}`);
+    }
   };
 
   const toggleFavorite = async (jobId) => {
@@ -183,87 +228,192 @@ const Home = () => {
       </Carousel>
 
       {/* Bộ lọc */}
-      <div className="home-filters d-flex gap-2 mb-3">
-        <Select
-          options={categories}
-          placeholder="Chọn phân loại"
-          isClearable
-          onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
-        />
-        <Select
-          options={provinces.map(p => ({ value: p, label: p }))}
-          placeholder="Chọn địa điểm"
-          isClearable
-          onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
-        />
-        <Form.Control
-          type="number"
-          placeholder="Lương tối thiểu (VND)"
-          onChange={(e) => handleFilterChange('minSalary', e.target.value)}
-        />
-        <Select
-          options={[
-            { value: 'desc', label: 'Yêu thích nhiều → ít' },
-            { value: 'asc', label: 'Yêu thích ít → nhiều' }
-          ]}
-          placeholder="Sắp xếp theo yêu thích"
-          isClearable
-          onChange={(opt) => handleFilterChange('favoriteSort', opt ? opt.value : '')}
-        />
-       
-      </div>
+      {/* Bộ lọc */}
+{/* Bộ lọc */}
+<div className="home-filters-wrapper">
+  <h4 className="home-filters-title">Chọn vị trí mong muốn</h4>
+  <div className="home-filters d-flex gap-2 flex-wrap">
+    <Select
+      options={categories}
+      placeholder="Chọn phân loại"
+      isClearable
+      onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
+    />
+    <Select
+      options={provinces.map(p => ({ value: p, label: p }))}
+      placeholder="Chọn địa điểm"
+      isClearable
+      onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
+    />
+    <Form.Control
+      type="number"
+      placeholder="Lương tối thiểu (VND)"
+      onChange={(e) => handleFilterChange('minSalary', e.target.value)}
+    />
+    <Select
+      options={[
+        { value: 'desc', label: 'Yêu thích nhiều → ít' },
+        { value: 'asc', label: 'Yêu thích ít → nhiều' }
+      ]}
+      placeholder="Sắp xếp theo yêu thích"
+      isClearable
+      onChange={(opt) => handleFilterChange('favoriteSort', opt ? opt.value : '')}
+    />
+  </div>
+</div>
+
 
       {/* Danh sách job */}
       <div className="home-job-listings row">
         {jobs.map((job) => (
-          <div className="col-md-4 mb-3" key={job.id}>
-            <Card className="position-relative">
-              <div
-                className="favorite-icon"
-                onClick={() => toggleFavorite(job.id)}
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  cursor: 'pointer',
-                  color: favorites.includes(job.id) ? 'red' : 'gray',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(255,255,255,0.8)',
-                  padding: '3px 6px',
-                  borderRadius: '12px',
-                  fontSize: '14px'
-                }}
-              >
-                <i className={favorites.includes(job.id) ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
-                <span>{job.favorite_count || 0}</span>
-              </div>
-              <Card.Body>
-                <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
-                <Card.Text>
-                  <strong>Vị trí công việc:</strong> {job.job_position}
-                  <br />
-                  <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
-                  <br />
-                  <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
-                  <br />
-                  <strong>Địa chỉ:</strong> {job.location}
-                  <br />
-                  <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
-                  <br />
-                  <strong>Ngày hết hạn:</strong>{' '}
-                  {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
-                </Card.Text>
-                <div className="d-flex gap-2">
-                  <Button variant="info" onClick={() => handleViewDetail(job.id)}>Xem chi tiết</Button>
-                  <Button variant="success" onClick={() => handleApply(job.id)}>Ứng tuyển</Button>
-                </div>
-              </Card.Body>
-            </Card>
+        <div className="col-md-4 mb-3" key={job.id}>
+        <Card className="position-relative">
+          <div
+            className="favorite-icon"
+            onClick={(e) => {
+              e.stopPropagation(); // Ngăn click vào favorite cũng chuyển trang
+              toggleFavorite(job.id);
+            }}
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              cursor: 'pointer',
+              color: favorites.includes(job.id) ? 'red' : 'gray',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: 'rgba(255,255,255,0.8)',
+              padding: '3px 6px',
+              borderRadius: '12px',
+              fontSize: '14px'
+            }}
+          >
+            <i className={favorites.includes(job.id) ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
+            <span>{job.favorite_count || 0}</span>
           </div>
+      
+          {/* Toàn bộ nội dung card có thể click */}
+          <div
+            onClick={() => navigate(`/job-detail/${job.id}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            <Card.Body>
+              <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
+              <Card.Text>
+                <strong>Vị trí công việc:</strong> {job.job_position}
+                <br />
+                <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
+                <br />
+                <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
+                <br />
+                <strong>Địa chỉ:</strong> {job.location}
+                <br />
+                <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
+                <br />
+                <strong>Ngày hết hạn:</strong>{' '}
+                {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
+              </Card.Text>
+            </Card.Body>
+          </div>
+      
+          {/* Các nút riêng */}
+          <div className="d-flex gap-2 p-2">
+            <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
+            <Button variant="success" onClick={() => handleApplyClick(job)}>Ứng tuyển</Button>
+          </div>
+        </Card>
+      </div>
+      
         ))}
       </div>
+
+      {/* Modal Apply Job */}
+      <Modal show={showApplyModal} onHide={() => setShowApplyModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Ứng tuyển công việc</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {applyMessage && (
+            <Alert variant={applyMessage.includes('thành công') ? 'success' : 'danger'}>
+              {applyMessage}
+            </Alert>
+          )}
+          <Form onSubmit={submitApplication}>
+            <Form.Group className="mb-3">
+              <Form.Label>Tên ứng viên</Form.Label>
+              <Form.Control
+                type="text"
+                name="candidate_name"
+                value={formData.candidate_name}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Số điện thoại</Form.Label>
+              <Form.Control
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Địa chỉ</Form.Label>
+              <Form.Control
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Kỹ năng</Form.Label>
+              <Form.Control
+                type="text"
+                name="skills"
+                value={formData.skills}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Giới thiệu bản thân</Form.Label>
+              <Form.Control
+                as="textarea"
+                name="introduction"
+                value={formData.introduction}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Tải CV lên (PDF)</Form.Label>
+              <Form.Control
+                type="file"
+                name="cv"
+                accept=".pdf"
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">Gửi ứng tuyển</Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };

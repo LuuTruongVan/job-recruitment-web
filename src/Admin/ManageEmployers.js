@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Table, Button, Spinner, Alert } from 'react-bootstrap';
+import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
-import { TokenContext } from '../App'; // chỉnh đường dẫn nếu file khác
+import { TokenContext } from '../App';
 
 const ManageEmployers = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');
@@ -9,8 +9,12 @@ const ManageEmployers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Bộ lọc
+  const [companySearch, setCompanySearch] = useState('');
+  const [phoneSearch, setPhoneSearch] = useState('');
+
   useEffect(() => {
-    const fetch = async () => {
+    const fetchEmployers = async () => {
       try {
         setLoading(true);
         const res = await axios.get('http://localhost:3001/employers/get-all', {
@@ -24,7 +28,7 @@ const ManageEmployers = () => {
         setLoading(false);
       }
     };
-    fetch();
+    fetchEmployers();
   }, [token]);
 
   const handleDelete = async (id) => {
@@ -40,26 +44,56 @@ const ManageEmployers = () => {
     }
   };
 
+  // Lọc kết quả
+  const filteredEmployers = employers.filter(e => {
+    const matchCompany = companySearch
+      ? e.name?.toLowerCase().includes(companySearch.toLowerCase())
+      : true;
+    const matchPhone = phoneSearch
+      ? e.phone?.toLowerCase().includes(phoneSearch.toLowerCase())
+      : true;
+    return matchCompany && matchPhone;
+  });
+
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
     <div>
       <h2>Quản lý nhà tuyển dụng</h2>
+
+      {/* Bộ lọc */}
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+        <Form.Control
+          placeholder="Tìm theo tên công ty..."
+          value={companySearch}
+          onChange={(e) => setCompanySearch(e.target.value)}
+          style={{ width: '250px' }}
+        />
+        <Form.Control
+          placeholder="Tìm theo số điện thoại..."
+          value={phoneSearch}
+          onChange={(e) => setPhoneSearch(e.target.value)}
+          style={{ width: '250px' }}
+        />
+      </div>
+
       <Table striped bordered hover>
         <thead>
           <tr>
             <th>ID</th>
             <th>Tên công ty</th>
+            <th>Phone</th>
             <th>Email</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
-          {employers.map(employer => (
+          {filteredEmployers.map(employer => (
             <tr key={employer.id}>
               <td>{employer.id}</td>
               <td>{employer.name}</td>
+              <td>{employer.phone || 'Chưa có'}</td>
               <td>{employer.email || 'Chưa có'}</td>
               <td>
                 <Button variant="danger" size="sm" onClick={() => handleDelete(employer.id)}>
@@ -70,7 +104,8 @@ const ManageEmployers = () => {
           ))}
         </tbody>
       </Table>
-      {employers.length === 0 && <p>Không có nhà tuyển dụng nào.</p>}
+
+      {filteredEmployers.length === 0 && <p>Không tìm thấy nhà tuyển dụng.</p>}
     </div>
   );
 };

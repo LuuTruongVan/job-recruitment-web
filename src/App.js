@@ -19,6 +19,7 @@ import Navbar from './components/Navbar';
 import Favorites from './components/Favorites';
 import JobManagementDetail from './components/JobManagementDetail';
 import AdminDashboard from './Admin/AdminDashboard';
+import Footer from './components/Footer';
 
 // Tạo context để truyền token
 export const TokenContext = createContext();
@@ -120,9 +121,12 @@ function App() {
         </div>
         <ChangePassword show={showChangePassword} onHide={() => setShowChangePassword(false)} />
       </div>
+      <Footer />
     </TokenContext.Provider>
+    
   );
 }
+
 
 export default function WrappedApp() {
   return (

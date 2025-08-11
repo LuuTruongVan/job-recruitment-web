@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Modal, Button, Form } from 'react-bootstrap';
 
@@ -8,67 +8,88 @@ const ManageUsers = () => {
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'candidate' });
+  const [roleFilter, setRoleFilter] = useState('');
+  const [searchName, setSearchName] = useState('');
+
+  const token = localStorage.getItem('admin_token');
+
+  // ✅ Dùng useMemo để headers không bị tạo mới mỗi render
+  const headers = useMemo(() => ({
+    Authorization: `Bearer ${token}`
+  }), [token]);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const token = localStorage.getItem('admin_token');
-        const response = await axios.get('http://localhost:3001/users/get-all', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        console.log('API response:', response.data); // Thêm log để kiểm tra
+        const response = await axios.get('http://localhost:3001/users/get-all', { headers });
         setUsers(response.data);
       } catch (err) {
-        setError(err.response?.data?.message || 'Error fetching users');
-        console.error('Error fetching users:', err.response?.data);
+        setError(err.response?.data?.message || 'Lỗi tải người dùng');
       } finally {
         setLoading(false);
       }
     };
-  
     fetchUsers();
-  }, []);
+  }, [headers]);
 
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      const token = localStorage.getItem('admin_token');
-      await axios.post('http://localhost:3001/users/add', newUser, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post('http://localhost:3001/users/add', newUser, { headers });
       setShowAddModal(false);
       setNewUser({ name: '', email: '', password: '', role: 'candidate' });
-      const response = await axios.get('http://localhost:3001/users/get-all', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+
+      const response = await axios.get('http://localhost:3001/users/get-all', { headers });
       setUsers(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error adding user');
-      console.error('Error adding user:', err.response?.data);
+      setError(err.response?.data?.message || 'Lỗi thêm người dùng');
     }
   };
 
   const handleDeleteUser = async (id) => {
     try {
-      const token = localStorage.getItem('admin_token');
-      await axios.delete(`http://localhost:3001/users/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const response = await axios.get('http://localhost:3001/users/get-all', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`http://localhost:3001/users/delete/${id}`, { headers });
+      const response = await axios.get('http://localhost:3001/users/get-all', { headers });
       setUsers(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error deleting user');
-      console.error('Error deleting user:', err.response?.data);
+      setError(err.response?.data?.message || 'Lỗi xóa người dùng');
     }
   };
 
+  const filteredUsers = users.filter(user => {
+    const matchRole = roleFilter ? user.role === roleFilter : true;
+    const matchName = searchName ? user.name?.toLowerCase().includes(searchName.toLowerCase()) : true;
+    return matchRole && matchName;
+  });
+
   if (loading) return <p>Đang tải dữ liệu...</p>;
-  if (error) return <p>Lỗi: {error}</p>;
+  if (error) return <p style={{ color: 'red' }}>Lỗi: {error}</p>;
 
   return (
     <div>
       <h2>Quản lý người dùng</h2>
+
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'center' }}>
+        <Form.Select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          style={{ width: '200px' }}
+        >
+          <option value="">Tất cả quyền</option>
+          <option value="candidate">Candidate</option>
+          <option value="employer">Employer</option>
+          <option value="admin">Admin</option>
+        </Form.Select>
+
+        <Form.Control
+          type="text"
+          placeholder="Tìm theo tên..."
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          style={{ width: '250px' }}
+        />
+      </div>
+
       <Button variant="primary" onClick={() => setShowAddModal(true)} style={{ marginBottom: '20px' }}>
         Thêm người dùng
       </Button>
@@ -79,7 +100,7 @@ const ManageUsers = () => {
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddUser}>
-            <Form.Group controlId="formName" style={{ marginBottom: '15px' }}>
+            <Form.Group className="mb-3">
               <Form.Label>Tên</Form.Label>
               <Form.Control
                 type="text"
@@ -88,7 +109,7 @@ const ManageUsers = () => {
                 required
               />
             </Form.Group>
-            <Form.Group controlId="formEmail" style={{ marginBottom: '15px' }}>
+            <Form.Group className="mb-3">
               <Form.Label>Email</Form.Label>
               <Form.Control
                 type="email"
@@ -97,7 +118,7 @@ const ManageUsers = () => {
                 required
               />
             </Form.Group>
-            <Form.Group controlId="formPassword" style={{ marginBottom: '15px' }}>
+            <Form.Group className="mb-3">
               <Form.Label>Mật khẩu</Form.Label>
               <Form.Control
                 type="password"
@@ -106,21 +127,18 @@ const ManageUsers = () => {
                 required
               />
             </Form.Group>
-            <Form.Group controlId="formRole" style={{ marginBottom: '15px' }}>
+            <Form.Group className="mb-3">
               <Form.Label>Quyền</Form.Label>
-              <Form.Control
-                as="select"
+              <Form.Select
                 value={newUser.role}
                 onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
               >
                 <option value="candidate">Candidate</option>
                 <option value="employer">Employer</option>
                 <option value="admin">Admin</option>
-              </Form.Control>
+              </Form.Select>
             </Form.Group>
-            <Button variant="primary" type="submit">
-              Thêm
-            </Button>
+            <Button variant="primary" type="submit">Thêm</Button>
             <Button variant="secondary" onClick={() => setShowAddModal(false)} style={{ marginLeft: '10px' }}>
               Hủy
             </Button>
@@ -139,7 +157,7 @@ const ManageUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map(user => (
+          {filteredUsers.map(user => (
             <tr key={user.id} style={{ border: '1px solid #ddd' }}>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.id}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.name || ''}</td>
@@ -157,7 +175,7 @@ const ManageUsers = () => {
           ))}
         </tbody>
       </table>
-      {users.length === 0 && <p>Không có người dùng nào.</p>}
+      {filteredUsers.length === 0 && <p>Không tìm thấy người dùng.</p>}
     </div>
   );
 };

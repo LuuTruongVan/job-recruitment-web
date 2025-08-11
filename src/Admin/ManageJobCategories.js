@@ -6,19 +6,27 @@ const ManageJobCategories = () => {
   const [categories, setCategories] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editedCategory, setEditedCategory] = useState({ name: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newCategoryName, setNewCategoryName] = useState('');
 
-  useEffect(() => {
+  // Hàm lấy danh mục
+  const fetchCategories = () => {
     axios.get('/categories')
       .then(response => setCategories(response.data))
       .catch(error => console.error('Error fetching categories:', error));
+  };
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   const handleEdit = (category) => {
     setEditingId(category.id);
     setEditedCategory({ name: category.name });
   };
+
   const handleSave = (id) => {
-    const token = localStorage.getItem('admin_token'); // Lấy token admin
+    const token = localStorage.getItem('admin_token');
     axios.put(`/categories/${id}`, editedCategory, {
       headers: { Authorization: `Bearer ${token}` }
     })
@@ -28,19 +36,65 @@ const ManageJobCategories = () => {
       })
       .catch(error => console.error('Error updating category:', error));
   };
-  
 
   const handleDelete = (id) => {
     if (window.confirm('Bạn có chắc muốn xóa danh mục này?')) {
-      axios.delete(`/categories/${id}`)
+      const token = localStorage.getItem('admin_token');
+      axios.delete(`/categories/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
         .then(() => setCategories(categories.filter(c => c.id !== id)))
         .catch(error => console.error('Error deleting category:', error));
     }
   };
 
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) {
+      alert('Vui lòng nhập tên danh mục');
+      return;
+    }
+    const token = localStorage.getItem('admin_token');
+    try {
+      await axios.post('/categories', { name: newCategoryName.trim() }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setNewCategoryName('');
+      fetchCategories(); // Load lại danh mục
+    } catch (error) {
+      console.error('Error adding category:', error);
+    }
+  };
+
+  // Lọc theo tên
+  const filteredCategories = categories.filter(c =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div>
       <h2>Quản lý danh mục</h2>
+
+      {/* Thanh tìm kiếm + thêm mới */}
+      <form
+        onSubmit={handleAddCategory}
+        style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}
+      >
+        <Form.Control
+          placeholder="Tìm theo tên danh mục..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ width: '250px' }}
+        />
+        <Form.Control
+          placeholder="Nhập tên danh mục mới..."
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+          style={{ width: '250px' }}
+        />
+        <Button variant="primary" type="submit">Thêm</Button>
+      </form>
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -50,7 +104,7 @@ const ManageJobCategories = () => {
           </tr>
         </thead>
         <tbody>
-          {categories.map(category => (
+          {filteredCategories.map(category => (
             <tr key={category.id}>
               <td>{category.id}</td>
               <td>

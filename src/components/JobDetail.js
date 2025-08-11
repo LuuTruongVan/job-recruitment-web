@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Button } from 'react-bootstrap';
+import { Button, Modal, Form, Alert } from 'react-bootstrap';
 import '../componentCss/JobDetail.css';
 
 const JobDetail = () => {
@@ -10,14 +10,25 @@ const JobDetail = () => {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [isFavorite, setIsFavorite] = useState(false);
-  const navigate = useNavigate();
+  const [showApplyModal, setShowApplyModal] = useState(false);
+  const [applyMessage, setApplyMessage] = useState('');
+  const [formData, setFormData] = useState({
+    candidate_name: '',
+    phone: '',
+    email: '',
+    address: '',
+    skills: '',
+    introduction: '',
+    cv: null
+  });
 
+  const navigate = useNavigate();
   const token =
     localStorage.getItem('candidate_token') ||
     localStorage.getItem('employer_token') ||
     localStorage.getItem('admin_token');
 
-  // Dùng useCallback để tránh warning missing dependency
+  // Lấy số lượng yêu thích
   const fetchFavoriteCount = useCallback(async () => {
     try {
       const res = await axios.get(`/favorites/count/${id}`);
@@ -80,18 +91,6 @@ const JobDetail = () => {
     }
   }, [id, token, fetchFavoriteCount]);
 
-  const handleApply = () => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
-    if (user.role === 'employer') {
-      alert('Tài khoản công ty không thể ứng tuyển!');
-      return;
-    }
-    navigate(`/apply-job/${id}`);
-  };
-
   const toggleFavorite = async () => {
     try {
       if (isFavorite) {
@@ -107,12 +106,60 @@ const JobDetail = () => {
         );
         setIsFavorite(true);
       }
-
-      // Load lại số lượng từ API để đồng bộ
       const updatedCount = await fetchFavoriteCount();
       setJob(prev => ({ ...prev, favorite_count: updatedCount }));
     } catch (err) {
       console.error('Error updating favorites:', err);
+    }
+  };
+
+  const handleApplyClick = () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (user.role === 'employer') {
+      alert('Tài khoản công ty không thể ứng tuyển!');
+      return;
+    }
+    setShowApplyModal(true);
+  };
+
+  const handleFormChange = (e) => {
+    if (e.target.name === 'cv') {
+      setFormData({ ...formData, cv: e.target.files[0] });
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
+  };
+
+  const submitApplication = async (e) => {
+    e.preventDefault();
+    const candidateToken = localStorage.getItem('candidate_token');
+    if (!candidateToken) {
+      setApplyMessage('Vui lòng đăng nhập với vai trò ứng viên.');
+      return;
+    }
+
+    const data = new FormData();
+    Object.keys(formData).forEach(key => data.append(key, formData[key]));
+    data.append('jobpost_id', id);
+
+    try {
+      await axios.post('http://localhost:3000/applications/add', data, {
+        headers: {
+          Authorization: `Bearer ${candidateToken}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setApplyMessage('Ứng tuyển thành công!');
+      setTimeout(() => {
+        setShowApplyModal(false);
+        setApplyMessage('');
+      }, 2000);
+    } catch (error) {
+      console.error('Error applying job:', error.response ? error.response.data : error.message);
+      setApplyMessage(`Lỗi ứng tuyển: ${error.response?.data?.message || 'Vui lòng thử lại.'}`);
     }
   };
 
@@ -123,7 +170,6 @@ const JobDetail = () => {
     <div className="job-detail-container">
       <div className="d-flex justify-content-between align-items-center">
         <h2>{job.title}</h2>
-        {/* Icon trái tim + số lượng */}
         <div
           onClick={toggleFavorite}
           style={{
@@ -156,9 +202,96 @@ const JobDetail = () => {
       <p><strong>Ngày hết hạn:</strong> {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</p>
 
       <div className="d-flex gap-2 mt-3">
-        <Button variant="success" onClick={handleApply}>Ứng tuyển</Button>
+        <Button variant="success" onClick={handleApplyClick}>Ứng tuyển</Button>
         <Button variant="secondary" onClick={() => navigate('/home')}>Quay lại</Button>
       </div>
+
+      {/* Modal Ứng tuyển */}
+      <Modal show={showApplyModal} onHide={() => setShowApplyModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Ứng tuyển công việc</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {applyMessage && (
+            <Alert variant={applyMessage.includes('thành công') ? 'success' : 'danger'}>
+              {applyMessage}
+            </Alert>
+          )}
+          <Form onSubmit={submitApplication}>
+            <Form.Group className="mb-3">
+              <Form.Label>Tên ứng viên</Form.Label>
+              <Form.Control
+                type="text"
+                name="candidate_name"
+                value={formData.candidate_name}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Số điện thoại</Form.Label>
+              <Form.Control
+                type="text"
+                name="phone"
+                value={formData.phone}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Địa chỉ</Form.Label>
+              <Form.Control
+                type="text"
+                name="address"
+                value={formData.address}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Kỹ năng</Form.Label>
+              <Form.Control
+                type="text"
+                name="skills"
+                value={formData.skills}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Giới thiệu bản thân</Form.Label>
+              <Form.Control
+                as="textarea"
+                name="introduction"
+                value={formData.introduction}
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Tải CV lên (PDF)</Form.Label>
+              <Form.Control
+                type="file"
+                name="cv"
+                accept=".pdf"
+                onChange={handleFormChange}
+                required
+              />
+            </Form.Group>
+            <Button variant="primary" type="submit">Gửi ứng tuyển</Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </div>
   );
 };
