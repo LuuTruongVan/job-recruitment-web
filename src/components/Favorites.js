@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Card, Modal, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import '../componentCss/Favorites.css';
 
 const Favorites = () => {
   const [jobs, setJobs] = useState([]);
@@ -24,7 +25,6 @@ const Favorites = () => {
                 localStorage.getItem('employer_token') ||
                 localStorage.getItem('admin_token') || '';
 
-  // Lấy danh sách favorites
   const fetchFavorites = useCallback(async () => {
     if (!token) return;
     try {
@@ -34,7 +34,6 @@ const Favorites = () => {
 
       const jobsData = res.data;
 
-      // Lấy job_position cho từng job
       const jobsWithPositions = await Promise.all(
         jobsData.map(async (job) => {
           if (job.job_position_id) {
@@ -72,7 +71,6 @@ const Favorites = () => {
     }
   }, [fetchFavorites, token]);
 
-  // Bỏ / thêm yêu thích
   const toggleFavorite = async (jobId) => {
     try {
       await axios.delete(`/favorites/${jobId}`, {
@@ -84,7 +82,6 @@ const Favorites = () => {
     }
   };
 
-  // Mở modal apply
   const handleApplyClick = (job) => {
     if (!user) {
       navigate('/login');
@@ -137,16 +134,15 @@ const Favorites = () => {
   };
 
   return (
-    <div className="favorites-container">
-      <h3>Danh sách yêu thích</h3>
-      <div className="row">
-        {jobs.length === 0 ? (
-          <p>Chưa có công việc yêu thích nào.</p>
-        ) : (
-          jobs.map((job) => (
-            <div className="col-md-4 mb-3" key={job.id}>
-              <Card className="position-relative">
-                {/* Icon yêu thích */}
+    <div className="favorites-container container my-4">
+      <h3 className="mb-4">Danh sách yêu thích</h3>
+      {jobs.length === 0 ? (
+        <p>Chưa có công việc yêu thích nào.</p>
+      ) : (
+        <div className="row">
+          {jobs.map((job) => (
+            <div className="col-md-4 mb-4" key={job.id}>
+              <Card className="h-100 shadow-sm position-relative">
                 <div
                   className="favorite-icon"
                   onClick={(e) => {
@@ -159,52 +155,46 @@ const Favorites = () => {
                     right: '10px',
                     cursor: 'pointer',
                     color: 'red',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '5px',
-                    background: 'rgba(255,255,255,0.8)',
-                    padding: '3px 6px',
-                    borderRadius: '12px',
-                    fontSize: '14px'
+                    background: 'rgba(255,255,255,0.9)',
+                    padding: '4px 8px',
+                    borderRadius: '20px',
+                    fontSize: '14px',
+                    zIndex: 10,
                   }}
+                  title="Bỏ yêu thích"
                 >
                   <i className="bi bi-heart-fill"></i>
                 </div>
 
-                {/* Nội dung card */}
-                <div
+                <Card.Body
                   onClick={() => navigate(`/job-detail/${job.id}`)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
                 >
-                  <Card.Body>
-                    <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
-                    <Card.Text>
-                      <strong>Vị trí công việc:</strong> {job.job_position}
-                      <br />
-                      <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
-                      <br />
-                      <strong>Địa chỉ:</strong> {job.location}
-                      <br />
-                      <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
-                      <br />
-                      <strong>Ngày hết hạn:</strong>{' '}
-                      {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
-                    </Card.Text>
-                  </Card.Body>
-                </div>
+                  <Card.Title className="text-center">{job.title}</Card.Title>
+                  <Card.Text className="job-description">
+                    <strong>Vị trí công việc:</strong> {job.job_position}
+                    <br />
+                    <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
+                    <br />
+                    <strong>Địa chỉ:</strong> {job.location}
+                    <br />
+                    <strong>Mức lương:</strong> {job.salary ? `${job.salary.toLocaleString()} VND` : 'Chưa có'}
+                    <br />
+                    <strong>Ngày hết hạn:</strong>{' '}
+                    {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
+                  </Card.Text>
+                </Card.Body>
 
-                {/* Các nút */}
-                <div className="d-flex gap-2 p-2">
+                <Card.Footer className="d-flex justify-content-between">
                   <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
                   <Button variant="success" onClick={() => handleApplyClick(job)}>Ứng tuyển</Button>
-                </div>
+                </Card.Footer>
               </Card>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
-      {/* Modal Apply */}
       <Modal show={showApplyModal} onHide={() => setShowApplyModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Ứng tuyển công việc</Modal.Title>

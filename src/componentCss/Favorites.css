@@ -1,0 +1,29 @@
+.favorites-container .card {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.favorites-container .card-body {
+  flex-grow: 1;
+}
+
+/* Giới hạn số dòng mô tả giống Home */
+.job-description {
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 6; /* giống Home */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Đồng bộ chiều cao tiêu đề */
+.card-title {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}

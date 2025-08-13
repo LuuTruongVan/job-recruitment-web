@@ -11,6 +11,19 @@ const JobManagementDetail = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  // Hàm kiểm tra bài đăng có hết hạn chưa (chỉ so sánh ngày, không so giờ phút giây)
+  const isExpired = (expiryDateString) => {
+    if (!expiryDateString) return false;
+    const expiryDate = new Date(expiryDateString);
+    const now = new Date();
+
+    // reset giờ phút giây cho so sánh chỉ ngày
+    expiryDate.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+
+    return expiryDate < now;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem('employer_token');
     console.log('Fetching job with id:', id, 'Token:', token);
@@ -80,6 +93,8 @@ const JobManagementDetail = () => {
   if (error) return <p>{error}</p>;
   if (!job) return <p>Đang tải...</p>;
 
+  const expired = isExpired(job.expiry_date);
+
   return (
     <div className="job-detail-container" style={{ maxWidth: '100%', width: '1200px', margin: '0 auto' }}>
       <div className="job-detail-layout">
@@ -87,18 +102,44 @@ const JobManagementDetail = () => {
           <p><strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}</p>
           <h2>{job.title}</h2>
           <p><strong>Vị trí công việc:</strong> {job.job_position || 'Chưa có vị trí'}</p>
-          <p><strong>Thông tin công việc:</strong> {job.job_info || 'Chưa có thông tin'}</p>
-          <p><strong>Yêu cầu công việc:</strong> {job.job_requirements || 'Chưa có yêu cầu'}</p>
-          <p><strong>Quyền lợi:</strong> {job.benefits || 'Chưa có quyền lợi'}</p>
+
+          {/* Hiển thị cảnh báo hết hạn */}
+          {expired && (
+            <p style={{ color: 'red', fontWeight: 'bold' }}>Bài đăng đã hết hạn</p>
+          )}
+
+          <p>
+            <strong>Thông tin công việc:</strong>
+            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
+              {job.job_info || 'Chưa có thông tin'}
+            </div>
+          </p>
+          <p>
+            <strong>Yêu cầu công việc:</strong>
+            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
+              {job.job_requirements || 'Chưa có yêu cầu'}
+            </div>
+          </p>
+          <p>
+            <strong>Quyền lợi:</strong>
+            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
+              {job.benefits || 'Chưa có quyền lợi'}
+            </div>
+          </p>
+
           <p><strong>Lương:</strong> {job.salary} VND</p>
           <p><strong>Phân loại:</strong> {job.category}</p>
           <p><strong>Địa chỉ:</strong> {job.location}</p>
           <p><strong>Email liên hệ:</strong> {job.email_contact || 'Chưa có email'}</p>
           <p><strong>Ngày đăng:</strong> {new Date(job.created_at).toLocaleDateString()}</p>
           <p><strong>Ngày hết hạn:</strong> {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</p>
-          <Button variant="secondary" onClick={() => navigate('/manage-posts')} className="mt-3">
-            Quay lại
-          </Button>
+
+          {/* Nếu bài đăng hết hạn thì không cho sửa / không hiện nút (nếu bạn có nút sửa) */}
+          {!expired && (
+            <Button variant="secondary" onClick={() => navigate('/manage-posts')} className="mt-3">
+              Quay lại
+            </Button>
+          )}
         </div>
         <div className="applications-content">
           {applications.length > 0 ? (
@@ -127,20 +168,27 @@ const JobManagementDetail = () => {
                       <td>{app.introduction || 'Không có giới thiệu'}</td>
                       <td>
                         {app.resume_url || app.cv_path ? (
-                          <a href={`http://localhost:3000${app.resume_url || app.cv_path}`} target="_blank" rel="noopener noreferrer">Xem CV</a>
+                          <a
+                            href={`http://localhost:3000${app.resume_url || app.cv_path}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Xem CV
+                          </a>
                         ) : 'Không có CV'}
                       </td>
                       <td>{app.status || 'pending'}</td>
                       <td>
-                        {app.status !== 'approved' && (
-                          <Button variant="success" onClick={() => handleApprove(app.id)} className="me-2">
-                            Duyệt
-                          </Button>
-                        )}
-                        {app.status !== 'rejected' && (
-                          <Button variant="danger" onClick={() => handleReject(app.id)}>
-                            Từ chối
-                          </Button>
+                        {/* Nếu đã duyệt hoặc từ chối thì không hiện nút */}
+                        {(app.status !== 'approved' && app.status !== 'rejected') && (
+                          <>
+                            <Button variant="success" onClick={() => handleApprove(app.id)} className="me-2">
+                              Duyệt
+                            </Button>
+                            <Button variant="danger" onClick={() => handleReject(app.id)}>
+                              Từ chối
+                            </Button>
+                          </>
                         )}
                       </td>
                     </tr>

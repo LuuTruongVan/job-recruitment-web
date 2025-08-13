@@ -90,17 +90,18 @@ router.get('/get-profile', async (req, res) => {
     let profile = users[0];
     if (profile.role === 'candidate') {
       const [candidate] = await pool.query(
-        'SELECT full_name, phone, address, resume, skills FROM candidates WHERE user_id = ?',
+        'SELECT full_name, phone, address, resume, skills, avatar_url FROM candidates WHERE user_id = ?',
         [decoded.id]
       );
-      profile = { ...profile, ...candidate[0] || { full_name: '', phone: '', address: '', resume: '', skills: '' } };
+      profile = { ...profile, ...candidate[0] || { full_name: '', phone: '', address: '', resume: '', skills: '', avatar_url: '' } };
     } else if (profile.role === 'employer') {
       const [employer] = await pool.query(
-        'SELECT name, address, email, phone, website FROM employers WHERE user_id = ?',
+        'SELECT name, address, email, phone, website, avatar_url FROM employers WHERE user_id = ?',
         [decoded.id]
       );
-      profile = { ...profile, ...employer[0] || { name: '', address: '', email: '', phone: '', website: '' } };
+      profile = { ...profile, ...employer[0] || { name: '', address: '', email: '', phone: '', website: '', avatar_url: '' } };
     }
+    
 
     res.json(profile);
   } catch (error) {
@@ -116,22 +117,22 @@ router.put('/update-profile', async (req, res) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const { full_name, phone, address, resume, skills, name: company_name, email, website } = req.body;
+    const { full_name, phone, address, resume, skills, name: company_name, email, website, avatar_url } = req.body;
     const connection = await pool.getConnection();
     await connection.beginTransaction();
 
     if (decoded.role === 'candidate') {
       await connection.execute(
-        'UPDATE candidates SET full_name = ?, phone = ?, address = ?, resume = ?, skills = ? WHERE user_id = ?',
-        [full_name, phone, address, resume, skills, decoded.id]
+        'UPDATE candidates SET full_name = ?, phone = ?, address = ?, resume = ?, skills = ?, avatar_url = ? WHERE user_id = ?',
+        [full_name, phone, address, resume, skills, avatar_url || '', decoded.id]
       );
       await connection.execute(
         'UPDATE users SET name = ? WHERE id = ?', [full_name, decoded.id]
       );
     } else if (decoded.role === 'employer') {
       await connection.execute(
-        'UPDATE employers SET name = ?, address = ?, email = ?, phone = ?, website = ? WHERE user_id = ?',
-        [company_name, address, email, phone, website, decoded.id]
+        'UPDATE employers SET name = ?, address = ?, email = ?, phone = ?, website = ?, avatar_url = ? WHERE user_id = ?',
+        [company_name, address, email, phone, website, avatar_url || '', decoded.id]
       );
       await connection.execute(
         'UPDATE users SET name = ? WHERE id = ?', [company_name, decoded.id]
@@ -146,6 +147,7 @@ router.put('/update-profile', async (req, res) => {
     res.status(500).json({ message: 'Error updating profile' });
   }
 });
+
 
 
 // Thêm route đổi mật khẩu

@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import ProfileModal from './ProfileModal';
+import LoginModal from './Login';
+import RegisterModal from './Register';
 import '../componentCss/Header.css';
 
 const Header = ({ user, handleLogout, setShowChangePassword }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
 
   const handleLogoutClick = () => {
     handleLogout();
@@ -13,7 +17,6 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
   return (
     <header className="header">
       <div className="header-container">
-        {/* Logo */}
         <div className="logo-container">
           <img
             className="logo"
@@ -23,24 +26,40 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
           />
         </div>
 
-        {/* Navigation */}
         <div className="nav-container">
           <div className="nav-links">
-            {user && user.role === 'candidate' && (
-              <>
-                <Link className="nav-link" to="/manage-applications">Quản lý ứng tuyển</Link>
-                <Link className="nav-link" to="/favorites">Yêu thích</Link>
-              </>
-            )}
-            {user && user.role === 'employer' && (
-              <>
-                <Link className="nav-link" to="/post-job">Đăng tin</Link>
-                <Link className="nav-link" to="/manage-posts">Quản lý bài đăng</Link>
-              </>
-            )}
+          {user && (user.role === 'candidate' || user.role === 'employer') && (
+  <>
+    {user.role === 'candidate' && (
+      <Link className="nav-link" to="/manage-applications">Quản lý ứng tuyển</Link>
+    )}
+    <Link className="nav-link" to="/favorites">Yêu thích</Link>
+  </>
+)}
+{user && user.role === 'employer' && (
+  <>
+    <Link className="nav-link" to="/post-job">Đăng tin</Link>
+    <Link className="nav-link" to="/manage-posts">Quản lý bài đăng</Link>
+  </>
+)}
 
             {user ? (
-              <div className="dropdown">
+              <div className="dropdown" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {/* Avatar nếu có */}
+                {user.avatar_url && (
+                  <img
+                    src={user.avatar_url}
+                    alt="Avatar"
+                    style={{
+                      width: '35px',
+                      height: '35px',
+                      borderRadius: '50%',
+                      objectFit: 'cover'
+                    }}
+                  />
+                )}
+
+                {/* Nút dropdown */}
                 <button className="dropdown-toggle">
                   Xin chào, {user.role === 'candidate'
                     ? (user.full_name || 'Người dùng')
@@ -52,51 +71,47 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
                 </button>
                 <ul className="dropdown-menu">
                   {user.role !== 'admin' && (
-                    <>
-                      {/* Mở modal thay vì đi tới trang profile */}
-                      <li>
-                        <button
-                          className="dropdown-item"
-                          onClick={() => setShowProfileModal(true)}
-                        >
-                          Xem hồ sơ
-                        </button>
-                      </li>
-                    </>
+                    <li>
+                      <button className="dropdown-item" onClick={() => setShowProfileModal(true)}>Xem hồ sơ</button>
+                    </li>
                   )}
                   <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={() => setShowChangePassword(true)}
-                    >
-                      Đổi mật khẩu
-                    </button>
+                    <button className="dropdown-item" onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</button>
                   </li>
                   <li>
-                    <button
-                      className="dropdown-item"
-                      onClick={handleLogoutClick}
-                    >
-                      Đăng xuất
-                    </button>
+                    <button className="dropdown-item" onClick={handleLogoutClick}>Đăng xuất</button>
                   </li>
                 </ul>
               </div>
             ) : (
               <>
-                <Link className="nav-link" to="/login">Đăng Nhập</Link>
-                <Link className="nav-link" to="/register">Đăng Ký</Link>
+                <button className="nav-link btn btn-link" onClick={() => setShowLoginModal(true)}>Đăng Nhập</button>
+                <button className="nav-link btn btn-link" onClick={() => setShowRegisterModal(true)}>Đăng Ký</button>
               </>
             )}
           </div>
         </div>
       </div>
 
-      {/* Modal hiển thị hồ sơ */}
-      <ProfileModal
-        show={showProfileModal}
-        onHide={() => setShowProfileModal(false)}
-      />
+      <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />
+      <LoginModal
+  show={showLoginModal}
+  onHide={() => setShowLoginModal(false)}
+  onSwitch={() => {
+    setShowLoginModal(false);
+    setShowRegisterModal(true);
+  }}
+/>
+
+<RegisterModal
+  show={showRegisterModal}
+  onHide={() => setShowRegisterModal(false)}
+  onSwitch={() => {
+    setShowRegisterModal(false);
+    setShowLoginModal(true);
+  }}
+/>
+
     </header>
   );
 };

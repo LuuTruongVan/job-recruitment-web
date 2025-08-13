@@ -1,6 +1,5 @@
-// src/components/ProfileModal.js
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, Form, Alert, Spinner } from 'react-bootstrap';
+import { Modal, Button, Form, Alert, Spinner, Image, Row, Col } from 'react-bootstrap';
 import axios from 'axios';
 
 const ProfileModal = ({ show, onHide }) => {
@@ -9,6 +8,7 @@ const ProfileModal = ({ show, onHide }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   const token =
     localStorage.getItem('candidate_token') ||
@@ -16,7 +16,6 @@ const ProfileModal = ({ show, onHide }) => {
     localStorage.getItem('admin_token') ||
     '';
 
-  // Fetch profile khi mở modal
   useEffect(() => {
     if (show && token) {
       setLoading(true);
@@ -26,13 +25,15 @@ const ProfileModal = ({ show, onHide }) => {
         })
         .then((res) => {
           setProfile(res.data);
+
           if (res.data.role === 'candidate') {
             setFormData({
               full_name: res.data.full_name || '',
               phone: res.data.phone || '',
               address: res.data.address || '',
               resume: res.data.resume || '',
-              skills: res.data.skills || ''
+              skills: res.data.skills || '',
+              avatar_url: res.data.avatar_url || ''
             });
           } else if (res.data.role === 'employer') {
             setFormData({
@@ -40,7 +41,9 @@ const ProfileModal = ({ show, onHide }) => {
               phone: res.data.phone || '',
               address: res.data.address || '',
               email: res.data.email || '',
-              website: res.data.website || ''
+              website: res.data.website || '',
+              company_intro: res.data.company_intro || '',
+              avatar_url: res.data.avatar_url || ''
             });
           }
           setLoading(false);
@@ -56,16 +59,39 @@ const ProfileModal = ({ show, onHide }) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formDataUpload = new FormData();
+    formDataUpload.append('avatar', file);
+
+    try {
+      setUploading(true);
+      const res = await axios.post('http://localhost:3001/upload-avatar', formDataUpload, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setFormData((prev) => ({ ...prev, avatar_url: res.data.url }));
+      setUploading(false);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setUploading(false);
+    }
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put('http://localhost:3001/users/update-profile', formData, {
+      await axios.put('http://localhost:3000/users/update-profile', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
+  
       setMessage('Cập nhật thông tin thành công!');
       setIsEditing(false);
-      // Reload profile sau khi update
-      const res = await axios.get('http://localhost:3001/users/get-profile', {
+      window.location.reload();
+      // Lấy lại dữ liệu mới từ server
+      const res = await axios.get('http://localhost:3000/users/get-profile', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProfile(res.data);
@@ -74,6 +100,7 @@ const ProfileModal = ({ show, onHide }) => {
       setMessage('Lỗi cập nhật thông tin!');
     }
   };
+  
 
   if (loading) {
     return (
@@ -99,82 +126,102 @@ const ProfileModal = ({ show, onHide }) => {
           </Alert>
         )}
 
-        {!isEditing ? (
-          <>
-            {profile.role === 'candidate' && (
+        <Row>
+          {/* Cột trái: Thông tin */}
+          <Col md={8}>
+            {!isEditing ? (
               <>
-                <p><strong>Họ và tên:</strong> {profile.full_name || 'Chưa có'}</p>
-                <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
-                <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
-                <p><strong>Giới thiệu:</strong> {profile.resume ? <a href={profile.resume} target="_blank" rel="noopener noreferrer">Xem CV</a> : 'Chưa có'}</p>
-                <p><strong>Kỹ năng:</strong> {profile.skills || 'Chưa có'}</p>
+                {profile.role === 'candidate' && (
+                  <>
+                    <p><strong>Họ và tên:</strong> {profile.full_name || 'Chưa có'}</p>
+                    <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
+                    <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
+                    <p><strong>CV:</strong> {profile.resume ? <a href={profile.resume} target="_blank" rel="noopener noreferrer">Xem CV</a> : 'Chưa có'}</p>
+                    <p><strong>Kỹ năng:</strong> {profile.skills || 'Chưa có'}</p>
+                  </>
+                )}
+                {profile.role === 'employer' && (
+                  <>
+                    <p><strong>Tên công ty:</strong> {profile.name || 'Chưa có'}</p>
+                    <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
+                    <p><strong>Email:</strong> {profile.email || 'Chưa có'}</p>
+                    <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
+                    <p><strong>Website:</strong> {profile.website ? <a href={profile.website} target="_blank" rel="noopener noreferrer">{profile.website}</a> : 'Chưa có'}</p>
+                    <p><strong>Giới thiệu công ty:</strong> {profile.company_intro || 'Chưa có'}</p>
+                  </>
+                )}
               </>
+            ) : (
+              <Form onSubmit={handleUpdate}>
+                {profile.role === 'candidate' && (
+                  <>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Họ và tên</Form.Label>
+                      <Form.Control type="text" name="full_name" value={formData.full_name} onChange={handleChange} required />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Số điện thoại</Form.Label>
+                      <Form.Control type="text" name="phone" value={formData.phone} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Địa chỉ</Form.Label>
+                      <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Resume (URL)</Form.Label>
+                      <Form.Control type="text" name="resume" value={formData.resume} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Kỹ năng</Form.Label>
+                      <Form.Control type="text" name="skills" value={formData.skills} onChange={handleChange} />
+                    </Form.Group>
+                  </>
+                )}
+                {profile.role === 'employer' && (
+                  <>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Tên công ty</Form.Label>
+                      <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Địa chỉ</Form.Label>
+                      <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Email</Form.Label>
+                      <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} required />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Số điện thoại</Form.Label>
+                      <Form.Control type="text" name="phone" value={formData.phone} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Website</Form.Label>
+                      <Form.Control type="text" name="website" value={formData.website} onChange={handleChange} />
+                    </Form.Group>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Giới thiệu công ty</Form.Label>
+                      <Form.Control as="textarea" rows={3} name="company_intro" value={formData.company_intro} onChange={handleChange} />
+                    </Form.Group>
+                  </>
+                )}
+                <Form.Group className="mb-3">
+                  <Form.Label>Chọn ảnh đại diện</Form.Label>
+                  <Form.Control type="file" accept="image/*" onChange={handleFileChange} />
+                  {uploading && <p>Đang tải ảnh...</p>}
+                </Form.Group>
+                <Button variant="primary" type="submit">Lưu thay đổi</Button>
+              </Form>
             )}
+          </Col>
 
-            {profile.role === 'employer' && (
-              <>
-                <p><strong>Tên công ty:</strong> {profile.name || 'Chưa có'}</p>
-                <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
-                <p><strong>Email:</strong> {profile.email || 'Chưa có'}</p>
-                <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
-                <p><strong>Website:</strong> {profile.website ? <a href={profile.website} target="_blank" rel="noopener noreferrer">{profile.website}</a> : 'Chưa có'}</p>
-              </>
+          {/* Cột phải: Avatar */}
+          <Col md={4} className="text-center">
+            {formData.avatar_url && (
+              <Image src={formData.avatar_url} roundedCircle width={150} height={150} alt="Avatar" />
             )}
-          </>
-        ) : (
-          <Form onSubmit={handleUpdate}>
-            {profile.role === 'candidate' && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Họ và tên</Form.Label>
-                  <Form.Control type="text" name="full_name" value={formData.full_name} onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Số điện thoại</Form.Label>
-                  <Form.Control type="text" name="phone" value={formData.phone} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Địa chỉ</Form.Label>
-                  <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Giới thiệu</Form.Label>
-                  <Form.Control type="text" name="resume" value={formData.resume} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Kỹ năng</Form.Label>
-                  <Form.Control type="text" name="skills" value={formData.skills} onChange={handleChange} />
-                </Form.Group>
-              </>
-            )}
-
-            {profile.role === 'employer' && (
-              <>
-                <Form.Group className="mb-3">
-                  <Form.Label>Tên công ty</Form.Label>
-                  <Form.Control type="text" name="name" value={formData.name} onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Địa chỉ</Form.Label>
-                  <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Email</Form.Label>
-                  <Form.Control type="email" name="email" value={formData.email} onChange={handleChange} required />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Số điện thoại</Form.Label>
-                  <Form.Control type="text" name="phone" value={formData.phone} onChange={handleChange} />
-                </Form.Group>
-                <Form.Group className="mb-3">
-                  <Form.Label>Website</Form.Label>
-                  <Form.Control type="text" name="website" value={formData.website} onChange={handleChange} />
-                </Form.Group>
-              </>
-            )}
-            <Button variant="primary" type="submit">Lưu thay đổi</Button>
-          </Form>
-        )}
+          </Col>
+        </Row>
       </Modal.Body>
       <Modal.Footer>
         {!isEditing ? (

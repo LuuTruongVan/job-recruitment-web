@@ -4,24 +4,20 @@ import axios from 'axios';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import '../componentCss/PostJob.css';
-
-// Thêm vào đầu file
 const provincesVN = [
+  { value: 'Hà Nội', label: 'Hà Nội' },
+  { value: 'Hồ Chí Minh', label: 'Hồ Chí Minh' },
+  { value: 'Hải Phòng', label: 'Hải Phòng' },
+  { value: 'Đà Nẵng', label: 'Đà Nẵng' },
+  { value: 'Cần Thơ', label: 'Cần Thơ' },
   { value: 'An Giang', label: 'An Giang' },
   { value: 'Bà Rịa - Vũng Tàu', label: 'Bà Rịa - Vũng Tàu' },
   { value: 'Bắc Giang', label: 'Bắc Giang' },
-  { value: 'Bắc Kạn', label: 'Bắc Kạn' },
-  { value: 'Bạc Liêu', label: 'Bạc Liêu' },
   { value: 'Bắc Ninh', label: 'Bắc Ninh' },
-  { value: 'Bến Tre', label: 'Bến Tre' },
-  { value: 'Bình Định', label: 'Bình Định' },
   { value: 'Bình Dương', label: 'Bình Dương' },
   { value: 'Bình Phước', label: 'Bình Phước' },
   { value: 'Bình Thuận', label: 'Bình Thuận' },
   { value: 'Cà Mau', label: 'Cà Mau' },
-  { value: 'Cần Thơ', label: 'Cần Thơ' },
-  { value: 'Cao Bằng', label: 'Cao Bằng' },
-  { value: 'Đà Nẵng', label: 'Đà Nẵng' },
   { value: 'Đắk Lắk', label: 'Đắk Lắk' },
   { value: 'Đắk Nông', label: 'Đắk Nông' },
   { value: 'Điện Biên', label: 'Điện Biên' },
@@ -30,46 +26,19 @@ const provincesVN = [
   { value: 'Gia Lai', label: 'Gia Lai' },
   { value: 'Hà Giang', label: 'Hà Giang' },
   { value: 'Hà Nam', label: 'Hà Nam' },
-  { value: 'Hà Nội', label: 'Hà Nội' },
   { value: 'Hà Tĩnh', label: 'Hà Tĩnh' },
   { value: 'Hải Dương', label: 'Hải Dương' },
-  { value: 'Hải Phòng', label: 'Hải Phòng' },
   { value: 'Hậu Giang', label: 'Hậu Giang' },
   { value: 'Hòa Bình', label: 'Hòa Bình' },
   { value: 'Hưng Yên', label: 'Hưng Yên' },
   { value: 'Khánh Hòa', label: 'Khánh Hòa' },
   { value: 'Kiên Giang', label: 'Kiên Giang' },
   { value: 'Kon Tum', label: 'Kon Tum' },
-  { value: 'Lai Châu', label: 'Lai Châu' },
   { value: 'Lâm Đồng', label: 'Lâm Đồng' },
   { value: 'Lạng Sơn', label: 'Lạng Sơn' },
   { value: 'Lào Cai', label: 'Lào Cai' },
   { value: 'Long An', label: 'Long An' },
-  { value: 'Nam Định', label: 'Nam Định' },
-  { value: 'Nghệ An', label: 'Nghệ An' },
-  { value: 'Ninh Bình', label: 'Ninh Bình' },
-  { value: 'Ninh Thuận', label: 'Ninh Thuận' },
-  { value: 'Phú Thọ', label: 'Phú Thọ' },
-  { value: 'Phú Yên', label: 'Phú Yên' },
-  { value: 'Quảng Bình', label: 'Quảng Bình' },
-  { value: 'Quảng Nam', label: 'Quảng Nam' },
-  { value: 'Quảng Ngãi', label: 'Quảng Ngãi' },
-  { value: 'Quảng Ninh', label: 'Quảng Ninh' },
-  { value: 'Quảng Trị', label: 'Quảng Trị' },
-  { value: 'Sóc Trăng', label: 'Sóc Trăng' },
-  { value: 'Sơn La', label: 'Sơn La' },
-  { value: 'Tây Ninh', label: 'Tây Ninh' },
-  { value: 'Thái Bình', label: 'Thái Bình' },
-  { value: 'Thái Nguyên', label: 'Thái Nguyên' },
-  { value: 'Thanh Hóa', label: 'Thanh Hóa' },
-  { value: 'Thừa Thiên Huế', label: 'Thừa Thiên Huế' },
-  { value: 'Tiền Giang', label: 'Tiền Giang' },
-  { value: 'TP Hồ Chí Minh', label: 'TP Hồ Chí Minh' },
-  { value: 'Trà Vinh', label: 'Trà Vinh' },
-  { value: 'Tuyên Quang', label: 'Tuyên Quang' },
-  { value: 'Vĩnh Long', label: 'Vĩnh Long' },
-  { value: 'Vĩnh Phúc', label: 'Vĩnh Phúc' },
-  { value: 'Yên Bái', label: 'Yên Bái' }
+  { value: 'Nam Định', label: 'Nam Định' }
 ];
 
 
@@ -77,17 +46,18 @@ const PostJob = () => {
   const [job, setJob] = useState({
     title: '',
     company_name: '',
-    jobInfo: '',
+    jobInfo: `• Vị trí tuyển dụng :\n• Số lượng tuyển dụng :\n• Hình thức làm việc :\n• Kinh nghiệm làm việc :\n• Bằng cấp :\n• Hình thức trả lương :\n• Giờ làm việc :\n• Địa điểm làm việc :`,
     jobPositionId: '',
-    jobRequirements: '',
-    benefits: '',
+    jobRequirements: `•\n•\n•\n`,
+    benefits: `•\n•\n•\n`,
     location: '',
     emailContact: '',
     salary: '',
     category: '',
     expiry_date: '',
-    employmentType: '' // Thêm trường mới
+    employmentType: ''
   });
+
   const [message, setMessage] = useState('');
   const [categories, setCategories] = useState([]);
   const [searchTermCategory, setSearchTermCategory] = useState('');
@@ -136,40 +106,36 @@ const PostJob = () => {
       location: job.location || '',
       emailContact: job.emailContact || '',
       expiry_date: job.expiry_date || null,
-      employmentType: job.employmentType || '' // Thêm trường này
+      employmentType: job.employmentType || ''
     };
-    console.log('Sending job data:', jobDataToSave);
     try {
-      const response = await axios.post('/jobposts', jobDataToSave, {
+      await axios.post('/jobposts', jobDataToSave, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Response from server:', response.data);
       setMessage('Đăng tin thành công!');
       navigate('/home');
       setJob({
         title: '',
         company_name: '',
-        jobInfo: '',
+        jobInfo: `- Vị trí tuyển dụng :\n- Số lượng tuyển dụng :\n- Hình thức làm việc :\n- Kinh nghiệm làm việc :\n- Bằng cấp :\n- Hình thức trả lương :\n- Giờ làm việc :\n- Địa điểm làm việc :`,
         jobPositionId: '',
-        jobRequirements: '',
-        benefits: '',
+        jobRequirements: `- ...\n- ...\n- ...`,
+        benefits: `- ...\n- ...\n- ...`,
         location: '',
         emailContact: '',
         salary: '',
         category: '',
         expiry_date: '',
-        employmentType: '' // Reset trường mới
+        employmentType: ''
       });
     } catch (error) {
       setMessage('Lỗi khi đăng tin: ' + (error.response?.data?.message || error.message));
-      console.error('Post job error:', error.response?.data || error.message);
     }
   };
 
   const fetchJobPositions = async (categoryName) => {
     try {
       const response = await axios.get(`/jobposts/job-positions?category=${encodeURIComponent(categoryName)}`);
-      console.log('Fetched job positions:', response.data);
       setJobPositions(response.data.map(pos => ({ value: pos.id, label: pos.name })));
     } catch (error) {
       console.error('Error fetching job positions:', error);
@@ -298,6 +264,7 @@ const PostJob = () => {
             name="jobInfo"
             value={job.jobInfo}
             onChange={handleChange}
+            rows={8}
             required
           />
         </Form.Group>
@@ -308,6 +275,7 @@ const PostJob = () => {
             name="jobRequirements"
             value={job.jobRequirements}
             onChange={handleChange}
+            rows={6}
             required
           />
         </Form.Group>
@@ -318,6 +286,7 @@ const PostJob = () => {
             name="benefits"
             value={job.benefits}
             onChange={handleChange}
+            rows={6}
             required
           />
         </Form.Group>
@@ -332,18 +301,17 @@ const PostJob = () => {
           />
         </Form.Group>
         <Form.Group className="mb-3">
-  <Form.Label>Địa chỉ</Form.Label>
-  <Select
-    value={provincesVN.find(p => p.value === job.location) || null}
-    onChange={(selectedOption) =>
-      setJob((prevJob) => ({ ...prevJob, location: selectedOption ? selectedOption.value : '' }))
-    }
-    options={provincesVN}
-    placeholder="Chọn tỉnh/thành..."
-    isClearable
-  />
-</Form.Group>
-
+          <Form.Label>Địa chỉ</Form.Label>
+          <Select
+            value={provincesVN.find(p => p.value === job.location) || null}
+            onChange={(selectedOption) =>
+              setJob((prevJob) => ({ ...prevJob, location: selectedOption ? selectedOption.value : '' }))
+            }
+            options={provincesVN}
+            placeholder="Chọn tỉnh/thành..."
+            isClearable
+          />
+        </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label>Email liên hệ</Form.Label>
           <Form.Control

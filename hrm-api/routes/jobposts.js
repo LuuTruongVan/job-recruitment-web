@@ -193,19 +193,27 @@ router.get('/my-jobs', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
   try {
     const { id } = req.params;
-    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ?', [id]);
-    if (job.length === 0) return res.status(404).json({ message: 'Job not found' });
+    const [job] = await pool.query(
+      `SELECT jp.*, 
+        (SELECT COUNT(*) FROM favorites f WHERE f.jobpost_id = jp.id) AS favorite_count
+       FROM jobposts jp
+       WHERE jp.id = ?`,
+      [id]
+    );
+
+    if (job.length === 0) {
+      return res.status(404).json({ message: 'Job not found' });
+    }
+
     res.json(job[0]);
   } catch (error) {
     console.error('Error fetching job detail:', error);
     res.status(500).json({ message: 'Error fetching job detail' });
   }
 });
+
 
 router.delete('/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];

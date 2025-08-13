@@ -121,7 +121,7 @@ const Home = () => {
 
   const handleApplyClick = (job) => {
     if (!user) {
-      navigate('/login');
+      alert('Vui lòng đăng nhập để ứng tuyển!');
       return;
     }
     if (user.role === 'employer') {
@@ -171,6 +171,10 @@ const Home = () => {
   };
 
   const toggleFavorite = async (jobId) => {
+    if (!user) {
+      alert('Vui lòng đăng nhập để thêm vào yêu thích!');
+      return;
+    }
     try {
       if (favorites.includes(jobId)) {
         await axios.delete(`/favorites/${jobId}`, {
@@ -228,103 +232,99 @@ const Home = () => {
       </Carousel>
 
       {/* Bộ lọc */}
-      {/* Bộ lọc */}
-{/* Bộ lọc */}
-<div className="home-filters-wrapper">
-  <h4 className="home-filters-title">Chọn vị trí mong muốn</h4>
-  <div className="home-filters d-flex gap-2 flex-wrap">
-    <Select
-      options={categories}
-      placeholder="Chọn phân loại"
-      isClearable
-      onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
-    />
-    <Select
-      options={provinces.map(p => ({ value: p, label: p }))}
-      placeholder="Chọn địa điểm"
-      isClearable
-      onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
-    />
-    <Form.Control
-      type="number"
-      placeholder="Lương tối thiểu (VND)"
-      onChange={(e) => handleFilterChange('minSalary', e.target.value)}
-    />
-    <Select
-      options={[
-        { value: 'desc', label: 'Yêu thích nhiều → ít' },
-        { value: 'asc', label: 'Yêu thích ít → nhiều' }
-      ]}
-      placeholder="Sắp xếp theo yêu thích"
-      isClearable
-      onChange={(opt) => handleFilterChange('favoriteSort', opt ? opt.value : '')}
-    />
-  </div>
-</div>
-
+      <div className="home-filters-wrapper">
+        <h4 className="home-filters-title">Chọn vị trí mong muốn</h4>
+        <div className="home-filters d-flex gap-2 flex-wrap">
+          <Select
+            options={categories}
+            placeholder="Chọn phân loại"
+            isClearable
+            onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
+          />
+          <Select
+            options={provinces.map(p => ({ value: p, label: p }))}
+            placeholder="Chọn địa điểm"
+            isClearable
+            onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
+          />
+          <Form.Control
+            type="number"
+            placeholder="Lương tối thiểu (VND)"
+            onChange={(e) => handleFilterChange('minSalary', e.target.value)}
+          />
+          <Select
+            options={[
+              { value: 'desc', label: 'Yêu thích nhiều → ít' },
+              { value: 'asc', label: 'Yêu thích ít → nhiều' }
+            ]}
+            placeholder="Sắp xếp theo yêu thích"
+            isClearable
+            onChange={(opt) => handleFilterChange('favoriteSort', opt ? opt.value : '')}
+          />
+        </div>
+      </div>
 
       {/* Danh sách job */}
-      <div className="home-job-listings row">
+      <div className="home-job-listings row align-items-stretch">
         {jobs.map((job) => (
-        <div className="col-md-4 mb-3" key={job.id}>
-        <Card className="position-relative">
-          <div
-            className="favorite-icon"
-            onClick={(e) => {
-              e.stopPropagation(); // Ngăn click vào favorite cũng chuyển trang
-              toggleFavorite(job.id);
-            }}
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              cursor: 'pointer',
-              color: favorites.includes(job.id) ? 'red' : 'gray',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '5px',
-              background: 'rgba(255,255,255,0.8)',
-              padding: '3px 6px',
-              borderRadius: '12px',
-              fontSize: '14px'
-            }}
-          >
-            <i className={favorites.includes(job.id) ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
-            <span>{job.favorite_count || 0}</span>
+          <div className="col-md-4 mb-3 d-flex" key={job.id}>
+            <Card className="position-relative flex-fill d-flex flex-column">
+              <div
+                className="favorite-icon"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleFavorite(job.id);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  cursor: 'pointer',
+                  color: favorites.includes(job.id) ? 'red' : 'gray',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  background: 'rgba(255,255,255,0.8)',
+                  padding: '3px 6px',
+                  borderRadius: '12px',
+                  fontSize: '14px'
+                }}
+              >
+                <i className={favorites.includes(job.id) ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
+                <span>{job.favorite_count || 0}</span>
+              </div>
+
+              {/* Nội dung chính */}
+              <div
+                onClick={() => navigate(`/job-detail/${job.id}`)}
+                style={{ cursor: 'pointer', flexGrow: 1 }}
+              >
+                <Card.Body className="d-flex flex-column">
+                  <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
+                  <Card.Text className="job-description">
+                    <strong>Vị trí công việc:</strong> {job.job_position}
+                    <br />
+                    <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
+                    <br />
+                    <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
+                    <br />
+                    <strong>Địa chỉ:</strong> {job.location}
+                    <br />
+                    <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
+                    <br />
+                    <strong>Ngày hết hạn:</strong>{' '}
+                    {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
+                  </Card.Text>
+                </Card.Body>
+              </div>
+
+              {/* Nút bấm */}
+              <div className="d-flex gap-2 p-2">
+                <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
+                <Button variant="success" onClick={() => handleApplyClick(job)}>Ứng tuyển</Button>
+              </div>
+            </Card>
           </div>
-      
-          {/* Toàn bộ nội dung card có thể click */}
-          <div
-            onClick={() => navigate(`/job-detail/${job.id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            <Card.Body>
-              <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
-              <Card.Text>
-                <strong>Vị trí công việc:</strong> {job.job_position}
-                <br />
-                <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
-                <br />
-                <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
-                <br />
-                <strong>Địa chỉ:</strong> {job.location}
-                <br />
-                <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
-                <br />
-                <strong>Ngày hết hạn:</strong>{' '}
-                {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
-              </Card.Text>
-            </Card.Body>
-          </div>
-      
-          {/* Các nút riêng */}
-          <div className="d-flex gap-2 p-2">
-            <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
-            <Button variant="success" onClick={() => handleApplyClick(job)}>Ứng tuyển</Button>
-          </div>
-        </Card>
-      </div>
-      
         ))}
       </div>
 
