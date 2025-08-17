@@ -174,11 +174,18 @@ const Favorites = () => {
                   <Card.Text className="job-description">
                     <strong>Vị trí công việc:</strong> {job.job_position}
                     <br />
+                    <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
+  <br />
                     <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
                     <br />
                     <strong>Địa chỉ:</strong> {job.location}
                     <br />
-                    <strong>Mức lương:</strong> {job.salary ? `${job.salary.toLocaleString()} VND` : 'Chưa có'}
+                    <strong>Mức lương:</strong>{' '}
+{job.salary
+  ? `${parseInt(job.salary, 10).toLocaleString('vi-VN')} VND`
+  : 'Chưa có'}
+
+
                     <br />
                     <strong>Ngày hết hạn:</strong>{' '}
                     {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}

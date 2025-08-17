@@ -24,7 +24,9 @@ router.get('/', authenticateUser, async (req, res) => {
       `SELECT jobposts.* 
        FROM favorites 
        JOIN jobposts ON favorites.jobpost_id = jobposts.id 
-       WHERE favorites.user_id = ?`,
+       WHERE favorites.user_id = ? 
+       AND jobposts.status = "approved"
+       AND jobposts.expiry_date > NOW()`,  
       [req.user.id]
     );
     res.json(rows);
@@ -33,6 +35,7 @@ router.get('/', authenticateUser, async (req, res) => {
     res.status(500).json({ message: 'Error fetching favorites' });
   }
 });
+
 // 📌 Thêm vào favorites
 router.post('/', authenticateUser, async (req, res) => {
   try {

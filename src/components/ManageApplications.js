@@ -31,6 +31,19 @@ const ManageApplications = () => {
       });
   }, []);
 
+  // 👉 Hàm chuyển trạng thái sang tiếng Việt
+  const translateStatus = (status) => {
+    switch (status) {
+      case 'approved':
+        return 'Đã duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
+      case 'pending':
+      default:
+        return 'Đang chờ';
+    }
+  };
+
   return (
     <div className="job-detail-container" style={{ maxWidth: '100%', width: '1200px', margin: '0 auto' }}>
       <div className="applications-content">
@@ -46,9 +59,8 @@ const ManageApplications = () => {
                   <th>Tên ứng viên</th>
                   <th>Email</th>
                   <th>Số điện thoại</th>
-                  <th>Kỹ năng</th>
-                  <th>Giới thiệu</th>
                   <th>CV</th>
+                  <th>Ứng tuyển ngày</th>
                   <th>Trạng thái</th>
                 </tr>
               </thead>
@@ -59,14 +71,13 @@ const ManageApplications = () => {
                     <td>{app.candidate_name || 'Không có tên'}</td>
                     <td>{app.email || 'Không có email'}</td>
                     <td>{app.phone || 'Không có số điện thoại'}</td>
-                    <td>{app.skills || 'Không có kỹ năng'}</td>
-                    <td>{app.introduction || 'Không có giới thiệu'}</td>
                     <td>
                       {app.cv_path ? (
                         <a href={`http://localhost:3000${app.cv_path}`} target="_blank" rel="noopener noreferrer">Xem CV</a>
                       ) : 'Không có CV'}
                     </td>
-                    <td>{app.status || 'pending'}</td>
+                    <td>{app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Chưa có'}</td>
+                    <td>{translateStatus(app.status)}</td>
                   </tr>
                 ))}
               </tbody>

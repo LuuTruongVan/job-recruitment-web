@@ -13,7 +13,7 @@
 .job-description {
   flex-grow: 1;
   display: -webkit-box;
-  -webkit-line-clamp: 6; /* giống Home */
+  -webkit-line-clamp: 7; /* giống Home */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

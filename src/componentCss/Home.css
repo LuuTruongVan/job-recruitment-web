@@ -84,7 +84,7 @@
   flex-grow: 1;
   /* Giới hạn dòng hiển thị, tránh card quá cao */
   display: -webkit-box;
-  -webkit-line-clamp: 6; /* Hiển thị tối đa 6 dòng */
+  -webkit-line-clamp: 7; /* Hiển thị tối đa 6 dòng */
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

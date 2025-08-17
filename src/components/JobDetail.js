@@ -198,7 +198,13 @@ const JobDetail = () => {
         <div>
           <p><strong>Vị trí:</strong> {job.job_position}</p>
           <p><strong>Hình thức:</strong> {job.employment_type || 'Chưa có'}</p>
-          <p><strong>Lương:</strong> {job.salary} VND</p>
+          <p>
+  <strong>Lương:</strong>{' '}
+  {job.salary
+    ? `${parseInt(job.salary, 10).toLocaleString('vi-VN')} VND`
+    : 'Chưa có'}
+</p>
+
           <p><strong>Địa chỉ:</strong> {job.location}</p>
         </div>
         <div>

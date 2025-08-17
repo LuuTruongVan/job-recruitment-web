@@ -310,7 +310,12 @@ const Home = () => {
                     <br />
                     <strong>Địa chỉ:</strong> {job.location}
                     <br />
-                    <strong>Mức lương:</strong> {job.salary ? `${job.salary} VND` : 'Chưa có'}
+                    <strong>Mức lương:</strong>{' '}
+{job.salary
+  ? `${parseInt(job.salary, 10).toLocaleString('vi-VN')} VND`
+  : 'Chưa có'}
+
+
                     <br />
                     <strong>Ngày hết hạn:</strong>{' '}
                     {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
