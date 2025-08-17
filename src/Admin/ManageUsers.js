@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import { Modal, Button, Form } from 'react-bootstrap';
-
+import '../componentCss/AdminResponsive.css';
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -149,34 +149,34 @@ const ManageUsers = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map(user => (
-            <tr key={user.id} style={{ border: '1px solid #ddd' }}>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.id}</td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.name || ''}</td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.email}</td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.role}</td>
-              <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-  {user.role !== 'admin' ? (
-    <button
-      onClick={() => handleDeleteUser(user.id)}
-      style={{
-        padding: '5px 10px',
-        backgroundColor: '#ff4444',
-        color: 'white',
-        border: 'none',
-        cursor: 'pointer'
-      }}
-    >
-      Xóa
-    </button>
-  ) : (
-    <span style={{ color: 'gray', fontStyle: 'italic' }}></span>
-  )}
-</td>
+  {filteredUsers.map(user => (
+    <tr key={user.id}>
+      <td data-label="ID">{user.id}</td>
+      <td data-label="Tên">{user.name || ''}</td>
+      <td data-label="Email">{user.email}</td>
+      <td data-label="Role">{user.role}</td>
+      <td data-label="Hành động">
+        {user.role !== 'admin' ? (
+          <button
+            onClick={() => handleDeleteUser(user.id)}
+            style={{
+              padding: '5px 10px',
+              backgroundColor: '#ff4444',
+              color: 'white',
+              border: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            Xóa
+          </button>
+        ) : (
+          <span style={{ color: 'gray', fontStyle: 'italic' }}></span>
+        )}
+      </td>
+    </tr>
+  ))}
+</tbody>
 
-            </tr>
-          ))}
-        </tbody>
       </table>
       {filteredUsers.length === 0 && <p>Không tìm thấy người dùng.</p>}
     </div>

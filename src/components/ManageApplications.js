@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Button } from 'react-bootstrap';
+import '../componentCss/ManageApplications.css';
 import '../componentCss/JobDetail.css';
+
 
 const ManageApplications = () => {
   const [applications, setApplications] = useState([]);
@@ -11,27 +13,23 @@ const ManageApplications = () => {
 
   useEffect(() => {
     const candidateToken = localStorage.getItem('candidate_token');
-    const token = candidateToken; // Chỉ dùng candidate_token
-    console.log('Token in ManageApplications:', token);
-    if (!token) {
+    if (!candidateToken) {
       setError('Vui lòng đăng nhập với vai trò ứng viên.');
       return;
     }
 
     axios.get('http://localhost:3000/applications/get', {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${candidateToken}` }
     })
       .then((response) => {
-        console.log('Response from /applications/get:', response.data);
         setApplications(response.data);
       })
       .catch((error) => {
         console.error('Error fetching applications:', error.response?.status, error.response?.data || error.message);
-        setError('Không thể tải danh sách ứng tuyển. Vui lòng kiểm tra console.');
+        setError('Không thể tải danh sách ứng tuyển.');
       });
   }, []);
 
-  // 👉 Hàm chuyển trạng thái sang tiếng Việt
   const translateStatus = (status) => {
     switch (status) {
       case 'approved':
@@ -52,7 +50,7 @@ const ManageApplications = () => {
           <p>{error}</p>
         ) : applications.length > 0 ? (
           <div className="mt-4">
-            <Table striped bordered hover>
+            <Table striped bordered hover className="responsive-table">
               <thead>
                 <tr>
                   <th>Tiêu đề công việc</th>
@@ -67,17 +65,21 @@ const ManageApplications = () => {
               <tbody>
                 {applications.map((app) => (
                   <tr key={app.id}>
-                    <td>{app.title || 'Chưa có tiêu đề'}</td>
-                    <td>{app.candidate_name || 'Không có tên'}</td>
-                    <td>{app.email || 'Không có email'}</td>
-                    <td>{app.phone || 'Không có số điện thoại'}</td>
-                    <td>
+                    <td data-label="Tiêu đề công việc">{app.title || 'Chưa có tiêu đề'}</td>
+                    <td data-label="Tên ứng viên">{app.candidate_name || 'Không có tên'}</td>
+                    <td data-label="Email">{app.email || 'Không có email'}</td>
+                    <td data-label="Số điện thoại">{app.phone || 'Không có số điện thoại'}</td>
+                    <td data-label="CV">
                       {app.cv_path ? (
-                        <a href={`http://localhost:3000${app.cv_path}`} target="_blank" rel="noopener noreferrer">Xem CV</a>
+                        <a href={`http://localhost:3000${app.cv_path}`} target="_blank" rel="noopener noreferrer">
+                          Xem CV
+                        </a>
                       ) : 'Không có CV'}
                     </td>
-                    <td>{app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Chưa có'}</td>
-                    <td>{translateStatus(app.status)}</td>
+                    <td data-label="Ứng tuyển ngày">
+                      {app.applied_at ? new Date(app.applied_at).toLocaleDateString() : 'Chưa có'}
+                    </td>
+                    <td data-label="Trạng thái">{translateStatus(app.status)}</td>
                   </tr>
                 ))}
               </tbody>

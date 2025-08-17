@@ -13,7 +13,7 @@ router.get('/get-all', async (req, res) => {
     if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
 
     const [candidates] = await pool.query(
-      `SELECT c.id, c.full_name, c.phone, c.address, c.resume, c.skills, c.avatar_url, u.email 
+      `SELECT c.id, c.full_name, c.phone, c.address, c.skills, c.avatar_url, u.email 
        FROM candidates c 
        LEFT JOIN users u ON c.user_id = u.id`
     );

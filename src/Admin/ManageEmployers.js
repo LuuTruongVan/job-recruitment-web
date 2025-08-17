@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { TokenContext } from '../App';
-
+import '../componentCss/AdminResponsive.css';
 const ManageEmployers = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');
   const [employers, setEmployers] = useState([]);
@@ -89,20 +89,21 @@ const ManageEmployers = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredEmployers.map(employer => (
-            <tr key={employer.id}>
-              <td>{employer.id}</td>
-              <td>{employer.name}</td>
-              <td>{employer.phone || 'Chưa có'}</td>
-              <td>{employer.email || 'Chưa có'}</td>
-              <td>
-                <Button variant="danger" size="sm" onClick={() => handleDelete(employer.id)}>
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {filteredEmployers.map(employer => (
+    <tr key={employer.id}>
+      <td data-label="ID">{employer.id}</td>
+      <td data-label="Tên công ty">{employer.name}</td>
+      <td data-label="Phone">{employer.phone || 'Chưa có'}</td>
+      <td data-label="Email">{employer.email || 'Chưa có'}</td>
+      <td data-label="Hành động">
+        <Button variant="danger" size="sm" onClick={() => handleDelete(employer.id)}>
+          Xóa
+        </Button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
       </Table>
 
       {filteredEmployers.length === 0 && <p>Không tìm thấy nhà tuyển dụng.</p>}

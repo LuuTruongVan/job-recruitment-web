@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
 import { Navbar, Nav } from 'react-bootstrap';
 import ManageCandidates from './ManageCandidates';
@@ -7,26 +7,47 @@ import ManageJobPosts from './ManageJobPosts';
 import ManageJobCategories from './ManageJobCategories';
 import ManageApplications from './ManageApplications';
 import ViewQualities from './ViewQualities';
-import ManageUsers from './ManageUsers'; // Thêm import ManageUsers
+import ManageUsers from './ManageUsers';
 import '../componentCss/Admin.css';
+
 const AdminDashboard = () => {
+  const [expanded, setExpanded] = useState(false);
+
+  const handleNavClick = () => {
+    setExpanded(false); // đóng menu khi click
+  };
+
   return (
     <div className="admin-dashboard">
-      <Navbar bg="light" expand="lg">
-        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+      <Navbar bg="light" expand="lg" expanded={expanded}>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setExpanded(expanded ? false : true)} />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-          <Nav.Link as={NavLink} to="manage-users">Quản lý người dùng</Nav.Link> {/* Thêm mục này */}
-            <Nav.Link as={NavLink} to="manage-candidates">Quản lý ứng viên</Nav.Link>
-            <Nav.Link as={NavLink} to="manage-employers">Quản lý nhà tuyển dụng</Nav.Link>
-            <Nav.Link as={NavLink} to="manage-job-posts">Quản lý bài đăng</Nav.Link>
-            <Nav.Link as={NavLink} to="manage-applications">Quản lý ứng tuyển</Nav.Link>
-            <Nav.Link as={NavLink} to="manage-job-categories">Quản lý danh mục</Nav.Link>
-            <Nav.Link as={NavLink} to="view-qualities">Xem số liệu</Nav.Link>
-       
+            <Nav.Link as={NavLink} to="manage-users" onClick={handleNavClick}>
+              Quản lý người dùng
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-candidates" onClick={handleNavClick}>
+              Quản lý ứng viên
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-employers" onClick={handleNavClick}>
+              Quản lý nhà tuyển dụng
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-job-posts" onClick={handleNavClick}>
+              Quản lý bài đăng
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-applications" onClick={handleNavClick}>
+              Quản lý ứng tuyển
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-job-categories" onClick={handleNavClick}>
+              Quản lý danh mục
+            </Nav.Link>
+            <Nav.Link as={NavLink} to="view-qualities" onClick={handleNavClick}>
+              Xem số liệu
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Navbar>
+
       <div className="content">
         <Routes>
           <Route path="manage-candidates" element={<ManageCandidates />} />
@@ -35,7 +56,7 @@ const AdminDashboard = () => {
           <Route path="manage-job-categories" element={<ManageJobCategories />} />
           <Route path="manage-applications" element={<ManageApplications />} />
           <Route path="view-qualities" element={<ViewQualities />} />
-          <Route path="manage-users" element={<ManageUsers />} /> {/* Thêm Route này */}
+          <Route path="manage-users" element={<ManageUsers />} />
         </Routes>
       </div>
     </div>

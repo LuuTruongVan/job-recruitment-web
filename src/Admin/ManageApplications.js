@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
-
+import '../componentCss/AdminResponsive.css';
 const ManageApplications = () => {
   const [applications, setApplications] = useState([]);
   const [searchName, setSearchName] = useState('');
@@ -62,32 +62,33 @@ const ManageApplications = () => {
         </Form.Select>
       </div>
 
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Ứng viên</th>
-            <th>Bài đăng</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredApps.map(app => (
-            <tr key={app.id}>
-              <td>{app.id}</td>
-              <td>{app.candidate_name || app.user_email}</td>
-              <td>{app.jobpost_title}</td>
-              <td>{app.status}</td>
-              <td>
-                <Button variant="danger" onClick={() => handleDelete(app.id)}>
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <Table striped bordered hover responsive>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Ứng viên</th>
+      <th>Bài đăng</th>
+      <th>Trạng thái</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {filteredApps.map(app => (
+      <tr key={app.id}>
+        <td data-label="ID">{app.id}</td>
+        <td data-label="Ứng viên">{app.candidate_name || app.user_email}</td>
+        <td data-label="Bài đăng">{app.jobpost_title}</td>
+        <td data-label="Trạng thái">{app.status}</td>
+        <td data-label="Hành động">
+          <Button variant="danger" onClick={() => handleDelete(app.id)}>
+            Xóa
+          </Button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
     </div>
   );
 };

@@ -1,0 +1,36 @@
+/* -------- Responsive Table cho ManageApplications -------- */
+@media (max-width: 768px) {
+  .responsive-table thead {
+    display: none;
+  }
+
+  .responsive-table tr {
+    display: block;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    background: #fff;
+  }
+
+  .responsive-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 5px;
+    border: none !important;
+    border-bottom: 1px solid #eee;
+  }
+
+  .responsive-table td:last-child {
+    border-bottom: none;
+  }
+
+  .responsive-table td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    flex: 1;
+    text-align: left;
+    padding-right: 10px;
+    color: #333;
+  }
+}

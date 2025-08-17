@@ -82,20 +82,25 @@ const ManageCandidates = () => {
           </tr>
         </thead>
         <tbody>
-          {filteredCandidates.map(candidate => (
-            <tr key={candidate.id}>
-              <td>{candidate.id}</td>
-              <td>{candidate.full_name}</td>
-              <td>{candidate.phone || 'Chưa có'}</td>
-              <td>{candidate.address || 'Chưa có'}</td>
-              <td>
-                <Button variant="danger" size="sm" onClick={() => handleDelete(candidate.id)}>
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {filteredCandidates.map(candidate => (
+    <tr key={candidate.id}>
+      <td data-label="ID">{candidate.id}</td>
+      <td data-label="Tên">{candidate.full_name}</td>
+      <td data-label="Phone">{candidate.phone || 'Chưa có'}</td>
+      <td data-label="Địa chỉ">{candidate.address || 'Chưa có'}</td>
+      <td data-label="Hành động">
+        <Button
+          variant="danger"
+          size="sm"
+          onClick={() => handleDelete(candidate.id)}
+        >
+          Xóa
+        </Button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
       </Table>
       {filteredCandidates.length === 0 && <p>Không tìm thấy ứng viên.</p>}
     </div>

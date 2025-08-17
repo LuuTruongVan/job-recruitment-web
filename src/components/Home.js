@@ -300,7 +300,7 @@ const Home = () => {
                 style={{ cursor: 'pointer', flexGrow: 1 }}
               >
                 <Card.Body className="d-flex flex-column">
-                  <Card.Title style={{ textAlign: 'center' }}>{job.title}</Card.Title>
+                <Card.Title style={{ textAlign: 'center', margin: '0 30px' }}>{job.title}</Card.Title>
                   <Card.Text className="job-description">
                     <strong>Vị trí công việc:</strong> {job.job_position}
                     <br />

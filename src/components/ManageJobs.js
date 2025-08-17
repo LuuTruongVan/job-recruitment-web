@@ -63,6 +63,43 @@ const ManageJobs = () => {
 
   return (
     <div className="manage-jobs">
+      {/* CSS responsive để bảng hiển thị dọc trên mobile */}
+      <style>{`
+        @media (max-width: 768px) {
+          table thead {
+            display: none;
+          }
+          table, table tbody, table tr, table td {
+            display: block;
+            width: 100%;
+          }
+          table tr {
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: #fff;
+          }
+          table td {
+            text-align: left;
+            padding: 8px 10px;
+            border: none;
+            border-bottom: 1px solid #eee;
+            position: relative;
+          }
+          table td:last-child {
+            border-bottom: none;
+          }
+          table td:before {
+            content: attr(data-label);
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+          }
+        }
+      `}</style>
+
       <h2>Quản lý tin tuyển dụng</h2>
       <Table striped bordered hover>
         <thead>
@@ -77,11 +114,11 @@ const ManageJobs = () => {
         <tbody>
           {jobs.map(job => (
             <tr key={job.id}>
-              <td>{job.title}</td>
-              <td>{job.job_position || 'Chưa có vị trí'}</td>
-              <td>{new Date(job.created_at).toLocaleDateString()}</td>
-              <td>{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
-              <td>
+              <td data-label="Tiêu đề">{job.title}</td>
+              <td data-label="Vị trí công việc">{job.job_position || 'Chưa có vị trí'}</td>
+              <td data-label="Ngày đăng">{new Date(job.created_at).toLocaleDateString()}</td>
+              <td data-label="Ngày hết hạn">{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
+              <td data-label="Hành động">
                 <Button variant="info" size="sm" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1">
                   Xem chi tiết
                 </Button>
@@ -121,11 +158,11 @@ const ManageJobs = () => {
             <tbody>
               {expiredJobs.map(job => (
                 <tr key={job.id}>
-                  <td>{job.title}</td>
-                  <td>{job.job_position || 'Chưa có vị trí'}</td>
-                  <td>{new Date(job.created_at).toLocaleDateString()}</td>
-                  <td>{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
-                  <td>
+                  <td data-label="Tiêu đề">{job.title}</td>
+                  <td data-label="Vị trí công việc">{job.job_position || 'Chưa có vị trí'}</td>
+                  <td data-label="Ngày đăng">{new Date(job.created_at).toLocaleDateString()}</td>
+                  <td data-label="Ngày hết hạn">{job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</td>
+                  <td data-label="Hành động">
                     <Button variant="info" size="sm" onClick={() => handleViewDetail(job.id)} className="me-2 mb-1">
                       Xem chi tiết
                     </Button>
@@ -137,7 +174,7 @@ const ManageJobs = () => {
                     </Button>
                   </td>
                 </tr>
-                ))}
+              ))}
             </tbody>
           </Table>
         </div>

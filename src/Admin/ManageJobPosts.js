@@ -3,7 +3,7 @@ import axios from 'axios';
 import { TokenContext } from '../App';
 import { Table, Button, Spinner, Alert } from 'react-bootstrap';
 import Select from 'react-select';
-
+import '../componentCss/AdminResponsive.css';
 const provinces = [
   "Hà Nội", "Hồ Chí Minh", "Hải Phòng", "Đà Nẵng", "Cần Thơ", "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
   "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông",
@@ -130,79 +130,84 @@ const ManageJobPosts = () => {
       </div>
 
       <h3>Bài đăng chờ duyệt</h3>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Tiêu đề</th>
-            <th>Danh mục</th>
-            <th>Địa điểm</th>
-            <th>Lương</th>
-            <th>Ngày tạo</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pendingPosts.map((job) => (
-            <tr key={job.id}>
-              <td>{job.title}</td>
-              <td>{job.category}</td>
-              <td>{job.location}</td>
-              <td>{job.salary}</td>
-              <td>{new Date(job.created_at).toLocaleString()}</td>
-              <td>
-                <Button
-                  variant="success"
-                  size="sm"
-                  onClick={() => approvePost(job.id)}
-                >
-                  Duyệt
-                </Button>{' '}
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => rejectPost(job.id)}
-                >
-                  Từ chối
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+<Table striped bordered hover responsive>
+  <thead>
+    <tr>
+      <th>Tiêu đề</th>
+      <th>Danh mục</th>
+      <th>Địa điểm</th>
+      <th>Lương</th>
+      <th>Ngày tạo</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {pendingPosts.map((job) => (
+      <tr key={job.id}>
+        <td data-label="Tiêu đề">{job.title}</td>
+        <td data-label="Danh mục">{job.category}</td>
+        <td data-label="Địa điểm">{job.location}</td>
+        <td data-label="Lương">{job.salary}</td>
+        <td data-label="Ngày tạo">
+          {new Date(job.created_at).toLocaleString()}
+        </td>
+        <td data-label="Hành động">
+          <Button
+            variant="success"
+            size="sm"
+            onClick={() => approvePost(job.id)}
+          >
+            Duyệt
+          </Button>{' '}
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => rejectPost(job.id)}
+          >
+            Từ chối
+          </Button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
 
-      <h3>Bài đăng đã duyệt</h3>
-      <Table striped bordered hover>
-        <thead>
-          <tr>
-            <th>Tiêu đề</th>
-            <th>Danh mục</th>
-            <th>Địa điểm</th>
-            <th>Lương</th>
-            <th>Ngày tạo</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {approvedPosts.map((job) => (
-            <tr key={job.id}>
-              <td>{job.title}</td>
-              <td>{job.category}</td>
-              <td>{job.location}</td>
-              <td>{job.salary}</td>
-              <td>{new Date(job.created_at).toLocaleString()}</td>
-              <td>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => rejectPost(job.id)}
-                >
-                  Xóa
-                </Button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+<h3>Bài đăng đã duyệt</h3>
+<Table striped bordered hover responsive>
+  <thead>
+    <tr>
+      <th>Tiêu đề</th>
+      <th>Danh mục</th>
+      <th>Địa điểm</th>
+      <th>Lương</th>
+      <th>Ngày tạo</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    {approvedPosts.map((job) => (
+      <tr key={job.id}>
+        <td data-label="Tiêu đề">{job.title}</td>
+        <td data-label="Danh mục">{job.category}</td>
+        <td data-label="Địa điểm">{job.location}</td>
+        <td data-label="Lương">{job.salary}</td>
+        <td data-label="Ngày tạo">
+          {new Date(job.created_at).toLocaleString()}
+        </td>
+        <td data-label="Hành động">
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => rejectPost(job.id)}
+          >
+            Xóa
+          </Button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
     </div>
   );
 };

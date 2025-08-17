@@ -1,4 +1,3 @@
-/* src/componentCss/Header.css */
 header {
   background-color: #000000;
   color: #ffffff;
@@ -11,10 +10,10 @@ header {
 
 .header-container {
   display: flex;
-  justify-content: space-between; /* Logo trái - Nav phải */
+  justify-content: space-between;
   align-items: center;
   max-width: 100%;
-  padding: 0 64px; /* Lề trái 64px, lề phải 64px */
+  padding: 0 64px;
 }
 
 .logo-container {
@@ -138,4 +137,49 @@ header {
   justify-content: flex-start;
   gap: 4px;
   margin-top: 4px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  font-size: 28px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .nav-container {
+    display: none;
+    position: absolute; /* tách riêng khỏi header */
+    top: 60px; /* chỉnh bằng chiều cao header */
+    left: 0;
+    width: 100%;
+    background-color: #000;
+    flex-direction: column;
+    padding: 10px 0;
+  }
+
+  .nav-container.active {
+    display: flex;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .nav-link {
+    width: 100%;
+    text-align: left;
+  }
+
+  .dropdown-menu {
+    position: static;
+    width: 100%;
+  }
 }
