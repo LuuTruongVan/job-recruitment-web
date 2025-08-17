@@ -25,7 +25,6 @@ const ProfileModal = ({ show, onHide }) => {
         })
         .then((res) => {
           setProfile(res.data);
-
           if (res.data.role === 'candidate') {
             setFormData({
               full_name: res.data.full_name || '',
@@ -71,7 +70,6 @@ const ProfileModal = ({ show, onHide }) => {
       const res = await axios.post('http://localhost:3001/upload-avatar', formDataUpload, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      
       setFormData((prev) => ({ ...prev, avatar_url: res.data.url }));
       setUploading(false);
     } catch (err) {
@@ -79,22 +77,20 @@ const ProfileModal = ({ show, onHide }) => {
       setUploading(false);
     }
   };
-
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put('http://localhost:3000/users/update-profile', formData, {
+      await axios.put('http://localhost:3001/users/update-profile', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-  
       setMessage('Cập nhật thông tin thành công!');
       setIsEditing(false);
-      window.location.reload();
-      // Lấy lại dữ liệu mới từ server
-      const res = await axios.get('http://localhost:3000/users/get-profile', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setProfile(res.data);
+  
+      // Reload sau 0.5s để hiển thị message trước khi load lại
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+  
     } catch (err) {
       console.error(err);
       setMessage('Lỗi cập nhật thông tin!');
@@ -104,7 +100,7 @@ const ProfileModal = ({ show, onHide }) => {
 
   if (loading) {
     return (
-      <Modal show={show} onHide={onHide} centered>
+      <Modal show={show} onHide={onHide} centered dialogClassName="profile-modal">
         <Modal.Body className="text-center">
           <Spinner animation="border" />
         </Modal.Body>
@@ -115,7 +111,7 @@ const ProfileModal = ({ show, onHide }) => {
   if (!profile) return null;
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
+    <Modal show={show} onHide={onHide} centered dialogClassName="profile-modal">
       <Modal.Header closeButton>
         <Modal.Title>Thông tin hồ sơ</Modal.Title>
       </Modal.Header>
@@ -127,7 +123,7 @@ const ProfileModal = ({ show, onHide }) => {
         )}
 
         <Row>
-          {/* Cột trái: Thông tin */}
+          {/* Cột trái */}
           <Col md={8}>
             {!isEditing ? (
               <>
@@ -136,7 +132,7 @@ const ProfileModal = ({ show, onHide }) => {
                     <p><strong>Họ và tên:</strong> {profile.full_name || 'Chưa có'}</p>
                     <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
                     <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
-                    <p><strong>CV:</strong> {profile.resume ? <a href={profile.resume} target="_blank" rel="noopener noreferrer">Xem CV</a> : 'Chưa có'}</p>
+                   
                     <p><strong>Kỹ năng:</strong> {profile.skills || 'Chưa có'}</p>
                   </>
                 )}
@@ -153,6 +149,7 @@ const ProfileModal = ({ show, onHide }) => {
               </>
             ) : (
               <Form onSubmit={handleUpdate}>
+                {/* Form chỉnh sửa giữ nguyên như cũ */}
                 {profile.role === 'candidate' && (
                   <>
                     <Form.Group className="mb-3">
@@ -167,10 +164,7 @@ const ProfileModal = ({ show, onHide }) => {
                       <Form.Label>Địa chỉ</Form.Label>
                       <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
                     </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Resume (URL)</Form.Label>
-                      <Form.Control type="text" name="resume" value={formData.resume} onChange={handleChange} />
-                    </Form.Group>
+                   
                     <Form.Group className="mb-3">
                       <Form.Label>Kỹ năng</Form.Label>
                       <Form.Control type="text" name="skills" value={formData.skills} onChange={handleChange} />
@@ -215,10 +209,19 @@ const ProfileModal = ({ show, onHide }) => {
             )}
           </Col>
 
-          {/* Cột phải: Avatar */}
+          {/* Cột phải */}
           <Col md={4} className="text-center">
             {formData.avatar_url && (
-              <Image src={formData.avatar_url} roundedCircle width={150} height={150} alt="Avatar" />
+              <Image
+                src={formData.avatar_url}
+                roundedCircle
+                style={{
+                  width: '150px',
+                  height: '150px',
+                  objectFit: 'cover'
+                }}
+                alt="Avatar"
+              />
             )}
           </Col>
         </Row>
@@ -231,6 +234,18 @@ const ProfileModal = ({ show, onHide }) => {
         )}
         <Button variant="secondary" onClick={onHide}>Đóng</Button>
       </Modal.Footer>
+
+      <style>
+        {`
+          .profile-modal .modal-dialog {
+            max-width: 600px;
+          }
+          .profile-modal .modal-content {
+            max-height: 90vh;
+            overflow-y: auto;
+          }
+        `}
+      </style>
     </Modal>
   );
 };

@@ -108,24 +108,24 @@ const JobManagementDetail = () => {
             <p style={{ color: 'red', fontWeight: 'bold' }}>Bài đăng đã hết hạn</p>
           )}
 
-          <p>
+          <div>
             <strong>Thông tin công việc:</strong>
             <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
               {job.job_info || 'Chưa có thông tin'}
             </div>
-          </p>
-          <p>
+          </div>
+          <div>
             <strong>Yêu cầu công việc:</strong>
             <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
               {job.job_requirements || 'Chưa có yêu cầu'}
             </div>
-          </p>
-          <p>
+          </div>
+          <div>
             <strong>Quyền lợi:</strong>
             <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
               {job.benefits || 'Chưa có quyền lợi'}
             </div>
-          </p>
+          </div>
 
           <p><strong>Lương:</strong> {job.salary} VND</p>
           <p><strong>Phân loại:</strong> {job.category}</p>

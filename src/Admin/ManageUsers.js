@@ -7,13 +7,12 @@ const ManageUsers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'candidate' });
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'admin' });
   const [roleFilter, setRoleFilter] = useState('');
   const [searchName, setSearchName] = useState('');
 
   const token = localStorage.getItem('admin_token');
 
-  // ✅ Dùng useMemo để headers không bị tạo mới mỗi render
   const headers = useMemo(() => ({
     Authorization: `Bearer ${token}`
   }), [token]);
@@ -35,9 +34,9 @@ const ManageUsers = () => {
   const handleAddUser = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3001/users/add', newUser, { headers });
+      await axios.post('http://localhost:3001/users/add', { ...newUser, role: 'admin' }, { headers });
       setShowAddModal(false);
-      setNewUser({ name: '', email: '', password: '', role: 'candidate' });
+      setNewUser({ name: '', email: '', password: '', role: 'admin' });
 
       const response = await axios.get('http://localhost:3001/users/get-all', { headers });
       setUsers(response.data);
@@ -91,12 +90,12 @@ const ManageUsers = () => {
       </div>
 
       <Button variant="primary" onClick={() => setShowAddModal(true)} style={{ marginBottom: '20px' }}>
-        Thêm người dùng
+        Thêm người dùng (Admin)
       </Button>
 
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Thêm người dùng mới</Modal.Title>
+          <Modal.Title>Thêm Admin mới</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleAddUser}>
@@ -127,17 +126,10 @@ const ManageUsers = () => {
                 required
               />
             </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Quyền</Form.Label>
-              <Form.Select
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              >
-                <option value="candidate">Candidate</option>
-                <option value="employer">Employer</option>
-                <option value="admin">Admin</option>
-              </Form.Select>
-            </Form.Group>
+
+            {/* Role mặc định admin */}
+            <input type="hidden" name="role" value="admin" />
+
             <Button variant="primary" type="submit">Thêm</Button>
             <Button variant="secondary" onClick={() => setShowAddModal(false)} style={{ marginLeft: '10px' }}>
               Hủy
@@ -164,13 +156,24 @@ const ManageUsers = () => {
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.email}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>{user.role}</td>
               <td style={{ border: '1px solid #ddd', padding: '8px' }}>
-                <button
-                  onClick={() => handleDeleteUser(user.id)}
-                  style={{ padding: '5px 10px', backgroundColor: '#ff4444', color: 'white', border: 'none', cursor: 'pointer' }}
-                >
-                  Xóa
-                </button>
-              </td>
+  {user.role !== 'admin' ? (
+    <button
+      onClick={() => handleDeleteUser(user.id)}
+      style={{
+        padding: '5px 10px',
+        backgroundColor: '#ff4444',
+        color: 'white',
+        border: 'none',
+        cursor: 'pointer'
+      }}
+    >
+      Xóa
+    </button>
+  ) : (
+    <span style={{ color: 'gray', fontStyle: 'italic' }}></span>
+  )}
+</td>
+
             </tr>
           ))}
         </tbody>

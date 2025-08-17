@@ -22,7 +22,6 @@ const JobDetail = () => {
     cv: null
   });
 
-  // State cho modal xem công ty
   const [showCompanyModal, setShowCompanyModal] = useState(false);
   const [companyInfo, setCompanyInfo] = useState(null);
 
@@ -44,14 +43,19 @@ const JobDetail = () => {
   useEffect(() => {
     const fetchJob = async () => {
       try {
-        const jobResponse = await axios.get(`/jobposts/${id}`);
+        const jobResponse = await axios.get(`/jobposts/${id}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {}
+        });
         const jobData = jobResponse.data;
+        console.log('Job data:', jobData);
+
         jobData.favorite_count = await fetchFavoriteCount();
 
         if (jobData.job_position_id) {
           try {
             const positionResponse = await axios.get(
-              `/jobposts/job-positions/${jobData.job_position_id}`
+              `/jobposts/job-positions/${jobData.job_position_id}`,
+              { headers: token ? { Authorization: `Bearer ${token}` } : {} }
             );
             jobData.job_position = positionResponse.data.name || 'Chưa có vị trí';
           } catch {
@@ -60,8 +64,10 @@ const JobDetail = () => {
         } else {
           jobData.job_position = 'Chưa có vị trí';
         }
+
         setJob(jobData);
       } catch (err) {
+        console.error('Error fetching job detail:', err);
         setError('Không thể tải thông tin công việc. Vui lòng thử lại.');
       }
     };
@@ -158,7 +164,6 @@ const JobDetail = () => {
     }
   };
 
-  // Hàm gọi API lấy thông tin công ty (public)
   const fetchCompanyInfo = async () => {
     try {
       const res = await axios.get(`/employers/public/${job.employer_id}`);
@@ -204,7 +209,7 @@ const JobDetail = () => {
         </div>
       </div>
 
-      <div className="job-description">
+      <div className="">
         <h5>Thông tin công việc</h5>
         <p style={{ whiteSpace: 'pre-line' }}>{job.job_info || 'Chưa có thông tin'}</p>
 
@@ -313,27 +318,26 @@ const JobDetail = () => {
           <Modal.Title>Thông tin công ty</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-  {companyInfo ? (
-    <>
-      {companyInfo.avatar_url && (
-        <img
-          src={companyInfo.avatar_url}
-          alt="Avatar"
-          style={{ width: '120px', height: '120px', borderRadius: '50%', marginBottom: '15px' }}
-        />
-      )}
-      <p><strong>Tên công ty:</strong> {companyInfo.name}</p>
-      <p><strong>Địa chỉ:</strong> {companyInfo.address}</p>
-      <p><strong>Số điện thoại:</strong> {companyInfo.phone || 'Chưa có'}</p>
-      <p><strong>Email:</strong> {companyInfo.email}</p>
-      <p><strong>Website:</strong> <a href={companyInfo.website} target="_blank" rel="noopener noreferrer">{companyInfo.website}</a></p>
-      <p><strong>Giới thiệu:</strong> {companyInfo.company_intro}</p>
-    </>
-  ) : (
-    <p>Đang tải...</p>
-  )}
-</Modal.Body>
-
+          {companyInfo ? (
+            <>
+              {companyInfo.avatar_url && (
+                <img
+                  src={companyInfo.avatar_url}
+                  alt="Avatar"
+                  style={{ width: '120px', height: '120px', borderRadius: '50%', marginBottom: '15px' }}
+                />
+              )}
+              <p><strong>Tên công ty:</strong> {companyInfo.name}</p>
+              <p><strong>Địa chỉ:</strong> {companyInfo.address}</p>
+              <p><strong>Số điện thoại:</strong> {companyInfo.phone || 'Chưa có'}</p>
+              <p><strong>Email:</strong> {companyInfo.email}</p>
+              <p><strong>Website:</strong> <a href={companyInfo.website} target="_blank" rel="noopener noreferrer">{companyInfo.website}</a></p>
+              <p><strong>Giới thiệu:</strong> {companyInfo.company_intro}</p>
+            </>
+          ) : (
+            <p>Đang tải...</p>
+          )}
+        </Modal.Body>
       </Modal>
     </div>
   );

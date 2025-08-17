@@ -20,7 +20,7 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
         <div className="logo-container">
           <img
             className="logo"
-            src="/assets/img/logo.jpg"
+            src="/assets/img/logo.png"
             alt="Logo"
             style={{ width: '100px' }}
           />
