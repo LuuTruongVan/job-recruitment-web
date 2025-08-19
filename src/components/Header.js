@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProfileModal from './ProfileModal';
 import LoginModal from './Login';
 import RegisterModal from './Register';
@@ -10,6 +10,8 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleLogoutClick = () => {
     handleLogout();
@@ -48,6 +50,22 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
                 <Link className="nav-link" to="/favorites" onClick={() => setMenuOpen(false)}>
                   Yêu thích
                 </Link>
+
+                {/* Nút chat */}
+            {/* Nút chat */}
+<button
+  className="nav-link btn btn-link"
+  onClick={()=>{
+    if(user) navigate("/chat");  // đổi từ currentUser → user
+    else alert("Bạn cần đăng nhập để chat!");
+  }}
+>
+  <i className="bi bi-chat-dots"></i>
+  Chat
+</button>
+
+
+
               </>
             )}
             {user && user.role === 'employer' && (

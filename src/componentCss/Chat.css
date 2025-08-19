@@ -1,0 +1,31 @@
+/* ChatList.css */
+.chat-list {
+    width: 250px; /* hoặc tùy ý */
+    border-right: 1px solid #ddd;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* khoảng cách giữa các conversation */
+    overflow-y: auto;
+    max-height: 80vh; /* tuỳ chỉnh chiều cao */
+  }
+  
+  .chat-list-item {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  
+  .chat-list-item:hover {
+    background-color: #f0f0f0;
+    border-color: #888;
+  }
+  
+  .chat-list-item.active {
+    background-color: #007bff; /* màu active */
+    color: white;
+    border-color: #0056b3;
+  }
+  

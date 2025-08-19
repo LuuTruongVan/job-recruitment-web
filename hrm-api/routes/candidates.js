@@ -125,4 +125,25 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
+
+
+
+// candidates.js
+router.get('/by-user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const [rows] = await pool.query('SELECT * FROM candidates WHERE user_id = ?', [userId]);
+    if (rows.length === 0) return res.status(404).json({ message: 'Candidate not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Lỗi server' });
+  }
+});
+
 module.exports = router;
+
+
+
+
+

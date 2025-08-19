@@ -20,6 +20,7 @@ import Favorites from './components/Favorites';
 import JobManagementDetail from './components/JobManagementDetail';
 import AdminDashboard from './Admin/AdminDashboard';
 import Footer from './components/Footer';
+import ChatPage from "./components/ChatPage";
 
 // Tạo context để truyền token
 export const TokenContext = createContext();
@@ -37,7 +38,6 @@ function App() {
       const candidateToken = localStorage.getItem('candidate_token');
       let currentToken = null;
 
-      // Ưu tiên token cuối cùng (có thể cải thiện bằng cách theo dõi role đăng nhập)
       if (candidateToken) currentToken = candidateToken;
       else if (employerToken) currentToken = employerToken;
       else if (adminToken) currentToken = adminToken;
@@ -50,7 +50,7 @@ function App() {
             headers: { Authorization: `Bearer ${currentToken}` }
           });
           const userData = response.data;
-          console.log('User data from API:', userData); // Debug chi tiết
+          console.log('User data from API:', userData);
           setUser(userData);
           if (userData.role === 'admin' && window.location.pathname !== '/admin') {
             window.location.href = '/admin';
@@ -117,16 +117,20 @@ function App() {
             <Route path="/job-management-detail/:id" element={user?.role === 'employer' ? <JobManagementDetail /> : <Home />} />
             <Route path="/candidate-dashboard" element={user ? <Home /> : <Home />} />
             <Route path="/admin/*" element={user?.role === 'admin' ? <AdminDashboard /> : <Home />} />
-          </Routes>
+
+            <Route path="/chat" element={user ? <ChatPage user={user} /> : <Login />} />
+            <Route path="/chat/:conversationId" element={user ? <ChatPage user={user} /> : <Login />} />
+
+
+
+</Routes>
         </div>
         <ChangePassword show={showChangePassword} onHide={() => setShowChangePassword(false)} />
       </div>
       <Footer />
     </TokenContext.Provider>
-    
   );
 }
-
 
 export default function WrappedApp() {
   return (
