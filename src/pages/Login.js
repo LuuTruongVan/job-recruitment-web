@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import logo from "../assets/img/logo.png";
 
 const LoginModal = ({ show, onHide, onSwitch }) => {
   const [mode, setMode] = useState('login'); // login | forgot | verifyOtp | resetPassword
@@ -94,7 +95,7 @@ const LoginModal = ({ show, onHide, onSwitch }) => {
   return (
     <Modal show={show} onHide={onHide} centered dialogClassName="small-login-modal">
       <div style={{ textAlign: 'center', paddingTop: '15px' }}>
-        <img src="/assets/img/logo.png" alt="Logo" style={{ maxHeight: '60px', marginBottom: '10px' }} />
+        <img src={logo} alt="Logo" style={{ maxHeight: '60px', marginBottom: '10px' }} />
         <h5 style={{ fontWeight: 'bold', marginBottom: '10px' }}>
           {mode === 'login'
             ? 'Đăng Nhập'

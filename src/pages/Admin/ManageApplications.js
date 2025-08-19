@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
-import '../componentCss/AdminResponsive.css';
+import '../../assets/css/AdminResponsive.css';
 const ManageApplications = () => {
   const [applications, setApplications] = useState([]);
   const [searchName, setSearchName] = useState('');

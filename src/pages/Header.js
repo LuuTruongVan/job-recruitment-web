@@ -3,7 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import ProfileModal from './ProfileModal';
 import LoginModal from './Login';
 import RegisterModal from './Register';
-import '../componentCss/Header.css';
+import '../assets/css/Header.css';
+import logo from "../assets/img/logo.png";
 
 const Header = ({ user, handleLogout, setShowChangePassword }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -22,12 +23,12 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
     <header className="header">
       <div className="header-container">
         <div className="logo-container">
-          <img
-            className="logo"
-            src="/assets/img/logo.png"
-            alt="Logo"
-            style={{ width: '100px' }}
-          />
+        <img
+        className="logo"
+        src={logo} 
+        alt="Logo"
+        style={{ width: '100px' }}
+      />
         </div>
 
         {/* Hamburger button */}

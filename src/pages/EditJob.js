@@ -3,7 +3,7 @@ import { Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 import Select from 'react-select';
 import { useParams, useNavigate } from 'react-router-dom';
-import '../componentCss/PostJob.css';
+import '../assets/css/PostJob.css';
 
 const EditJob = () => {
   const { id } = useParams();

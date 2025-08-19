@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
-import { TokenContext } from '../App';
+import { TokenContext } from '../../App';
 
 const ManageCandidates = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');

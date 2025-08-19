@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Modal, Form, Alert } from 'react-bootstrap';
-import '../componentCss/JobDetail.css';
+import '../assets/css/JobDetail.css';
 
 const JobDetail = () => {
   const { id } = useParams();

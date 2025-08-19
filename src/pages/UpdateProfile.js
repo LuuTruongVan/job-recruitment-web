@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import '../componentCss/UpdateProfile.css';
+import '../assets/css/UpdateProfile.css';
 
 const UpdateProfile = () => {
   const [profile, setProfile] = useState(null);

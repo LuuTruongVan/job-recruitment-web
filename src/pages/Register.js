@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
-
+import logo from "../assets/img/logo.png";
 const RegisterModal = ({ show, onHide, onSwitch }) => {
   const [userData, setUserData] = useState({ name: '', email: '', password: '', role: 'candidate' });
   const [message, setMessage] = useState('');
@@ -47,7 +47,7 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
   return (
     <Modal show={show} onHide={onHide} centered dialogClassName="small-register-modal">
       <div style={{ textAlign: 'center', paddingTop: '15px' }}>
-        <img src="/assets/img/logo.png" alt="Logo" style={{ maxHeight: '60px', marginBottom: '10px' }} />
+        <img src={logo} alt="Logo" style={{ maxHeight: '60px', marginBottom: '10px' }} />
         <h5 style={{ fontWeight: 'bold', marginBottom: '10px' }}>Đăng Ký</h5>
       </div>
 

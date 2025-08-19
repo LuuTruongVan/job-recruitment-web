@@ -1,5 +1,5 @@
 import React from 'react';
-import '../componentCss/Navbar.css';
+import '../assets/css/Navbar.css';
 import Breadcrumb from './Breadcrumb';
 
 const Navbar = ({ user }) => {

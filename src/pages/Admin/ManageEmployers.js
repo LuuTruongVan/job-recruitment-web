@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
-import { TokenContext } from '../App';
-import '../componentCss/AdminResponsive.css';
+import { TokenContext } from '../../App';
+import '../../assets/css/AdminResponsive.css';
 const ManageEmployers = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');
   const [employers, setEmployers] = useState([]);

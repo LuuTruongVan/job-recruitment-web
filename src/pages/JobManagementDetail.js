@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Table } from 'react-bootstrap';
-import '../componentCss/JobDetail.css';
-import '../componentCss/JobManagementDetail.css';
+import '../assets/css/JobDetail.css';
+import '../assets/css/JobManagementDetail.css';
 const JobManagementDetail = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);

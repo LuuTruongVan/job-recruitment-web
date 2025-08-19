@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Table, Button } from 'react-bootstrap';
-import '../componentCss/ManageApplications.css';
-import '../componentCss/JobDetail.css';
+import '../assets/css/ManageApplications.css';
+import '../assets/css/JobDetail.css';
 
 
 const ManageApplications = () => {

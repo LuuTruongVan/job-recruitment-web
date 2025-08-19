@@ -3,8 +3,10 @@ import { Carousel, Button, Card, Form, Modal, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
-import '../componentCss/Home.css';
-
+import '../assets/css/Home.css';
+import slide1 from "../assets/img/slide1.jpg";
+import slide2 from "../assets/img/slide2.jpg";
+import slide3 from "../assets/img/slide3.jpg";
 const provinces = [
   "Hà Nội","Hồ Chí Minh","Hải Phòng","Đà Nẵng","Cần Thơ","An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu",
   "Bắc Ninh","Bến Tre","Bình Định","Bình Dương","Bình Phước","Bình Thuận","Cà Mau","Cao Bằng","Đắk Lắk","Đắk Nông",
@@ -209,21 +211,33 @@ const Home = () => {
       {/* Slide Banner */}
       <Carousel className="home-carousel mb-4">
         <Carousel.Item>
-          <img className="d-block w-100" src="/assets/img/slide1.jpg" alt="Slide 1" />
+        <img 
+      className="d-block w-100" 
+      src={slide1} 
+      alt="Slide 1" 
+    />
           <Carousel.Caption>
             <h3>Tin tức tuyển dụng nổi bật</h3>
             <p>Khám phá cơ hội mới ngay hôm nay!</p>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-          <img className="d-block w-100" src="/assets/img/slide2.jpg" alt="Slide 2" />
+        <img 
+      className="d-block w-100" 
+      src={slide2} 
+      alt="Slide 2" 
+    />
           <Carousel.Caption>
             <h3>Cơ hội việc làm hấp dẫn</h3>
             <p>Ứng tuyển ngay để không bỏ lỡ!</p>
           </Carousel.Caption>
         </Carousel.Item>
         <Carousel.Item>
-          <img className="d-block w-100" src="/assets/img/slide3.jpg" alt="Slide 3" />
+        <img 
+      className="d-block w-100" 
+      src={slide3} 
+      alt="Slide 3" 
+    />
           <Carousel.Caption>
             <h3>Khám phá sự nghiệp mới</h3>
             <p>Bắt đầu hành trình của bạn ngay bây giờ!</p>

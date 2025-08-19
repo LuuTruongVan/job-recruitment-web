@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Button, Card, Modal, Form, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../componentCss/Favorites.css';
+import '../assets/css/Favorites.css';
 
 const Favorites = () => {
   const [jobs, setJobs] = useState([]);

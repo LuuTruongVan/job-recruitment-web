@@ -8,7 +8,8 @@ import ManageJobCategories from './ManageJobCategories';
 import ManageApplications from './ManageApplications';
 import ViewQualities from './ViewQualities';
 import ManageUsers from './ManageUsers';
-import '../componentCss/Admin.css';
+import '../../assets/css/Admin.css';
+
 
 const AdminDashboard = () => {
   const [expanded, setExpanded] = useState(false);
