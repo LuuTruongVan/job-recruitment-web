@@ -36,8 +36,8 @@ router.post('/add', async (req, res) => {
 
       if (role === 'candidate') {
         await connection.execute(
-          'INSERT INTO candidates (user_id, full_name, phone, address, resume, skills) VALUES (?, ?, ?, ?, ?, ?)',
-          [userId, name, '', '', '', '']
+          'INSERT INTO candidates (user_id, full_name, phone, address, skills) VALUES (?, ?, ?, ?, ?)',
+          [userId, name, '',  '', '']
         );
       } else if (role === 'employer') {
         await connection.execute(

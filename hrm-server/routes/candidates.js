@@ -49,8 +49,8 @@ router.post('/add', async (req, res) => {
     if (existing.length > 0) return res.status(400).json({ message: 'Profile already exists' });
 
     await pool.query(
-      'INSERT INTO candidates (user_id, full_name, phone, address, resume, skills, avatar_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [decoded.id, full_name, phone, address, resume, skills, avatar_url]
+      'INSERT INTO candidates (user_id, full_name, phone, address, skills, avatar_url) VALUES (?, ?, ?, ?, ?, ?)',
+      [decoded.id, full_name, phone, address, skills, avatar_url]
     );
     res.status(201).json({ message: 'Candidate profile added successfully' });
   } catch (error) {
