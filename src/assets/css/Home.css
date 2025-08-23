@@ -9,7 +9,7 @@
   margin-left: calc(-50vw + 50%);
   height: 500px;
   overflow: hidden;
-  margin-top: 70px; /* Chỉ cần bằng chiều cao header fixed */
+  margin-top: 50px; /* Chỉ cần bằng chiều cao header fixed */
 }
 
 .home-carousel .carousel-item {

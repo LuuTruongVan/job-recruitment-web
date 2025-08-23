@@ -1,6 +1,6 @@
 import React from 'react';
 import '../assets/css/Navbar.css';
-import Breadcrumb from './Breadcrumb';
+import Breadcrumb from '../component/Breadcrumb';
 
 const Navbar = ({ user }) => {
   // Nếu là admin thì không hiển thị Navbar

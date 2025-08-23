@@ -4,3 +4,56 @@
 .me-auto{
     background-color: rgb(51, 50, 50);
 }
+.admin-dashboard {
+    margin-top: 70px;
+}
+
+/* Thanh navbar */
+.navbar {
+    background-color: rgb(51, 50, 50) !important;
+    padding: 15px 20px; /* tăng chiều cao */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Container của nav link */
+.me-auto {
+    display: flex;
+    flex-wrap: wrap; /* Nếu quá dài thì tự xuống dòng */
+    gap: 0;
+}
+
+/* Style cho từng mục menu */
+.me-auto .nav-link {
+    color: white !important;
+    font-weight: 500;
+    font-size: 16px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    margin: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Khi hover */
+.me-auto .nav-link:hover {
+    background-color: #007bff;
+    color: #fff !important;
+    transform: scale(1.05);
+}
+
+/* Khi mục được chọn */
+.me-auto .nav-link.active {
+    background-color: #007bff;
+    color: #fff !important;
+    font-weight: bold;
+    border-color: #007bff;
+}
+
+/* Nội dung bên trong */
+.content {
+    padding: 20px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 120px);
+    border-radius: 8px;
+    margin-top: 20px;
+}

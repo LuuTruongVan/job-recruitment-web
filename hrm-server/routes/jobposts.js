@@ -70,14 +70,34 @@ router.post('/', async (req, res) => {
 // Thêm route PUT /:id để cập nhật công việc
 router.put('/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
-  console.log('Received token for update:', token);
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
   const { id } = req.params;
-  const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name, employmentType } = req.body;
-  console.log('Received update data:', req.body);
+  const {
+    title,
+    jobInfo,
+    jobPositionId,
+    jobRequirements,
+    benefits,
+    salary,
+    category,
+    location,
+    emailContact,
+    expiry_date,
+    company_name,
+    employmentType
+  } = req.body;
 
-  if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
+  if (
+    !title ||
+    !jobInfo ||
+    !jobRequirements ||
+    !benefits ||
+    !salary ||
+    !category ||
+    !location ||
+    !emailContact
+  ) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -95,12 +115,31 @@ router.put('/:id', async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
+    // ✅ Luôn reset status về pending khi employer sửa bài
     await pool.query(
-      'UPDATE jobposts SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, company_name = ?, employment_type = ? WHERE id = ?',
-      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', expiry_date || null, company_name || '', employmentType || '', id]
+      `UPDATE jobposts 
+       SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, 
+           salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, 
+           company_name = ?, employment_type = ?, status = 'pending'
+       WHERE id = ?`,
+      [
+        title || '',
+        jobInfo || '',
+        jobPositionId || null,
+        jobRequirements || '',
+        benefits || '',
+        salary || 0,
+        category || '',
+        location || '',
+        emailContact || '',
+        expiry_date || null,
+        company_name || '',
+        employmentType || '',
+        id,
+      ]
     );
 
-    res.json({ message: 'Job updated successfully' });
+    res.json({ message: 'Job updated successfully and status set to pending' });
   } catch (error) {
     console.error('Error updating job:', error);
     if (error.name === 'JsonWebTokenError') {
@@ -109,6 +148,7 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: 'Error updating job' });
   }
 });
+
 
 // Các route khác giữ nguyên
 router.get('/job-positions', async (req, res) => {

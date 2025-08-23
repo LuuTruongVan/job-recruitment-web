@@ -229,47 +229,48 @@ const JobDetail = () => {
       <div className="d-flex gap-2 mt-3">
   <Button variant="success" onClick={handleApplyClick}>Ứng tuyển</Button>
   <Button variant="secondary" onClick={() => navigate('/home')}>Quay lại</Button>
-  <Button
-  variant="primary"
-  onClick={async () => {
-    if (!user) return alert("Bạn cần đăng nhập!");
 
-    try {
-      // lấy candidateId từ backend
-      const res = await fetch(`http://localhost:3000/candidates/by-user/${user.id}`);
-      if (!res.ok) {
-        alert("Không tìm thấy thông tin candidate!");
-        return;
-      }
-      const candData = await res.json();
-      const candidate_id = candData.id;
+  {/* Chỉ hiển thị nút chat nếu là ứng viên */}
+  {user?.role === "candidate" && (
+    <Button
+      variant="primary"
+      onClick={async () => {
+        if (!user) return alert("Bạn cần đăng nhập!");
 
-      // tạo hoặc lấy conversation
-      const convRes = await fetch("http://localhost:3000/conversations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ candidate_id, employer_id: job.employer_id })
-      });
+        try {
+          const res = await fetch(`http://localhost:3000/candidates/by-user/${user.id}`);
+          if (!res.ok) {
+            alert("Không tìm thấy thông tin candidate!");
+            return;
+          }
+          const candData = await res.json();
+          const candidate_id = candData.id;
 
-      if (!convRes.ok) {
-        alert("Lỗi khi tạo cuộc trò chuyện!");
-        return;
-      }
+          const convRes = await fetch("http://localhost:3000/conversations", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ candidate_id, employer_id: job.employer_id })
+          });
 
-      const conv = await convRes.json();
-      navigate(`/chat/${conv.id}`, { replace: false });
+          if (!convRes.ok) {
+            alert("Lỗi khi tạo cuộc trò chuyện!");
+            return;
+          }
 
-    } catch (err) {
-      console.error(err);
-      alert("Có lỗi xảy ra. Vui lòng thử lại.");
-    }
-  }}
->
-  Chat với nhà tuyển dụng
-</Button>
-
-
+          const conv = await convRes.json();
+          navigate(`/chat/${conv.id}`, { replace: false });
+        } catch (err) {
+          console.error(err);
+          alert("Có lỗi xảy ra. Vui lòng thử lại.");
+        }
+      }}
+    >
+      Chat với nhà tuyển dụng
+    </Button>
+  )}
 </div>
+
+
 
 
       {/* Modal Ứng tuyển */}

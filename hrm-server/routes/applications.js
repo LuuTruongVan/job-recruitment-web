@@ -124,30 +124,69 @@ router.get('/get-all', async (req, res) => {
   }
 });
 
-router.delete('/delete/:id', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
+router.delete("/delete/:id", async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token provided" });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token in /delete:', decoded);
-    if (decoded.role !== 'employer' && decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
+    console.log("Decoded token in /delete:", decoded);
 
     const { id } = req.params;
-    const [application] = await pool.query(
-      'SELECT j.employer_id FROM applications a JOIN jobposts j ON a.jobpost_id = j.id WHERE a.id = ?',
-      [id]
-    );
-    if (application.length === 0) return res.status(404).json({ message: 'Application not found' });
 
-    if (decoded.role === 'employer' && application[0].employer_id !== decoded.id) {
-      return res.status(403).json({ message: 'Unauthorized' });
+    // Nếu là candidate → chỉ được hủy đơn ứng tuyển của chính mình
+    if (decoded.role === "candidate") {
+      const [application] = await pool.query(
+        "SELECT * FROM applications WHERE id = ? AND user_id = ?",
+        [id, decoded.id]
+      );
+
+      if (application.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "Application not found or unauthorized" });
+      }
+
+      await pool.query("DELETE FROM applications WHERE id = ?", [id]);
+      return res.json({ message: "Application deleted successfully" });
     }
 
-    await pool.query('DELETE FROM applications WHERE id = ?', [id]);
-    res.json({ message: 'Application deleted successfully' });
+    // Nếu là employer → chỉ được xóa đơn ứng tuyển của jobpost do mình đăng
+    if (decoded.role === "employer") {
+      const [application] = await pool.query(
+        "SELECT j.employer_id FROM applications a JOIN jobposts j ON a.jobpost_id = j.id WHERE a.id = ?",
+        [id]
+      );
+
+      if (application.length === 0)
+        return res.status(404).json({ message: "Application not found" });
+
+      if (application[0].employer_id !== decoded.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      await pool.query("DELETE FROM applications WHERE id = ?", [id]);
+      return res.json({ message: "Application deleted successfully" });
+    }
+
+    // Nếu là admin → xóa được mọi đơn ứng tuyển
+    if (decoded.role === "admin") {
+      const [application] = await pool.query(
+        "SELECT * FROM applications WHERE id = ?",
+        [id]
+      );
+
+      if (application.length === 0)
+        return res.status(404).json({ message: "Application not found" });
+
+      await pool.query("DELETE FROM applications WHERE id = ?", [id]);
+      return res.json({ message: "Application deleted successfully" });
+    }
+
+    return res.status(403).json({ message: "Access denied" });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting application' });
+    console.error("Error deleting application:", error);
+    res.status(500).json({ message: "Error deleting application" });
   }
 });
 

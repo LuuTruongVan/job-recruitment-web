@@ -1,5 +1,6 @@
 import React from "react";
-import '../assets/css/Chat.css';
+import "../../assets/css/Chat.css";
+
 const ChatList = ({ conversations, onSelect, activeId }) => {
   return (
     <div className="chat-list">

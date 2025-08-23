@@ -1,19 +1,19 @@
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import React, { useState, useEffect, createContext } from 'react';
 import './App.css';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import Login from './component/auth/LoginModal';
+import Register from './component/auth/RegisterModal';
 import PostJob from './pages/PostJob';
 import ManageApplications from './pages/ManageApplications';
 import Home from './pages/Home';
 import axios from 'axios';
-import UpdateProfile from './pages/UpdateProfile';
+import UpdateProfile from './component/UpdateProfile';
 import JobDetail from './pages/JobDetail';
-import ApplyJob from './pages/ApplyJob';
+import ApplyJob from './component/ApplyModal';
 import ManageJobs from './pages/ManageJobs';
 import EditJob from './pages/EditJob';
-import Profile from './pages/Profile';
-import ChangePassword from './pages/ChangePassword';
+import Profile from './component/Profile';
+import ChangePassword from './component/ChangePassword';
 import Header from './pages/Header';
 import Navbar from './pages/Navbar';
 import Favorites from './pages/Favorites';
@@ -30,6 +30,7 @@ function App() {
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation(); // ⬅️ Thêm dòng này để lấy URL hiện tại
 
   useEffect(() => {
     const updateUser = async () => {
@@ -117,17 +118,15 @@ function App() {
             <Route path="/job-management-detail/:id" element={user?.role === 'employer' ? <JobManagementDetail /> : <Home />} />
             <Route path="/candidate-dashboard" element={user ? <Home /> : <Home />} />
             <Route path="/admin/*" element={user?.role === 'admin' ? <AdminDashboard /> : <Home />} />
-
             <Route path="/chat" element={user ? <ChatPage user={user} /> : <Login />} />
             <Route path="/chat/:conversationId" element={user ? <ChatPage user={user} /> : <Login />} />
-
-
-
-</Routes>
+          </Routes>
         </div>
         <ChangePassword show={showChangePassword} onHide={() => setShowChangePassword(false)} />
       </div>
-      <Footer />
+
+      {/* Ẩn Footer nếu đang ở trang Chat */}
+      {!location.pathname.startsWith("/chat") && <Footer />}
     </TokenContext.Provider>
   );
 }

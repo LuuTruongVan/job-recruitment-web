@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import ProfileModal from './ProfileModal';
-import LoginModal from './Login';
-import RegisterModal from './Register';
+import ProfileModal from '../component/ProfileModal';
+import LoginModal from '../component/auth/LoginModal';
+import RegisterModal from '../component/auth/RegisterModal';
 import '../assets/css/Header.css';
 import logo from "../assets/img/logo.png";
 
@@ -22,14 +22,15 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
   return (
     <header className="header">
       <div className="header-container">
-        <div className="logo-container">
-        <img
-        className="logo"
-        src={logo} 
-        alt="Logo"
-        style={{ width: '100px' }}
-      />
-        </div>
+      <div className="logo-container" style={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+  <img
+    className="logo"
+    src={logo} 
+    alt="Logo"
+    style={{ width: '100px' }}
+  />
+</div>
+
 
         {/* Hamburger button */}
         <button

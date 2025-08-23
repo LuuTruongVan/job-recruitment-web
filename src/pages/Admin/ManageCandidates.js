@@ -12,12 +12,13 @@ const ManageCandidates = () => {
   const [searchName, setSearchName] = useState('');
   const [searchPhone, setSearchPhone] = useState('');
 
+  // ✅ Fetch danh sách ứng viên
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
         const res = await axios.get('http://localhost:3001/candidates/get-all', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setCandidates(res.data);
       } catch (err) {
@@ -29,25 +30,27 @@ const ManageCandidates = () => {
     fetchCandidates();
   }, [token]);
 
+  // ✅ Xóa ứng viên
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa ứng viên này?')) return;
     try {
       await axios.delete(`http://localhost:3001/candidates/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setCandidates(prev => prev.filter(c => c.id !== id));
+      setCandidates((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
       alert(err.response?.data?.message || 'Lỗi khi xóa ứng viên');
     }
   };
 
-  // Lọc danh sách
-  const filteredCandidates = candidates.filter(c => {
+  // ✅ Lọc danh sách ứng viên
+  const filteredCandidates = candidates.filter((c) => {
     const matchName = c.full_name?.toLowerCase().includes(searchName.toLowerCase());
     const matchPhone = c.phone?.toLowerCase().includes(searchPhone.toLowerCase());
     return matchName && matchPhone;
   });
 
+  // ✅ Loading & Error
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
@@ -71,37 +74,38 @@ const ManageCandidates = () => {
         />
       </div>
 
+      {/* Bảng danh sách */}
       <Table striped bordered hover>
         <thead>
           <tr>
             <th>ID</th>
             <th>Tên</th>
             <th>Phone</th>
-            <th>Địa chỉ</th>
+            <th>Email</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
-  {filteredCandidates.map(candidate => (
-    <tr key={candidate.id}>
-      <td data-label="ID">{candidate.id}</td>
-      <td data-label="Tên">{candidate.full_name}</td>
-      <td data-label="Phone">{candidate.phone || 'Chưa có'}</td>
-      <td data-label="Địa chỉ">{candidate.address || 'Chưa có'}</td>
-      <td data-label="Hành động">
-        <Button
-          variant="danger"
-          size="sm"
-          onClick={() => handleDelete(candidate.id)}
-        >
-          Xóa
-        </Button>
-      </td>
-    </tr>
-  ))}
-</tbody>
-
+          {filteredCandidates.map((candidate) => (
+            <tr key={candidate.id}>
+              <td>{candidate.id}</td>
+              <td>{candidate.full_name}</td>
+              <td>{candidate.phone || 'Chưa có'}</td>
+              <td>{candidate.email || 'Chưa có'}</td>
+              <td>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => handleDelete(candidate.id)}
+                >
+                  Xóa
+                </Button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
       </Table>
+
       {filteredCandidates.length === 0 && <p>Không tìm thấy ứng viên.</p>}
     </div>
   );
