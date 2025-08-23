@@ -1,7 +1,8 @@
 import React from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import '../assets/css/Footer.css';
-
+import appstore from "../assets/img/qr-appstore.jpg";
+import ggplay from "../assets/img/qr-ggplay.jpg";
 const Footer = () => {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -44,8 +45,8 @@ const Footer = () => {
             </div>
             <p className="fw-bold">Tải ứng dụng tại đây</p>
             <div className="d-flex gap-2">
-              <img src="/assets/img/qr-appstore.jpg" alt="App Store" height="65" width="65" />
-              <img src="/assets/img/qr-ggplay.jpg" alt="Google Play" height="65" width="65" />
+              <img src={appstore} alt="App Store" height="65" width="65" />
+              <img src={ggplay} alt="Google Play" height="65" width="65" />
             </div>
           </Col>
         </Row>
