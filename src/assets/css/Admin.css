@@ -1,59 +1,170 @@
-.admin-dashboard{
-    margin-top:70px;
+/* Navbar admin */
+.admin-navbar {
+  background-color: rgb(51, 50, 50) !important;
+  padding: 34px 90px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  transition: background-color 0.3s ease;
+  position: sticky; /* Giữ navbar cố định */
+  top: 74px; /* Cố định ở 74px từ đầu trang */
+  margin-top: 0; /* Loại bỏ margin-top vì đã dùng top */
 }
-.me-auto{
-    background-color: rgb(51, 50, 50);
+
+/* Nội dung trong navbar */
+.admin-navbar .navbar-collapse {
+  justify-content: center;
 }
+
+/* Nav link */
+.admin-navbar .me-auto {
+  display: flex;
+  justify-content: center;
+  flex-wrap: nowrap; /* Ngăn nhảy xuống hàng */
+  gap: 8px;
+  background-color: transparent !important;
+  max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+  width: 100%;
+}
+
+.admin-navbar .nav-link {
+  color: white !important;
+  font-weight: 500;
+  font-size: 16px;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.admin-navbar .nav-link:hover {
+  background-color: #007bff;
+  color: #fff !important;
+  transform: scale(1.05);
+}
+
+.admin-navbar .nav-link.active {
+  background-color: #007bff;
+  color: #fff !important;
+  font-weight: bold;
+  border-color: #007bff;
+}
+
+/* Container chính */
 .admin-dashboard {
-    margin-top: 70px;
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng viewport */
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Đảm bảo context cho các phần tử con */
 }
 
-/* Thanh navbar */
-.navbar {
-    background-color: rgb(51, 50, 50) !important;
-    padding: 15px 20px; /* tăng chiều cao */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Container của nav link */
-.me-auto {
-    display: flex;
-    flex-wrap: wrap; /* Nếu quá dài thì tự xuống dòng */
-    gap: 0;
-}
-
-/* Style cho từng mục menu */
-.me-auto .nav-link {
-    color: white !important;
-    font-weight: 500;
-    font-size: 16px;
-    padding: 12px 18px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
-    margin: 4px;
-    transition: all 0.3s ease;
-}
-
-/* Khi hover */
-.me-auto .nav-link:hover {
-    background-color: #007bff;
-    color: #fff !important;
-    transform: scale(1.05);
-}
-
-/* Khi mục được chọn */
-.me-auto .nav-link.active {
-    background-color: #007bff;
-    color: #fff !important;
-    font-weight: bold;
-    border-color: #007bff;
-}
-
-/* Nội dung bên trong */
+/* Nội dung */
 .content {
-    padding: 20px;
-    background-color: #f8f9fa;
-    min-height: calc(100vh - 120px);
+  flex: 1; /* Chiếm toàn bộ không gian còn lại */
+  padding: 20px;
+  overflow-y: auto; /* Cho phép scroll trong content */
+  margin-top: 0; /* Đảm bảo không chồng lên header */
+  padding-top: 74px; /* Tạo khoảng cách từ header */
+}
+
+/* ===================== */
+/* Tablet Responsive */
+/* ===================== */
+@media (max-width: 1024px) and (min-width: 768px) {
+  /* Ẩn background navbar trên tablet */
+  .admin-navbar {
+    background-color: transparent !important;
+    box-shadow: none;
+    padding: 15px 20px;
+    top: 74px; /* Giữ cố định ở 74px */
+  }
+
+  /* Khi menu mở, background của menu riêng biệt */
+  .admin-navbar .navbar-collapse.show {
+    display: block !important;
+    background-color: rgb(51, 50, 50);
+    position: absolute;
+    top: 55px;
+    right: 10px;
+    width: 250px;
+    padding: 15px;
     border-radius: 8px;
-    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-align: center; /* Căn giữa nội dung menu */
+  }
+
+  .admin-navbar .me-auto {
+    flex-direction: column;
+    align-items: center; /* Căn giữa các item */
+    gap: 10px;
+  }
+
+  .admin-navbar .nav-link {
+    width: 100%;
+    text-align: center;
+  }
+
+  .content {
+    padding-top: 74px; /* Giữ khoảng cách từ header */
+  }
+}
+
+/* ===================== */
+/* Mobile Responsive */
+/* ===================== */
+@media (max-width: 767px) {
+  /* Ẩn background navbar trên mobile */
+  .admin-navbar {
+    background-color: transparent !important;
+    box-shadow: none;
+    padding: 10px 16px;
+    top: 74px; /* Giữ cố định ở 74px */
+  }
+
+  /* Icon toggle */
+  .admin-toggle {
+    display: block !important;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 26px;
+    margin-left: auto;
+    z-index: 1100;
+  }
+
+  /* Ẩn menu khi chưa mở */
+  .admin-navbar .navbar-collapse {
+    display: none !important;
+  }
+
+  /* Khi mở menu thì hiện riêng */
+  .admin-navbar .navbar-collapse.show {
+    display: block !important;
+    background-color: rgb(51, 50, 50);
+    position: absolute;
+    top: 55px;
+    right: 10px;
+    width: 220px;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    text-align: center; /* Căn giữa nội dung menu */
+  }
+
+  .admin-navbar .me-auto {
+    flex-direction: column;
+    align-items: center; /* Căn giữa các item */
+    gap: 10px;
+  }
+
+  .admin-navbar .nav-link {
+    width: 100%;
+    text-align: center;
+  }
+
+  .content {
+    padding-top: 74px; /* Giữ khoảng cách từ header */
+  }
 }

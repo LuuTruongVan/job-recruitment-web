@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Button, Table } from 'react-bootstrap';
 import '../assets/css/JobDetail.css';
 import '../assets/css/JobManagementDetail.css';
+
 const JobManagementDetail = () => {
   const { id } = useParams();
   const [job, setJob] = useState(null);
@@ -56,7 +57,7 @@ const JobManagementDetail = () => {
   const handleApprove = async (applicationId) => {
     const token = localStorage.getItem('employer_token');
     try {
-      await axios.put(`/jobposts/${id}/applications/${applicationId}/approve`, {}, {
+      await axios.put(`/applications/jobposts/${id}/applications/${applicationId}/approve`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setApplications(applications.map(app =>
@@ -70,7 +71,7 @@ const JobManagementDetail = () => {
   const handleReject = async (applicationId) => {
     const token = localStorage.getItem('employer_token');
     try {
-      await axios.put(`/jobposts/${id}/applications/${applicationId}/reject`, {}, {
+      await axios.put(`/applications/jobposts/${id}/applications/${applicationId}/reject`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setApplications(applications.map(app =>

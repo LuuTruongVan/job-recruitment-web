@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../db');
 const jwt = require('jsonwebtoken');
+const { createNotification } = require("../utils/notifications"); // Import hàm thông báo
 
 router.get('/count', async (_, res) => {
   try {
@@ -12,7 +13,6 @@ router.get('/count', async (_, res) => {
     res.status(500).json({ message: 'Error fetching jobposts count' });
   }
 });
-
 
 router.get('/admin', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -55,6 +55,22 @@ router.post('/', async (req, res) => {
       'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name, employment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)',
       [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '', employmentType || '']
     );
+
+    // Gửi thông báo cho tất cả admin
+    const io = req.app.get('io');
+    const [admins] = await pool.query('SELECT id FROM users WHERE role = ?', ['admin']);
+    if (admins.length > 0) {
+      const adminIds = admins.map(admin => admin.id);
+      for (const adminId of adminIds) {
+        await createNotification(
+          adminId,
+          "Bài đăng mới",
+          `Có bài đăng mới với tiêu đề "${title}" từ ${company_name || 'một nhà tuyển dụng'}.`,
+          io
+        );
+      }
+    }
+
     res.status(201).json({ message: 'Job posted successfully', insertId: result.insertId });
   } catch (error) {
     console.error('Error posting job:', error);
@@ -149,7 +165,6 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-
 // Các route khác giữ nguyên
 router.get('/job-positions', async (req, res) => {
   const { category } = req.query;
@@ -211,9 +226,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-
-
-
 router.get('/my-jobs', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -253,7 +265,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: 'Error fetching job detail' });
   }
 });
-
 
 router.delete('/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -369,7 +380,7 @@ router.put('/:id/applications/:applicationId/approve', async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
-    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['approved', applicationId, id]); // Thay job_id thành jobpost_id
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['approved', applicationId, id]);
     res.json({ message: 'Application approved' });
   } catch (error) {
     console.error('Error approving application:', error);
@@ -396,7 +407,7 @@ router.put('/:id/applications/:applicationId/reject', async (req, res) => {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
-    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['rejected', applicationId, id]); // Thay job_id thành jobpost_id
+    await pool.query('UPDATE applications SET status = ? WHERE id = ? AND jobpost_id = ?', ['rejected', applicationId, id]);
     res.json({ message: 'Application rejected' });
   } catch (error) {
     console.error('Error rejecting application:', error);
@@ -404,25 +415,6 @@ router.put('/:id/applications/:applicationId/reject', async (req, res) => {
   }
 });
 
-router.get('/admin', async (req, res) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'No token provided' });
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Decoded token in /jobposts/admin:', decoded); // Log để debug
-    if (decoded.role !== 'admin') return res.status(403).json({ message: 'Access denied' });
-
-    const [jobPosts] = await pool.query('SELECT * FROM jobposts');
-    if (!jobPosts.length) return res.status(404).json({ message: 'No job posts found' });
-    res.json(jobPosts);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching all job posts' });
-  }
-});
-
-// Admin cập nhật trạng thái bài đăng
-// Admin cập nhật trạng thái
 router.put('/admin/:id/status', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -435,10 +427,9 @@ router.put('/admin/:id/status', async (req, res) => {
 
     console.log('Body nhận được khi duyệt:', req.body);
     const { status } = req.body;
-    if (!status || !['approved', 'pending'].includes(status)) {
+    if (!status || !['approved', 'pending', 'rejected'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status value' });
     }
-    
 
     const [result] = await pool.query(
       'UPDATE jobposts SET status = ? WHERE id = ?',
@@ -449,13 +440,32 @@ router.put('/admin/:id/status', async (req, res) => {
       return res.status(404).json({ message: 'Job post not found' });
     }
 
+    // Lấy thông tin bài đăng để gửi thông báo
+    const [[job]] = await pool.query('SELECT * FROM jobposts WHERE id = ?', [req.params.id]);
+    const employer_id = job.employer_id;
+
+    // Lấy user_id của employer
+    const [employer] = await pool.query('SELECT user_id FROM employers WHERE id = ?', [employer_id]);
+    if (employer.length === 0) {
+      return res.status(500).json({ message: 'Employer not found' });
+    }
+    const employer_user_id = employer[0].user_id;
+
+    // Gửi thông báo cho employer
+    const io = req.app.get('io');
+    await createNotification(
+      employer_user_id,
+      "Bài đăng đã được cập nhật",
+      `Bài "${job.title}" của bạn đã được Admin cập nhật trạng thái thành "${status}".`,
+      io
+    );
+
     res.json({ message: 'Status updated successfully' });
   } catch (error) {
     console.error('Error updating job post status:', error);
     res.status(500).json({ message: 'Error updating job post status' });
   }
 });
-
 
 // Admin xóa bài đăng
 router.delete('/admin/:id', async (req, res) => {
@@ -477,8 +487,5 @@ router.delete('/admin/:id', async (req, res) => {
     res.status(500).json({ message: 'Error deleting job post' });
   }
 });
-
-
-
 
 module.exports = router;

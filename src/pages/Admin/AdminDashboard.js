@@ -10,18 +10,29 @@ import ViewQualities from './ViewQualities';
 import ManageUsers from './ManageUsers';
 import '../../assets/css/Admin.css';
 
-
 const AdminDashboard = () => {
   const [expanded, setExpanded] = useState(false);
 
   const handleNavClick = () => {
-    setExpanded(false); // đóng menu khi click
+    setExpanded(false);
   };
 
   return (
     <div className="admin-dashboard">
-      <Navbar bg="light" expand="lg" expanded={expanded}>
-        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={() => setExpanded(expanded ? false : true)} />
+      <Navbar
+        bg="light"
+        expand="lg"
+        expanded={expanded}
+        className="admin-navbar"
+      >
+        {/* Icon toggle cho mobile */}
+        <Navbar.Toggle
+          aria-controls="basic-navbar-nav"
+          onClick={() => setExpanded(expanded ? false : true)}
+          className="admin-toggle"
+        />
+
+        {/* Menu */}
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
             <Nav.Link as={NavLink} to="manage-users" onClick={handleNavClick}>
