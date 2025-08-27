@@ -4,6 +4,7 @@ import axios from 'axios';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
 import '../assets/css/PostJob.css';
+
 const provincesVN = [
   { value: 'Hà Nội', label: 'Hà Nội' },
   { value: 'Hồ Chí Minh', label: 'Hồ Chí Minh' },
@@ -41,7 +42,6 @@ const provincesVN = [
   { value: 'Nam Định', label: 'Nam Định' }
 ];
 
-
 const PostJob = () => {
   const [job, setJob] = useState({
     title: '',
@@ -55,7 +55,8 @@ const PostJob = () => {
     salary: '',
     category: '',
     expiry_date: '',
-    employmentType: ''
+    employmentType: '',
+    job_image: null // Thêm trường ảnh
   });
 
   const [message, setMessage] = useState('');
@@ -67,7 +68,11 @@ const PostJob = () => {
 
   const handleChange = (e) => {
     if (e.target) {
-      setJob((prevJob) => ({ ...prevJob, [e.target.name]: e.target.value }));
+      if (e.target.name === 'job_image') {
+        setJob((prevJob) => ({ ...prevJob, [e.target.name]: e.target.files[0] }));
+      } else {
+        setJob((prevJob) => ({ ...prevJob, [e.target.name]: e.target.value }));
+      }
     }
   };
 
@@ -94,23 +99,30 @@ const PostJob = () => {
       setMessage('Vui lòng đăng nhập với vai trò employer!');
       return;
     }
-    const jobDataToSave = {
-      title: job.title || '',
-      company_name: job.company_name || '',
-      jobInfo: job.jobInfo || '',
-      jobPositionId: job.jobPositionId || null,
-      jobRequirements: job.jobRequirements || '',
-      benefits: job.benefits || '',
-      salary: job.salary ? parseFloat(job.salary) : 0,
-      category: job.category || '',
-      location: job.location || '',
-      emailContact: job.emailContact || '',
-      expiry_date: job.expiry_date || null,
-      employmentType: job.employmentType || ''
-    };
+
+    const jobDataToSave = new FormData();
+    jobDataToSave.append('title', job.title || '');
+    jobDataToSave.append('company_name', job.company_name || '');
+    jobDataToSave.append('jobInfo', job.jobInfo || '');
+    jobDataToSave.append('jobPositionId', job.jobPositionId || '');
+    jobDataToSave.append('jobRequirements', job.jobRequirements || '');
+    jobDataToSave.append('benefits', job.benefits || '');
+    jobDataToSave.append('salary', job.salary ? parseFloat(job.salary) : 0);
+    jobDataToSave.append('category', job.category || '');
+    jobDataToSave.append('location', job.location || '');
+    jobDataToSave.append('emailContact', job.emailContact || '');
+    jobDataToSave.append('expiry_date', job.expiry_date || null);
+    jobDataToSave.append('employmentType', job.employmentType || '');
+    if (job.job_image) {
+      jobDataToSave.append('job_image', job.job_image); // Thêm ảnh vào FormData
+    }
+
     try {
       await axios.post('/jobposts', jobDataToSave, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
       });
       setMessage('Đăng tin thành công!');
       navigate('/home');
@@ -126,7 +138,8 @@ const PostJob = () => {
         salary: '',
         category: '',
         expiry_date: '',
-        employmentType: ''
+        employmentType: '',
+        job_image: null // Reset ảnh
       });
     } catch (error) {
       setMessage('Lỗi khi đăng tin: ' + (error.response?.data?.message || error.message));
@@ -255,6 +268,15 @@ const PostJob = () => {
             value={job.company_name}
             onChange={handleChange}
             required
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Ảnh đại diện bài đăng</Form.Label>
+          <Form.Control
+            type="file"
+            name="job_image"
+            accept="image/*" // Chỉ cho phép upload ảnh
+            onChange={handleChange}
           />
         </Form.Group>
         <Form.Group className="mb-3">

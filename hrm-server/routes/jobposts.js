@@ -3,7 +3,8 @@ const router = express.Router();
 const pool = require('../db');
 const jwt = require('jsonwebtoken');
 const { createNotification } = require("../utils/notifications"); // Import hàm thông báo
-
+const multer = require('multer'); // Thêm multer
+const path = require('path');
 router.get('/count', async (_, res) => {
   try {
     const [result] = await pool.query('SELECT COUNT(*) as count FROM jobposts');
@@ -13,6 +14,18 @@ router.get('/count', async (_, res) => {
     res.status(500).json({ message: 'Error fetching jobposts count' });
   }
 });
+
+// Cấu hình multer để lưu file ảnh
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/job_images')); // Thư mục lưu ảnh
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`); // Đặt tên file
+  }
+});
+
+const upload = multer({ storage: storage });
 
 router.get('/admin', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -31,13 +44,15 @@ router.get('/admin', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', upload.single('job_image'), async (req, res) => { // Sử dụng upload.single
   const token = req.headers.authorization?.split(' ')[1];
   console.log('Received token:', token);
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
+  // Lấy dữ liệu từ req.body (đã được multer parse)
   const { title, jobInfo, jobPositionId, jobRequirements, benefits, salary, category, location, emailContact, expiry_date, company_name, employmentType } = req.body;
   console.log('Received job data:', req.body);
+
   if (!title || !jobInfo || !jobRequirements || !benefits || !salary || !category || !location || !emailContact) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
@@ -51,9 +66,15 @@ router.post('/', async (req, res) => {
     }
     const employerId = employer[0].id;
 
+    // Xử lý ảnh nếu có (đã được multer xử lý)
+    let jobImagePath = null;
+    if (req.file) { // Sử dụng req.file thay vì req.files.job_image
+      jobImagePath = `/uploads/job_images/${req.file.filename}`;
+    }
+
     const [result] = await pool.query(
-      'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name, employment_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?)',
-      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '', employmentType || '']
+      'INSERT INTO jobposts (title, job_info, job_position_id, job_requirements, benefits, salary, category, location, email_contact, employer_id, created_at, expiry_date, company_name, employment_type, job_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)',
+      [title || '', jobInfo || '', jobPositionId || null, jobRequirements || '', benefits || '', salary || 0, category || '', location || '', emailContact || '', employerId, expiry_date || null, company_name || '', employmentType || '', jobImagePath]
     );
 
     // Gửi thông báo cho tất cả admin
@@ -83,7 +104,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Thêm route PUT /:id để cập nhật công việc
+// Cập nhật route PUT
 router.put('/:id', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -125,18 +146,25 @@ router.put('/:id', async (req, res) => {
     }
     const employerId = employer[0].id;
 
-    // Kiểm tra xem job có thuộc về employer này không
     const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
     if (job.length === 0) {
       return res.status(403).json({ message: 'Unauthorized or job not found' });
     }
 
-    // ✅ Luôn reset status về pending khi employer sửa bài
+    let jobImagePath = job[0].job_image;
+    if (req.files && req.files.job_image) {
+      const image = req.files.job_image;
+      const imageName = `${Date.now()}-${image.name}`;
+      const uploadPath = path.join(__dirname, '../uploads/job_images', imageName);
+      await image.mv(uploadPath);
+      jobImagePath = `/uploads/job_images/${imageName}`;
+    }
+
     await pool.query(
       `UPDATE jobposts 
        SET title = ?, job_info = ?, job_position_id = ?, job_requirements = ?, benefits = ?, 
            salary = ?, category = ?, location = ?, email_contact = ?, expiry_date = ?, 
-           company_name = ?, employment_type = ?, status = 'pending'
+           company_name = ?, employment_type = ?, status = 'pending', job_image = ?
        WHERE id = ?`,
       [
         title || '',
@@ -151,6 +179,7 @@ router.put('/:id', async (req, res) => {
         expiry_date || null,
         company_name || '',
         employmentType || '',
+        jobImagePath,
         id,
       ]
     );
