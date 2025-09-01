@@ -99,28 +99,6 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
               </Link>
             )}
 
-            {/* Employer - Quản lý bài đăng */}
-            {user && user.role === "employer" && (
-              <Link
-                className="nav-link"
-                to="/manage-posts"
-                onClick={() => setMenuOpen(false)}
-              >
-                Quản lý bài đăng
-              </Link>
-            )}
-
-            {/* Candidate - Quản lý ứng tuyển */}
-            {user && user.role === "candidate" && (
-              <Link
-                className="nav-link"
-                to="/manage-applications"
-                onClick={() => setMenuOpen(false)}
-              >
-                Quản lý ứng tuyển
-              </Link>
-            )}
-
             {/* Yêu thích */}
             {user && (
               <Link
@@ -133,17 +111,19 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
             )}
 
             {/* Chat */}
-            {user && (
-              <button
-                className="nav-link btn btn-link"
-                onClick={() => {
-                  if (user) navigate("/chat");
-                  else alert("Bạn cần đăng nhập để chat!");
-                }}
-              >
-                <i className="bi bi-chat-dots"></i> Chat
-              </button>
-            )}
+           {/* Chat - Chỉ hiện nếu KHÔNG phải admin */}
+{user && user.role !== "admin" && (
+  <button
+    className="nav-link btn btn-link"
+    onClick={() => {
+      if (user) navigate("/chat");
+      else alert("Bạn cần đăng nhập để chat!");
+    }}
+  >
+    <i className="bi bi-chat-dots"></i> Chat
+  </button>
+)}
+
 
             {/* Icon thông báo */}
             {user && (
@@ -200,13 +180,12 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
                   />
                 )}
                 <button className="dropdown-toggle">
-                  {" "}
                   {user.role === "candidate"
                     ? user.full_name || "Người dùng"
                     : user.role === "employer"
                     ? user.name || "Công ty"
                     : user.role === "admin"
-                    ? user.username || user.email || "Quản trị viên"
+                    ? user.name || "Admin" // Ưu tiên user.name, nếu không có thì hiển thị "Admin"
                     : "Người dùng"}
                 </button>
                 <ul className="dropdown-menu">
@@ -221,6 +200,28 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
                       >
                         Xem hồ sơ
                       </button>
+                    </li>
+                  )}
+                  {user.role === "employer" && (
+                    <li>
+                      <Link
+                        className="dropdown-item"
+                        to="/manage-posts"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Danh sách bài đăng
+                      </Link>
+                    </li>
+                  )}
+                  {user.role === "candidate" && (
+                    <li>
+                      <Link
+                        className="dropdown-item"
+                        to="/manage-applications"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        Danh sách ứng tuyển
+                      </Link>
                     </li>
                   )}
                   <li>

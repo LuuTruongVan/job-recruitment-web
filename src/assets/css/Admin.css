@@ -7,9 +7,9 @@
   justify-content: center;
   z-index: 1000;
   transition: background-color 0.3s ease;
-  position: sticky; /* Giữ navbar cố định */
-  top: 74px; /* Cố định ở 74px từ đầu trang */
-  margin-top: 0; /* Loại bỏ margin-top vì đã dùng top */
+  position: sticky;
+  top: 74px;
+  margin-top: 0;
 }
 
 /* Nội dung trong navbar */
@@ -21,10 +21,10 @@
 .admin-navbar .me-auto {
   display: flex;
   justify-content: center;
-  flex-wrap: nowrap; /* Ngăn nhảy xuống hàng */
+  flex-wrap: nowrap;
   gap: 8px;
   background-color: transparent !important;
-  max-width: 1200px; /* Giới hạn chiều rộng tối đa */
+  max-width: 1200px;
   width: 100%;
 }
 
@@ -54,34 +54,209 @@
 
 /* Container chính */
 .admin-dashboard {
-  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng viewport */
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  position: relative; /* Đảm bảo context cho các phần tử con */
+  position: relative;
 }
 
 /* Nội dung */
 .content {
-  flex: 1; /* Chiếm toàn bộ không gian còn lại */
+  flex: 1;
   padding: 20px;
-  overflow-y: auto; /* Cho phép scroll trong content */
-  margin-top: 0; /* Đảm bảo không chồng lên header */
-  padding-top: 74px; /* Tạo khoảng cách từ header */
+  overflow-y: auto;
+  margin-top: 0;
+  padding-top: 74px;
 }
 
-/* ===================== */
-/* Tablet Responsive */
-/* ===================== */
+/* Container chứa bảng */
+.table-container {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Tiêu đề */
+.table-container h2, .table-container h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 15px;
+  border-left: 5px solid #000000;
+  padding-left: 10px;
+}
+
+/* Bộ lọc */
+.filter-container {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-input, .filter-select {
+  max-width: 250px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.filter-select {
+  height: 38px;
+}
+
+/* Wrapper cho react-select */
+.select-wrapper {
+  max-width: 250px;
+  width: 100%;
+}
+
+/* Nút */
+.btn-danger {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: white !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-danger:hover {
+  background-color: #c82333 !important;
+  border-color: #c82333 !important;
+  transform: scale(1.05);
+}
+
+.btn-primary {
+  background-color: #000000 !important;
+  border-color: #0a0a0a !important;
+  color: white !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #373738 !important;
+  border-color: #2f2f2f !important;
+  transform: scale(1.05);
+}
+
+.btn-success {
+  background-color: #28a745 ;
+  border-color: #28a745 ;
+  color: white !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-success:hover {
+  background-color: #218838 !important;
+  border-color: #218838 !important;
+  transform: scale(1.05);
+}
+
+.btn-warning {
+  background-color: #ffc107 !important;
+  border-color: #ffc107 !important;
+  color: #000 !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800 !important;
+  border-color: #e0a800 !important;
+  transform: scale(1.05);
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: white !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268 !important;
+  border-color: #5a6268 !important;
+  transform: scale(1.05);
+}
+
+.add-button {
+  margin-bottom: 15px;
+}
+
+/* Thông báo lỗi */
+.error-message {
+  color: #dc3545;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Không có dữ liệu */
+.table-container p {
+  color: #000;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 20px;
+}
+
+/* Bảng */
+.table {
+  font-size: 16px;
+  color: #000;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Không thể xóa admin */
+.no-action {
+  color: #6c757d;
+  font-style: italic;
+}
+
+/* Căn giữa modal */
+.centered-modal .modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0 auto;
+}
+
+.centered-modal .modal-content {
+  max-width: 500px;
+  width: 100%;
+}
+
+/* Responsive cho tablet */
 @media (max-width: 1024px) and (min-width: 768px) {
-  /* Ẩn background navbar trên tablet */
   .admin-navbar {
     background-color: transparent !important;
     box-shadow: none;
     padding: 15px 20px;
-    top: 74px; /* Giữ cố định ở 74px */
+    top: 74px;
   }
 
-  /* Khi menu mở, background của menu riêng biệt */
   .admin-navbar .navbar-collapse.show {
     display: block !important;
     background-color: rgb(51, 50, 50);
@@ -92,12 +267,12 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    text-align: center; /* Căn giữa nội dung menu */
+    text-align: center;
   }
 
   .admin-navbar .me-auto {
     flex-direction: column;
-    align-items: center; /* Căn giữa các item */
+    align-items: center;
     gap: 10px;
   }
 
@@ -107,23 +282,32 @@
   }
 
   .content {
-    padding-top: 74px; /* Giữ khoảng cách từ header */
+    padding-top: 74px;
+  }
+
+  .table-container {
+    padding: 15px;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-input, .filter-select, .select-wrapper {
+    max-width: 100%;
   }
 }
 
-/* ===================== */
-/* Mobile Responsive */
-/* ===================== */
-@media (max-width: 767px) {
-  /* Ẩn background navbar trên mobile */
+/* Responsive cho mobile */
+@media (max-width: 768px) {
   .admin-navbar {
     background-color: transparent !important;
     box-shadow: none;
     padding: 10px 16px;
-    top: 74px; /* Giữ cố định ở 74px */
+    top: 74px;
   }
 
-  /* Icon toggle */
   .admin-toggle {
     display: block !important;
     background-color: transparent;
@@ -134,12 +318,10 @@
     z-index: 1100;
   }
 
-  /* Ẩn menu khi chưa mở */
   .admin-navbar .navbar-collapse {
     display: none !important;
   }
 
-  /* Khi mở menu thì hiện riêng */
   .admin-navbar .navbar-collapse.show {
     display: block !important;
     background-color: rgb(51, 50, 50);
@@ -150,12 +332,12 @@
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    text-align: center; /* Căn giữa nội dung menu */
+    text-align: center;
   }
 
   .admin-navbar .me-auto {
     flex-direction: column;
-    align-items: center; /* Căn giữa các item */
+    align-items: center;
     gap: 10px;
   }
 
@@ -165,6 +347,73 @@
   }
 
   .content {
-    padding-top: 74px; /* Giữ khoảng cách từ header */
+    padding-top: 74px;
+  }
+
+  .table-container {
+    padding: 10px;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-input, .filter-select, .select-wrapper {
+    max-width: 100%;
+  }
+
+  .table-container h2, .table-container h3 {
+    font-size: 20px;
+  }
+
+  .add-button {
+    width: 100%;
+  }
+
+  /* Responsive bảng */
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+  }
+
+  td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: right;
+    padding: 10px;
+    border: none;
+    border-bottom: 1px solid #eee;
+    font-size: 16px;
+  }
+
+  td:last-child {
+    border-bottom: none;
+  }
+
+  td::before {
+    content: attr(data-label);
+    font-weight: bold;
+    text-transform: capitalize;
+    text-align: left;
+    font-size: 16px;
+    width: 50%;
   }
 }

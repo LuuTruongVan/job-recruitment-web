@@ -1,20 +1,21 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Carousel, Button, Card, Form, Modal, Alert } from 'react-bootstrap';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import {  Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
 import '../assets/css/Home.css';
-import slide1 from "../assets/img/slide1.jpg";
-import slide2 from "../assets/img/slide2.jpg";
-import slide3 from "../assets/img/slide3.jpg";
+import ApplyModal from '../component/ApplyModal';
+import slide1 from '../assets/img/slide1.jpg'; // Import ảnh slide1
+import FavoriteCard from '../component/favorites/FavoriteCard';
+
 const provinces = [
-  "Hà Nội","Hồ Chí Minh","Hải Phòng","Đà Nẵng","Cần Thơ","An Giang","Bà Rịa - Vũng Tàu","Bắc Giang","Bắc Kạn","Bạc Liêu",
-  "Bắc Ninh","Bến Tre","Bình Định","Bình Dương","Bình Phước","Bình Thuận","Cà Mau","Cao Bằng","Đắk Lắk","Đắk Nông",
-  "Điện Biên","Đồng Nai","Đồng Tháp","Gia Lai","Hà Giang","Hà Nam","Hà Tĩnh","Hải Dương","Hậu Giang","Hòa Bình",
-  "Hưng Yên","Khánh Hòa","Kiên Giang","Kon Tum","Lai Châu","Lâm Đồng","Lạng Sơn","Lào Cai","Long An","Nam Định",
-  "Nghệ An","Ninh Bình","Ninh Thuận","Phú Thọ","Quảng Bình","Quảng Nam","Quảng Ngãi","Quảng Ninh","Quảng Trị",
-  "Sóc Trăng","Sơn La","Tây Ninh","Thái Bình","Thái Nguyên","Thanh Hóa","Thừa Thiên Huế","Tiền Giang","Trà Vinh",
-  "Tuyên Quang","Vĩnh Long","Vĩnh Phúc","Yên Bái","Phú Yên"
+  "Hà Nội", "Hồ Chí Minh", "Hải Phòng", "Đà Nẵng", "Cần Thơ", "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
+  "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông",
+  "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Tĩnh", "Hải Dương", "Hậu Giang", "Hòa Bình",
+  "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định",
+  "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị",
+  "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh",
+  "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái", "Phú Yên"
 ];
 
 const Home = () => {
@@ -35,8 +36,10 @@ const Home = () => {
     introduction: '',
     cv: null
   });
+  const [activeIndex, setActiveIndex] = useState(0);
 
   const navigate = useNavigate();
+  const cardRefs = useRef([]);
 
   const token =
     localStorage.getItem('candidate_token') ||
@@ -62,6 +65,16 @@ const Home = () => {
       const response = await axios.get('/jobposts', { params });
       let jobsData = response.data;
 
+      // Lọc bài đăng chưa hết hạn
+      const currentDate = new Date();
+      jobsData = jobsData.filter(job => !job.expiry_date || new Date(job.expiry_date) > currentDate);
+
+      // Lọc bỏ bài đăng không có ảnh khỏi slide
+      jobsData = jobsData.map(job => ({
+        ...job,
+        job_image: job.job_image && job.job_image.trim() !== '' ? job.job_image : null
+      }));
+
       if (filters.favoriteSort === 'desc') {
         jobsData.sort((a, b) => (b.favorite_count || 0) - (a.favorite_count || 0));
       } else if (filters.favoriteSort === 'asc') {
@@ -85,6 +98,7 @@ const Home = () => {
       );
 
       setJobs(jobsWithPositions);
+      setActiveIndex(0); // Reset slide về đầu khi load lại
     } catch (error) {
       console.error('Error fetching jobs:', error);
     }
@@ -116,6 +130,26 @@ const Home = () => {
       fetchFavorites();
     }
   }, [fetchJobs, fetchFavorites, token]);
+
+  // Tự động chuyển slide
+  useEffect(() => {
+    const jobsWithImages = jobs.filter(job => job.job_image);
+    if (jobsWithImages.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prevIndex) => (prevIndex + 1) % jobsWithImages.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [jobs]);
+
+  const handlePrevSlide = () => {
+    const jobsWithImages = jobs.filter(job => job.job_image);
+    setActiveIndex((prevIndex) => (prevIndex - 1 + jobsWithImages.length) % jobsWithImages.length);
+  };
+
+  const handleNextSlide = () => {
+    const jobsWithImages = jobs.filter(job => job.job_image);
+    setActiveIndex((prevIndex) => (prevIndex + 1) % jobsWithImages.length);
+  };
 
   const handleFilterChange = (name, value) => {
     setFilters({ ...filters, [name]: value });
@@ -206,44 +240,81 @@ const Home = () => {
     }
   };
 
+  // Thêm hiệu ứng scroll
+  useEffect(() => {
+    const elements = cardRefs.current;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    elements.forEach((ref) => {
+      if (ref) {
+        observer.observe(ref);
+      }
+    });
+
+    return () => {
+      elements.forEach((ref) => {
+        if (ref) {
+          observer.unobserve(ref);
+        }
+      });
+    };
+  }, [jobs]);
+
   return (
     <div className="home-container">
-      {/* Slide Banner */}
-      <Carousel className="home-carousel mb-4">
-        <Carousel.Item>
-        <img 
-      className="d-block w-100" 
-      src={slide1} 
-      alt="Slide 1" 
-    />
-          <Carousel.Caption>
-            <h3>Tin tức tuyển dụng nổi bật</h3>
-            <p>Khám phá cơ hội mới ngay hôm nay!</p>
-          </Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-        <img 
-      className="d-block w-100" 
-      src={slide2} 
-      alt="Slide 2" 
-    />
-          <Carousel.Caption>
-            <h3>Cơ hội việc làm hấp dẫn</h3>
-            <p>Ứng tuyển ngay để không bỏ lỡ!</p>
-          </Carousel.Caption>
-        </Carousel.Item>
-        <Carousel.Item>
-        <img 
-      className="d-block w-100" 
-      src={slide3} 
-      alt="Slide 3" 
-    />
-          <Carousel.Caption>
-            <h3>Khám phá sự nghiệp mới</h3>
-            <p>Bắt đầu hành trình của bạn ngay bây giờ!</p>
-          </Carousel.Caption>
-        </Carousel.Item>
-      </Carousel>
+      {/* Job Listings Carousel */}
+      <div className="job-carousel mb-4" style={{ backgroundImage: `url(${slide1})` }}>
+        <div className="carousel-inner">
+          {jobs.filter(job => job.job_image).length > 0 ? (
+            jobs.filter(job => job.job_image).map((job, index) => (
+              <div
+                key={job.id}
+                className={`carousel-item ${index === activeIndex ? 'active' : ''}`}
+                onClick={() => navigate(`/job-detail/${job.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <img
+                  src={job.job_image}
+                  className="d-block w-100"
+                  alt={job.title}
+                />
+                <div className="carousel-caption">
+                  <h5>{job.title}</h5>
+                  <p className="job-position">{job.job_position || 'Chưa có vị trí'}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="carousel-item active">
+              <img src="https://via.placeholder.com/800x400" className="d-block w-100" alt="No jobs" />
+              <div className="carousel-caption">
+                <h5>Không có bài đăng</h5>
+                <p>Vui lòng thử lại sau.</p>
+              </div>
+            </div>
+          )}
+        </div>
+        {jobs.filter(job => job.job_image).length > 1 && (
+          <>
+            <button className="carousel-control-prev" onClick={handlePrevSlide}>
+              <span className="carousel-control-prev-icon" aria-hidden="true">&lt;</span>
+            </button>
+            <button className="carousel-control-next" onClick={handleNextSlide}>
+              <span className="carousel-control-next-icon" aria-hidden="true">&gt;</span>
+            </button>
+          </>
+        )}
+      </div>
 
       {/* Bộ lọc */}
       <div className="home-filters-wrapper">
@@ -280,159 +351,31 @@ const Home = () => {
 
       {/* Danh sách job */}
       <div className="home-job-listings row align-items-stretch">
-        {jobs.map((job) => (
-          <div className="col-md-4 mb-3 d-flex" key={job.id}>
-            <Card className="position-relative flex-fill d-flex flex-column">
-              <div
-                className="favorite-icon"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFavorite(job.id);
-                }}
-                style={{
-                  position: 'absolute',
-                  top: '10px',
-                  right: '10px',
-                  cursor: 'pointer',
-                  color: favorites.includes(job.id) ? 'red' : 'gray',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'rgba(255,255,255,0.8)',
-                  padding: '3px 6px',
-                  borderRadius: '12px',
-                  fontSize: '14px'
-                }}
-              >
-                <i className={favorites.includes(job.id) ? 'bi bi-heart-fill' : 'bi bi-heart'}></i>
-                <span>{job.favorite_count || 0}</span>
-              </div>
-
-              {/* Nội dung chính */}
-              <div
-                onClick={() => navigate(`/job-detail/${job.id}`)}
-                style={{ cursor: 'pointer', flexGrow: 1 }}
-              >
-                <Card.Body className="d-flex flex-column">
-                <Card.Title style={{ textAlign: 'center', margin: '0 30px' }}>{job.title}</Card.Title>
-                  <Card.Text className="job-description">
-                    <strong>Vị trí công việc:</strong> {job.job_position}
-                    <br />
-                    <strong>Trạng thái làm việc:</strong> {job.employment_type || 'Chưa có'}
-                    <br />
-                    <strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}
-                    <br />
-                    <strong>Địa chỉ:</strong> {job.location}
-                    <br />
-                    <strong>Mức lương:</strong>{' '}
-{job.salary
-  ? `${parseInt(job.salary, 10).toLocaleString('vi-VN')} VND`
-  : 'Chưa có'}
+  {jobs.map((job, index) => (
+    <div
+      ref={(el) => (cardRefs.current[index] = el)}
+      className="col-md-4 mb-3 d-flex"
+      key={job.id}
+    >
+      <FavoriteCard
+        job={job}
+        navigate={navigate}
+        toggleFavorite={toggleFavorite}
+        handleApplyClick={handleApplyClick}
+      />
+    </div>
+  ))}
+</div>
 
 
-                    <br />
-                    <strong>Ngày hết hạn:</strong>{' '}
-                    {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}
-                  </Card.Text>
-                </Card.Body>
-              </div>
-
-              {/* Nút bấm */}
-              <div className="d-flex gap-2 p-2">
-                <Button variant="info" onClick={() => navigate(`/job-detail/${job.id}`)}>Xem chi tiết</Button>
-                <Button variant="success" onClick={() => handleApplyClick(job)}>Ứng tuyển</Button>
-              </div>
-            </Card>
-          </div>
-        ))}
-      </div>
-
-      {/* Modal Apply Job */}
-      <Modal show={showApplyModal} onHide={() => setShowApplyModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Ứng tuyển công việc</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {applyMessage && (
-            <Alert variant={applyMessage.includes('thành công') ? 'success' : 'danger'}>
-              {applyMessage}
-            </Alert>
-          )}
-          <Form onSubmit={submitApplication}>
-            <Form.Group className="mb-3">
-              <Form.Label>Tên ứng viên</Form.Label>
-              <Form.Control
-                type="text"
-                name="candidate_name"
-                value={formData.candidate_name}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Số điện thoại</Form.Label>
-              <Form.Control
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Địa chỉ</Form.Label>
-              <Form.Control
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Kỹ năng</Form.Label>
-              <Form.Control
-                type="text"
-                name="skills"
-                value={formData.skills}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Giới thiệu bản thân</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="introduction"
-                value={formData.introduction}
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Tải CV lên (PDF)</Form.Label>
-              <Form.Control
-                type="file"
-                name="cv"
-                accept=".pdf"
-                onChange={handleFormChange}
-                required
-              />
-            </Form.Group>
-            <Button variant="primary" type="submit">Gửi ứng tuyển</Button>
-          </Form>
-        </Modal.Body>
-      </Modal>
+      <ApplyModal
+        show={showApplyModal}
+        onHide={() => setShowApplyModal(false)}
+        formData={formData}
+        handleFormChange={handleFormChange}
+        submitApplication={submitApplication}
+        applyMessage={applyMessage}
+      />
     </div>
   );
 };

@@ -20,10 +20,10 @@ const conversationsRouter = require("./routes/conversations");
 const messagesRouter = require("./routes/messages");
 const notificationsRouter = require("./routes/notifications");
 
-// ===== Middleware =====
+// Middleware
 app.use(
   cors({
-    origin: "http://localhost:3001", // FRONTEND
+    origin: "http://localhost:3001",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
@@ -33,17 +33,17 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ===== Multer (nếu cần ở index) =====
+// Multer
 const storage = multer.diskStorage({
   destination: "./uploads/",
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname)),
 });
 const upload = multer({ storage });
 
-// ===== Static =====
+// Static
 app.use("/uploads", express.static("uploads"));
 
-// ===== Routes =====
+// Routes
 app.use("/favorites", favoritesRoutes);
 app.use("/upload-avatar", uploadAvatarRoutes);
 app.use("/users", usersRouter);
@@ -56,7 +56,7 @@ app.use("/conversations", conversationsRouter);
 app.use("/messages", messagesRouter);
 app.use("/notifications", notificationsRouter);
 
-// ===== Server + Socket.io =====
+// Server + Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -68,7 +68,7 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-// ===== SOCKET.IO =====
+// Socket.io Logic
 io.on("connection", (socket) => {
   console.log("🔌 Client connected:", socket.id);
 
@@ -87,11 +87,11 @@ io.on("connection", (socket) => {
   socket.on("sendMessage", async (msg) => {
     try {
       const [result] = await pool.query(
-        "INSERT INTO messages (conversation_id, sender_id, receiver_id, message, created_at) VALUES (?, ?, ?, ?, NOW())",
+        "INSERT INTO messages (conversation_id, sender_id, receiver_id, message, created_at, is_read) VALUES (?, ?, ?, ?, NOW(), 0)",
         [msg.conversation_id, msg.sender_id, msg.receiver_id, msg.message]
       );
 
-      const [newMsg] = await pool.query("SELECT * FROM messages WHERE id=?", [result.insertId]);
+      const [newMsg] = await pool.query("SELECT * FROM messages WHERE id = ?", [result.insertId]);
       io.to(`conv_${msg.conversation_id}`).emit("receiveMessage", newMsg[0]);
     } catch (err) {
       console.error("Socket sendMessage error:", err);
@@ -103,7 +103,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3000; // API + SOCKET
+const PORT = 3000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

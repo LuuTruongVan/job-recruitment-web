@@ -77,6 +77,7 @@ const ProfileModal = ({ show, onHide }) => {
       setUploading(false);
     }
   };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
@@ -85,18 +86,15 @@ const ProfileModal = ({ show, onHide }) => {
       });
       setMessage('Cập nhật thông tin thành công!');
       setIsEditing(false);
-  
-      // Reload sau 0.5s để hiển thị message trước khi load lại
+
       setTimeout(() => {
         window.location.reload();
       }, 500);
-  
     } catch (err) {
       console.error(err);
       setMessage('Lỗi cập nhật thông tin!');
     }
   };
-  
 
   if (loading) {
     return (
@@ -123,7 +121,6 @@ const ProfileModal = ({ show, onHide }) => {
         )}
 
         <Row>
-          {/* Cột trái */}
           <Col md={8}>
             {!isEditing ? (
               <>
@@ -132,7 +129,6 @@ const ProfileModal = ({ show, onHide }) => {
                     <p><strong>Họ và tên:</strong> {profile.full_name || 'Chưa có'}</p>
                     <p><strong>Số điện thoại:</strong> {profile.phone || 'Chưa có'}</p>
                     <p><strong>Địa chỉ:</strong> {profile.address || 'Chưa có'}</p>
-                   
                     <p><strong>Kỹ năng:</strong> {profile.skills || 'Chưa có'}</p>
                   </>
                 )}
@@ -149,7 +145,6 @@ const ProfileModal = ({ show, onHide }) => {
               </>
             ) : (
               <Form onSubmit={handleUpdate}>
-                {/* Form chỉnh sửa giữ nguyên như cũ */}
                 {profile.role === 'candidate' && (
                   <>
                     <Form.Group className="mb-3">
@@ -164,7 +159,6 @@ const ProfileModal = ({ show, onHide }) => {
                       <Form.Label>Địa chỉ</Form.Label>
                       <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} />
                     </Form.Group>
-                   
                     <Form.Group className="mb-3">
                       <Form.Label>Kỹ năng</Form.Label>
                       <Form.Control type="text" name="skills" value={formData.skills} onChange={handleChange} />
@@ -209,17 +203,12 @@ const ProfileModal = ({ show, onHide }) => {
             )}
           </Col>
 
-          {/* Cột phải */}
           <Col md={4} className="text-center">
             {formData.avatar_url && (
               <Image
                 src={formData.avatar_url}
                 roundedCircle
-                style={{
-                  width: '150px',
-                  height: '150px',
-                  objectFit: 'cover'
-                }}
+                style={{ width: '150px', height: '150px', objectFit: 'cover' }}
                 alt="Avatar"
               />
             )}
@@ -243,6 +232,12 @@ const ProfileModal = ({ show, onHide }) => {
           .profile-modal .modal-content {
             max-height: 90vh;
             overflow-y: auto;
+          }
+          .modal-backdrop {
+            z-index: 1300; /* Cao hơn z-index của header (1200) */
+          }
+          .modal {
+            z-index: 1400; /* Cao hơn backdrop để hiển thị modal lên trên */
           }
         `}
       </style>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from 'react-bootstrap';
-import ApplyModal from '../component/ApplyModal'; // Import component ApplyModal
+import ApplyModal from '../component/ApplyModal';
 import '../assets/css/JobDetail.css';
 
 const JobDetail = () => {
@@ -24,8 +24,8 @@ const JobDetail = () => {
   });
 
   const [companyInfo, setCompanyInfo] = useState(null);
-
   const navigate = useNavigate();
+
   const token =
     localStorage.getItem('candidate_token') ||
     localStorage.getItem('employer_token') ||
@@ -47,7 +47,6 @@ const JobDetail = () => {
           headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
         const jobData = jobResponse.data;
-        console.log('Job data:', jobData); // Kiểm tra dữ liệu
 
         jobData.favorite_count = await fetchFavoriteCount();
 
@@ -172,7 +171,7 @@ const JobDetail = () => {
 
   return (
     <div className="job-detail-container">
-      {/* Phần thông tin công ty với background image */}
+      {/* Phần thông tin công ty */}
       <div
         className="company-header"
         style={{
@@ -196,10 +195,58 @@ const JobDetail = () => {
           <p><strong>Email:</strong> {companyInfo.email}</p>
           <p><strong>Website:</strong> <a href={companyInfo.website} target="_blank" rel="noopener noreferrer">{companyInfo.website}</a></p>
           <p><strong>Giới thiệu:</strong> {companyInfo.company_intro}</p>
+
+          {user?.role === "candidate" && (
+            <>
+              <Button
+                variant="warning"
+                className="chat-btn"
+                onClick={async () => {
+                  if (!user) return alert("Bạn cần đăng nhập!");
+                  try {
+                    const res = await fetch(`http://localhost:3000/candidates/by-user/${user.id}`);
+                    if (!res.ok) {
+                      alert("Không tìm thấy thông tin candidate!");
+                      return;
+                    }
+                    const candData = await res.json();
+                    const candidate_id = candData.id;
+
+                    const convRes = await fetch("http://localhost:3000/conversations", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ candidate_id, employer_id: job.employer_id })
+                    });
+
+                    if (!convRes.ok) {
+                      alert("Lỗi khi tạo cuộc trò chuyện!");
+                      return;
+                    }
+
+                    const conv = await convRes.json();
+                    navigate(`/chat/${conv.id}`, { replace: false });
+                  } catch (err) {
+                    console.error(err);
+                    alert("Có lỗi xảy ra. Vui lòng thử lại.");
+                  }
+                }}
+              >
+                💬 Chat với nhà tuyển dụng
+              </Button>
+
+              <Button
+                variant="success"
+                className="apply-now-btn"
+                onClick={handleApplyClick}
+              >
+                🚀 Ứng tuyển ngay
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Phần nội dung không cần background image */}
+      {/* Phần nội dung công việc */}
       <div className="job-content">
         <div className="job-header">
           <div>
@@ -232,61 +279,29 @@ const JobDetail = () => {
           </div>
         </div>
 
-        <div className="">
-          <h5>Thông tin công việc</h5>
-          <p style={{ whiteSpace: 'pre-line' }}>{job.job_info || 'Chưa có thông tin'}</p>
+        <div className="job-details-sections">
+          <div className="job-detail-box">
+            <h5>Thông tin công việc</h5>
+            <p style={{ whiteSpace: 'pre-line' }}>{job.job_info || 'Chưa có thông tin'}</p>
+          </div>
 
-          <h5>Yêu cầu công việc</h5>
-          <p style={{ whiteSpace: 'pre-line' }}>{job.job_requirements || 'Chưa có yêu cầu'}</p>
+          <div className="job-detail-box">
+            <h5>Yêu cầu công việc</h5>
+            <p style={{ whiteSpace: 'pre-line' }}>{job.job_requirements || 'Chưa có yêu cầu'}</p>
+          </div>
 
-          <h5>Quyền lợi</h5>
-          <p style={{ whiteSpace: 'pre-line' }}>{job.benefits || 'Chưa có quyền lợi'}</p>
+          <div className="job-detail-box">
+            <h5>Quyền lợi</h5>
+            <p style={{ whiteSpace: 'pre-line' }}>{job.benefits || 'Chưa có quyền lợi'}</p>
+          </div>
         </div>
 
         <div className="d-flex gap-2 mt-3">
-          <Button variant="success" onClick={handleApplyClick}>Ứng tuyển</Button>
-          <Button variant="secondary" onClick={() => navigate('/home')}>Quay lại</Button>
-
-          {user?.role === "candidate" && (
-            <Button
-              variant="primary"
-              onClick={async () => {
-                if (!user) return alert("Bạn cần đăng nhập!");
-                try {
-                  const res = await fetch(`http://localhost:3000/candidates/by-user/${user.id}`);
-                  if (!res.ok) {
-                    alert("Không tìm thấy thông tin candidate!");
-                    return;
-                  }
-                  const candData = await res.json();
-                  const candidate_id = candData.id;
-
-                  const convRes = await fetch("http://localhost:3000/conversations", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ candidate_id, employer_id: job.employer_id })
-                  });
-
-                  if (!convRes.ok) {
-                    alert("Lỗi khi tạo cuộc trò chuyện!");
-                    return;
-                  }
-
-                  const conv = await convRes.json();
-                  navigate(`/chat/${conv.id}`, { replace: false });
-                } catch (err) {
-                  console.error(err);
-                  alert("Có lỗi xảy ra. Vui lòng thử lại.");
-                }
-              }}
-            >
-              Chat với nhà tuyển dụng
-            </Button>
-          )}
+          <Button variant="outline-secondary" onClick={() => navigate('/home')}>Quay lại</Button>
+          <Button variant="primary" onClick={handleApplyClick}>Ứng tuyển</Button>
         </div>
       </div>
 
-      {/* Sử dụng component ApplyModal */}
       <ApplyModal
         show={showApplyModal}
         onHide={() => setShowApplyModal(false)}

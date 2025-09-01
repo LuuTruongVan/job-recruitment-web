@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Button, Form } from 'react-bootstrap';
 import axios from 'axios';
+import '../../assets/css/AdminResponsive.css';
 
 const ManageJobCategories = () => {
   const [categories, setCategories] = useState([]);
@@ -9,7 +10,6 @@ const ManageJobCategories = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Hàm lấy danh mục
   const fetchCategories = () => {
     axios.get('/categories')
       .then(response => setCategories(response.data))
@@ -60,37 +60,35 @@ const ManageJobCategories = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setNewCategoryName('');
-      fetchCategories(); // Load lại danh mục
+      fetchCategories();
     } catch (error) {
       console.error('Error adding category:', error);
     }
   };
 
-  // Lọc theo tên
   const filteredCategories = categories.filter(c =>
     c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
-    <div>
+    <div className="table-container">
       <h2>Quản lý danh mục</h2>
 
-      {/* Thanh tìm kiếm + thêm mới */}
       <form
         onSubmit={handleAddCategory}
-        style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}
+        className="filter-container"
       >
         <Form.Control
           placeholder="Tìm theo tên danh mục..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: '250px' }}
+          className="filter-input"
         />
         <Form.Control
           placeholder="Nhập tên danh mục mới..."
           value={newCategoryName}
           onChange={(e) => setNewCategoryName(e.target.value)}
-          style={{ width: '250px' }}
+          className="filter-input"
         />
         <Button variant="primary" type="submit">Thêm</Button>
       </form>
@@ -106,8 +104,8 @@ const ManageJobCategories = () => {
         <tbody>
           {filteredCategories.map(category => (
             <tr key={category.id}>
-              <td>{category.id}</td>
-              <td>
+              <td data-label="ID">{category.id}</td>
+              <td data-label="Tên danh mục">
                 {editingId === category.id ? (
                   <Form.Control
                     value={editedCategory.name}
@@ -117,7 +115,7 @@ const ManageJobCategories = () => {
                   category.name
                 )}
               </td>
-              <td>
+              <td data-label="Hành động">
                 {editingId === category.id ? (
                   <Button variant="success" onClick={() => handleSave(category.id)}>Lưu</Button>
                 ) : (

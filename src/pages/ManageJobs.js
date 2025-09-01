@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Button, Collapse, Badge } from "react-bootstrap";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import '../assets/css/ManageJob.css';
 
 const ManageJobs = () => {
   const [jobs, setJobs] = useState([]);
@@ -38,7 +39,7 @@ const ManageJobs = () => {
           })
         );
 
-        // ✅ Lọc bài chưa hết hạn & bài đã hết hạn
+        // Lọc bài chưa hết hạn & bài đã hết hạn
         const validJobs = jobsWithPositions.filter(
           (job) =>
             !job.expiry_date ||
@@ -59,6 +60,8 @@ const ManageJobs = () => {
   }, []);
 
   const handleDelete = async (id) => {
+    // Thêm xác nhận trước khi xóa
+    if (!window.confirm('Bạn có chắc muốn xóa bài đăng này?')) return;
     const token = localStorage.getItem("employer_token");
     try {
       await axios.delete(`/jobposts/${id}`, {
@@ -68,6 +71,7 @@ const ManageJobs = () => {
       setExpiredJobs(expiredJobs.filter((job) => job.id !== id));
     } catch (error) {
       console.error("Error deleting job:", error);
+      alert(error.response?.data?.message || 'Lỗi khi xóa bài đăng');
     }
   };
 
@@ -79,7 +83,7 @@ const ManageJobs = () => {
     navigate(`/job-management-detail/${id}`);
   };
 
-  // ✅ Hiển thị trạng thái duyệt
+  // Hiển thị trạng thái duyệt
   const renderStatus = (status) => {
     switch (status) {
       case "approved":
@@ -167,7 +171,7 @@ const ManageJobs = () => {
         onClick={() => setOpenExpired(!openExpired)}
         aria-controls="expired-jobs"
         aria-expanded={openExpired}
-        className="mt-3"
+        className="btn-toggle-expired"
       >
         Các bài đăng hết hạn ({expiredJobs.length})
       </Button>
@@ -214,7 +218,6 @@ const ManageJobs = () => {
                       >
                         Xem chi tiết
                       </Button>
-                      {/* ❌ Ẩn nút Sửa cho bài hết hạn */}
                       <Button
                         variant="danger"
                         size="sm"

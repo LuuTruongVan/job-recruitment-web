@@ -1,4 +1,3 @@
-// src/components/auth/RegisterModal.jsx
 import React from "react";
 import { Modal, Form, Button, Alert } from "react-bootstrap";
 import logo from "../../assets/img/logo.png";
@@ -107,6 +106,12 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
         {`
           .small-register-modal .modal-dialog {
             max-width: 320px;
+          }
+          .modal-backdrop {
+            z-index: 1300;
+          }
+          .modal {
+            z-index: 1400;
           }
         `}
       </style>

@@ -116,6 +116,12 @@ const LoginModal = ({ show, onHide, onSwitch }) => {
           .small-login-modal .modal-dialog {
             max-width: 320px;
           }
+          .modal-backdrop {
+            z-index: 1300;
+          }
+          .modal {
+            z-index: 1400;
+          }
         `}
       </style>
     </Modal>

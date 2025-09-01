@@ -3,7 +3,6 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../db');
-
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
@@ -37,7 +36,7 @@ router.post('/add', async (req, res) => {
       if (role === 'candidate') {
         await connection.execute(
           'INSERT INTO candidates (user_id, full_name, phone, address, skills) VALUES (?, ?, ?, ?, ?)',
-          [userId, name, '',  '', '']
+          [userId, name, '', '', '']
         );
       } else if (role === 'employer') {
         await connection.execute(
@@ -79,7 +78,6 @@ router.post('/add', async (req, res) => {
   }
 });
 
-
 router.post('/get', async (req, res) => {
   const { email, password } = req.body;
   console.log('Received /users/get request:', { email });
@@ -96,7 +94,6 @@ router.post('/get', async (req, res) => {
     if (user.role !== 'admin' && !user.is_verified) {
       return res.status(403).json({ message: 'Vui lòng xác thực email trước khi đăng nhập' });
     }
-    
 
     // Kiểm tra mật khẩu
     const isMatch = await bcrypt.compare(password, user.password);
@@ -112,13 +109,11 @@ router.post('/get', async (req, res) => {
     );
 
     res.json({ token });
-
   } catch (error) {
     console.error('Error in /users/get:', error);
     res.status(500).json({ message: 'Error getting user' });
   }
 });
-
 
 router.put('/update/:id/toggle', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
@@ -139,13 +134,15 @@ router.put('/update/:id/toggle', async (req, res) => {
     res.status(500).json({ message: 'Error updating user status' });
   }
 });
+
 router.get('/get-profile', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const [users] = await pool.query('SELECT id, email, role FROM users WHERE id = ?', [decoded.id]);
+    // Thêm trường name vào truy vấn
+    const [users] = await pool.query('SELECT id, email, role, name FROM users WHERE id = ?', [decoded.id]);
     if (users.length === 0) return res.status(404).json({ message: 'User not found' });
 
     let profile = users[0];
@@ -193,7 +190,7 @@ router.put('/update-profile', async (req, res) => {
       email,
       website,
       avatar_url,
-      company_intro // thêm trường này
+      company_intro
     } = req.body;
 
     connection = await pool.getConnection();
@@ -230,10 +227,6 @@ router.put('/update-profile', async (req, res) => {
   }
 });
 
-
-
-
-// Thêm route đổi mật khẩu
 router.put('/change-password', async (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -402,7 +395,6 @@ router.post('/forgot-password', async (req, res) => {
       'INSERT INTO reset_password_tokens (email, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))',
       [email, otp]
     );
-    
 
     // Cấu hình nodemailer
     const transporter = nodemailer.createTransport({
@@ -428,7 +420,6 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-// Bước 1: Xác minh OTP
 router.post('/verify-reset-otp', async (req, res) => {
   const { email, otp } = req.body;
   try {
@@ -448,7 +439,6 @@ router.post('/verify-reset-otp', async (req, res) => {
   }
 });
 
-// Bước 2: Đặt lại mật khẩu
 router.post('/reset-password', async (req, res) => {
   const { email, newPassword } = req.body;
   try {
@@ -464,9 +454,5 @@ router.post('/reset-password', async (req, res) => {
     res.status(500).json({ message: 'Lỗi server khi đặt lại mật khẩu!' });
   }
 });
-
-
-
-
 
 module.exports = router;

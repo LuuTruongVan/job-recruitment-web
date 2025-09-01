@@ -2,17 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { Table, Button, Spinner, Alert, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { TokenContext } from '../../App';
+import '../../assets/css/AdminResponsive.css';
 
 const ManageCandidates = () => {
   const token = useContext(TokenContext) || localStorage.getItem('admin_token');
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-
   const [searchName, setSearchName] = useState('');
   const [searchPhone, setSearchPhone] = useState('');
 
-  // ✅ Fetch danh sách ứng viên
   useEffect(() => {
     const fetchCandidates = async () => {
       try {
@@ -30,7 +29,6 @@ const ManageCandidates = () => {
     fetchCandidates();
   }, [token]);
 
-  // ✅ Xóa ứng viên
   const handleDelete = async (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa ứng viên này?')) return;
     try {
@@ -43,38 +41,34 @@ const ManageCandidates = () => {
     }
   };
 
-  // ✅ Lọc danh sách ứng viên
   const filteredCandidates = candidates.filter((c) => {
     const matchName = c.full_name?.toLowerCase().includes(searchName.toLowerCase());
     const matchPhone = c.phone?.toLowerCase().includes(searchPhone.toLowerCase());
     return matchName && matchPhone;
   });
 
-  // ✅ Loading & Error
   if (loading) return <Spinner animation="border" />;
   if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
-    <div>
+    <div className="table-container">
       <h2>Quản lý ứng viên</h2>
 
-      {/* Bộ lọc */}
-      <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
+      <div className="filter-container">
         <Form.Control
           placeholder="Tìm theo tên..."
           value={searchName}
           onChange={(e) => setSearchName(e.target.value)}
-          style={{ width: '250px' }}
+          className="filter-input"
         />
         <Form.Control
           placeholder="Tìm theo số điện thoại..."
           value={searchPhone}
           onChange={(e) => setSearchPhone(e.target.value)}
-          style={{ width: '250px' }}
+          className="filter-input"
         />
       </div>
 
-      {/* Bảng danh sách */}
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -88,11 +82,11 @@ const ManageCandidates = () => {
         <tbody>
           {filteredCandidates.map((candidate) => (
             <tr key={candidate.id}>
-              <td>{candidate.id}</td>
-              <td>{candidate.full_name}</td>
-              <td>{candidate.phone || 'Chưa có'}</td>
-              <td>{candidate.email || 'Chưa có'}</td>
-              <td>
+              <td data-label="ID">{candidate.id}</td>
+              <td data-label="Tên">{candidate.full_name}</td>
+              <td data-label="Phone">{candidate.phone || 'Chưa có'}</td>
+              <td data-label="Email">{candidate.email || 'Chưa có'}</td>
+              <td data-label="Hành động">
                 <Button
                   variant="danger"
                   size="sm"

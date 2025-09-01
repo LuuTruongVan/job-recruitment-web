@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { TokenContext } from '../../App';
 import { Table, Button, Spinner, Alert } from 'react-bootstrap';
 import Select from 'react-select';
 import '../../assets/css/AdminResponsive.css';
+
 const provinces = [
   "Hà Nội", "Hồ Chí Minh", "Hải Phòng", "Đà Nẵng", "Cần Thơ", "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu",
   "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Đắk Lắk", "Đắk Nông",
@@ -15,7 +15,7 @@ const provinces = [
 ];
 
 const ManageJobPosts = () => {
-  const token = useContext(TokenContext);
+  const token = localStorage.getItem('admin_token');
   const [pendingPosts, setPendingPosts] = useState([]);
   const [approvedPosts, setApprovedPosts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -23,7 +23,6 @@ const ManageJobPosts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // Lấy category từ API
   useEffect(() => {
     axios.get('http://localhost:3000/categories')
       .then(res => {
@@ -41,7 +40,6 @@ const ManageJobPosts = () => {
 
       let data = res.data;
 
-      // Áp dụng bộ lọc
       if (filters.category) {
         data = data.filter(job => job.category === filters.category);
       }
@@ -112,21 +110,27 @@ const ManageJobPosts = () => {
   if (error) return <Alert variant="danger">{error}</Alert>;
 
   return (
-    <div className="manage-job-posts p-3">
-      <h3>Bộ lọc</h3>
-      <div className="d-flex gap-2 flex-wrap mb-3">
-        <Select
-          options={categories}
-          placeholder="Chọn phân loại"
-          isClearable
-          onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
-        />
-        <Select
-          options={provinces.map(p => ({ value: p, label: p }))}
-          placeholder="Chọn địa điểm"
-          isClearable
-          onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
-        />
+    <div className="table-container">
+      <h2>Bộ lọc</h2>
+      <div className="filter-container">
+        <div className="select-wrapper">
+          <Select
+            options={categories}
+            placeholder="Chọn phân loại"
+            isClearable
+            onChange={(opt) => handleFilterChange('category', opt ? opt.value : '')}
+            className="filter-select"
+          />
+        </div>
+        <div className="select-wrapper">
+          <Select
+            options={provinces.map(p => ({ value: p, label: p }))}
+            placeholder="Chọn địa điểm"
+            isClearable
+            onChange={(opt) => handleFilterChange('location', opt ? opt.value : '')}
+            className="filter-select"
+          />
+        </div>
       </div>
 
       <h3>Bài đăng chờ duyệt</h3>

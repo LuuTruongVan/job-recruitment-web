@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Button, Table } from 'react-bootstrap';
-import '../assets/css/JobDetail.css';
 import '../assets/css/JobManagementDetail.css';
 
 const JobManagementDetail = () => {
@@ -91,49 +90,62 @@ const JobManagementDetail = () => {
     <div className="job-detail-container">
       <div className="job-detail-layout">
         <div className="job-content">
-          <p><strong>Tên công ty:</strong> {job.company_name || 'Chưa có'}</p>
-          <h2>{job.title}</h2>
-          <p><strong>Vị trí công việc:</strong> {job.job_position || 'Chưa có vị trí'}</p>
-          {expired && (
-            <p style={{ color: 'red', fontWeight: 'bold' }}>Bài đăng đã hết hạn</p>
-          )}
-          <div>
-            <strong>Thông tin công việc:</strong>
-            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
-              {job.job_info || 'Chưa có thông tin'}
+          <div className="job-header">
+            <div>
+              <h2>{job.title}</h2>
+              <p className="company-name">{job.company_name || 'Chưa có'}</p>
             </div>
+            {expired && (
+              <p className="expired-notice">Bài đăng đã hết hạn</p>
+            )}
           </div>
-          <div>
-            <strong>Yêu cầu công việc:</strong>
-            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
-              {job.job_requirements || 'Chưa có yêu cầu'}
+
+          <div className="job-info-grid">
+            <div>
+              <p><strong>Vị trí:</strong> {job.job_position}</p>
+              <p><strong>Hình thức:</strong> {job.employment_type || 'Chưa có'}</p>
+              <p>
+                <strong>Lương:</strong>{' '}
+                {job.salary
+                  ? `${parseInt(job.salary, 10).toLocaleString('vi-VN')} VND`
+                  : 'Chưa có'}
+              </p>
+              <p><strong>Địa chỉ:</strong> {job.location}</p>
             </div>
-          </div>
-          <div>
-            <strong>Quyền lợi:</strong>
-            <div style={{ whiteSpace: 'pre-line', marginTop: '4px' }}>
-              {job.benefits || 'Chưa có quyền lợi'}
+            <div>
+              <p><strong>Email liên hệ:</strong> {job.email_contact || 'Chưa có email'}</p>
+              <p><strong>Ngày đăng:</strong> {new Date(job.created_at).toLocaleDateString()}</p>
+              <p><strong>Hết hạn:</strong> {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</p>
+              <p><strong>Phân loại:</strong> {job.category}</p>
             </div>
           </div>
 
-          <p><strong>Lương:</strong> {job.salary} VND</p>
-          <p><strong>Phân loại:</strong> {job.category}</p>
-          <p><strong>Địa chỉ:</strong> {job.location}</p>
-          <p><strong>Email liên hệ:</strong> {job.email_contact || 'Chưa có email'}</p>
-          <p><strong>Ngày đăng:</strong> {new Date(job.created_at).toLocaleDateString()}</p>
-          <p><strong>Ngày hết hạn:</strong> {job.expiry_date ? new Date(job.expiry_date).toLocaleDateString() : 'Chưa có'}</p>
+          <div className="job-details-sections">
+            <div className="job-detail-box">
+              <h5>Thông tin công việc</h5>
+              <p style={{ whiteSpace: 'pre-line' }}>{job.job_info || 'Chưa có thông tin'}</p>
+            </div>
+            <div className="job-detail-box">
+              <h5>Yêu cầu công việc</h5>
+              <p style={{ whiteSpace: 'pre-line' }}>{job.job_requirements || 'Chưa có yêu cầu'}</p>
+            </div>
+            <div className="job-detail-box">
+              <h5>Quyền lợi</h5>
+              <p style={{ whiteSpace: 'pre-line' }}>{job.benefits || 'Chưa có quyền lợi'}</p>
+            </div>
+          </div>
 
-          {!expired && (
-            <Button variant="secondary" onClick={() => navigate('/manage-posts')} className="mt-3">
+          <div className="d-flex gap-2 mt-3">
+            <Button variant="outline-secondary" onClick={() => navigate('/manage-posts')}>
               Quay lại
             </Button>
-          )}
+          </div>
         </div>
 
         <div className="applications-content">
           {applications.length > 0 ? (
-            <div className="mt-4">
-              <h3>Danh sách ứng viên</h3>
+            <div className="job-detail-box">
+              <h5>Danh sách ứng viên</h5>
               <Table striped bordered hover className="responsive-table">
                 <thead>
                   <tr>
@@ -170,10 +182,18 @@ const JobManagementDetail = () => {
                       <td data-label="Hành động">
                         {(app.status !== 'approved' && app.status !== 'rejected') && (
                           <>
-                            <Button variant="success" onClick={() => handleApprove(app.id)} className="me-2">
+                            <Button
+                              variant="success"
+                              onClick={() => handleApprove(app.id)}
+                              className="me-2 action-btn"
+                            >
                               Duyệt
                             </Button>
-                            <Button variant="danger" onClick={() => handleReject(app.id)}>
+                            <Button
+                              variant="danger"
+                              onClick={() => handleReject(app.id)}
+                              className="action-btn"
+                            >
                               Từ chối
                             </Button>
                           </>
@@ -185,7 +205,9 @@ const JobManagementDetail = () => {
               </Table>
             </div>
           ) : (
-            <p>Chưa có ứng viên nào ứng tuyển.</p>
+            <div className="job-detail-box">
+              <p>Chưa có ứng viên nào ứng tuyển.</p>
+            </div>
           )}
         </div>
       </div>

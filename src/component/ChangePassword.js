@@ -105,6 +105,16 @@ const ChangePassword = ({ show, onHide }) => {
           </Button>
         </Form>
       </Modal.Body>
+      <style>
+        {`
+          .modal-backdrop {
+            z-index: 1300;
+          }
+          .modal {
+            z-index: 1400;
+          }
+        `}
+      </style>
     </Modal>
   );
 };

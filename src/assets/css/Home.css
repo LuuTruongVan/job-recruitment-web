@@ -2,107 +2,180 @@
   padding: 0;
   margin: 0;
   width: 100%;
+  position: relative;
 }
 
-.home-carousel {
+.job-carousel {
   width: 100vw;
   margin-left: calc(-50vw + 50%);
   height: 500px;
   overflow: hidden;
-  margin-top: 50px; /* Chỉ cần bằng chiều cao header fixed */
+  margin-top: 50px;
+  position: relative;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
 
-.home-carousel .carousel-item {
-  height: 500px;
+.job-carousel .carousel-inner {
+  display: flex;
+  height: 100%;
+  position: relative;
+  z-index: 2;
 }
 
-.home-carousel .carousel-item img {
+.job-carousel .carousel-item {
+  height: 300px;
+  width: 500px;
+  flex: 0 0 500px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.5s ease-in-out;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.job-carousel .carousel-item.active {
+  display: flex;
+}
+
+.job-carousel .carousel-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 10px;
 }
 
-.home-carousel .carousel-caption {
+.job-carousel .carousel-caption {
   background-color: rgba(0, 0, 0, 0.6);
-  padding: 10px;
+  padding: 5px;
   border-radius: 5px;
+  text-align: center;
+  color: #fff;
 }
 
-.home-filters {
+.job-carousel .carousel-caption h5 {
+  font-size: clamp(1.25rem, 2.5vw, 1.5rem); /* Tăng từ 18px lên ~20-24px */
+  margin: 0;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.job-carousel .carousel-caption .job-position {
+  font-size: clamp(0.875rem, 2vw, 1rem); /* Tăng từ 14px lên ~14-16px */
+  margin: 5px 0 0;
+  color: #ddd;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.job-carousel .carousel-control-prev,
+.job-carousel .carousel-control-next {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 10px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.job-carousel .carousel-control-prev {
+  left: calc(50% - 250px - 20px);
+}
+
+.job-carousel .carousel-control-next {
+  right: calc(50% - 250px - 20px);
+}
+
+.job-carousel .carousel-control-prev-icon,
+.job-carousel .carousel-control-next-icon {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* Media queries để tối ưu hóa trên các kích thước màn hình */
+@media (max-width: 768px) {
+  .job-carousel {
+    height: 300px;
+    background-size: contain;
+    background-position: center;
+  }
+
+  .job-carousel .carousel-item {
+    height: 200px;
+    width: 350px;
+    flex: 0 0 350px;
+  }
+
+  .job-carousel .carousel-control-prev {
+    left: calc(50% - 175px - 20px);
+  }
+
+  .job-carousel .carousel-control-next {
+    right: calc(50% - 175px - 20px);
+  }
+
+  .job-carousel .carousel-caption h5 {
+    font-size: 1.25rem; /* Nhỏ hơn một chút cho mobile */
+  }
+
+  .job-carousel .carousel-caption .job-position {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1200px) {
+  .job-carousel {
+    height: 400px;
+    background-size: cover;
+  }
+
+  .job-carousel .carousel-item {
+    height: 250px;
+    width: 400px;
+    flex: 0 0 400px;
+  }
+
+  .job-carousel .carousel-control-prev {
+    left: calc(50% - 200px - 20px);
+  }
+
+  .job-carousel .carousel-control-next {
+    right: calc(50% - 200px - 20px);
+  }
+}
+
+@media (min-width: 1201px) {
+  .job-carousel {
+    height: 500px;
+    background-size: cover;
+  }
+}
+
+.home-filters-wrapper {
   margin-bottom: 20px;
   margin-top: 30px;
-}
-
-.home-filters input {
-  padding: 8px;
-  margin-right: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.home-filters button {
-  padding: 8px 15px;
-}
-
-.home-job-listings {
-  margin-top: 20px;
-}
-
-.home-job-listings.row.align-items-stretch > div {
-  display: flex;
-}
-
-.home-job-listings .card {
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  transition: box-shadow 0.3s;
-  
-  display: flex !important;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.home-job-listings .card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.home-job-listings .card-body {
-  padding: 15px;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.home-job-listings .card-title {
-  font-size: 1.25rem;
-  margin-bottom: 10px;
-  flex-shrink: 0;
-  text-align: center;
-}
-
-.home-job-listings .job-description {
-  flex-grow: 1;
-  /* Giới hạn dòng hiển thị, tránh card quá cao */
-  display: -webkit-box;
-  -webkit-line-clamp: 7; /* Hiển thị tối đa 6 dòng */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.home-filters {
-  display: flex;
-  flex-wrap: nowrap; /* Không cho xuống hàng */
-  gap: 10px;
-  align-items: center;
-}
-
-.home-filters .form-control {
-  width: 150px; /* Ô lương nhỏ lại */
-}
-
-.home-filters .css-13cymwt-control {
-  min-width: 200px; /* Select giữ kích thước vừa đủ */
+  padding-left: 15px;
 }
 
 .home-filters-title {
@@ -111,4 +184,93 @@
   color: #007bff;
   text-decoration: underline;
   margin-bottom: 10px;
+  display: inline-block;
+}
+
+.home-filters {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 10px;
+  align-items: center;
+  padding-left: 15px;
+}
+
+.home-filters .form-control {
+  width: 150px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.home-filters .css-13cymwt-control {
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.home-job-listings {
+  margin-top: 30px;
+  padding-left: 15px;
+}
+
+.job-description {
+  margin-top: 10px;
+  font-size: clamp(0.875rem, 2vw, 1rem); /* Tăng từ 14px lên ~14-16px */
+  line-height: 1.6;
+}
+
+.favorite-icon {
+  font-size: 18px;
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+}
+
+.favorite-icon:hover {
+  color: red;
+}
+
+/* Căn giữa và thay đổi màu sắc cho nút */
+.card .d-flex.gap-2.p-2 {
+  justify-content: center; /* Căn giữa hai nút */
+  gap: 15px; /* Tăng khoảng cách giữa hai nút */
+}
+
+.card .btn {
+  background-color: #5b5a5a; /* Màu đen làm màu chủ đạo */
+  color: #fff; /* Chữ trắng */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.card .btn:hover {
+  background-color: #333; /* Màu xám đậm khi hover */
+  transform: translateY(-2px); /* Hiệu ứng nâng lên khi hover */
+  color: #fff; /* Giữ màu chữ trắng */
+}
+
+/* Thêm animation khi scroll */
+.home-job-listings .col-md-4 {
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.home-job-listings .col-md-4.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Thêm style cho FavoriteCard */
+.home-job-listings .card {
+  font-size: 1rem; /* Kích thước chữ cơ bản cho card */
+}
+
+.home-job-listings .card-title {
+  font-size: clamp(1.125rem, 2.5vw, 1.25rem); /* ~18-20px cho tiêu đề công việc */
+  font-weight: bold;
+}
+
+.home-job-listings .card-text {
+  font-size: clamp(0.875rem, 2vw, 1rem); /* ~14-16px cho nội dung mô tả */
 }

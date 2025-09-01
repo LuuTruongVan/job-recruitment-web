@@ -307,12 +307,28 @@ router.delete('/:id', async (req, res) => {
       return res.status(400).json({ message: 'No employer record found for this user' });
     }
     const employerId = employer[0].id;
+
     const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ? AND employer_id = ?', [id, employerId]);
-    if (job.length === 0) return res.status(403).json({ message: 'Unauthorized or job not found' });
-    await pool.query('DELETE FROM jobposts WHERE id = ?', [id]);
+    if (job.length === 0) {
+      return res.status(403).json({ message: 'Unauthorized or job not found' });
+    }
+
+    // Xóa các bản ghi liên quan trong favorites
+    await pool.query('DELETE FROM favorites WHERE jobpost_id = ?', [id]);
+
+    // Sau đó xóa bài đăng
+    const [result] = await pool.query('DELETE FROM jobposts WHERE id = ?', [id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Job not found during deletion' });
+    }
+
     res.json({ message: 'Job deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting job' });
+    console.error('Error deleting job ID:', id, 'Error:', error);
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(500).json({ message: 'Cannot delete job due to related records in other tables' });
+    }
+    res.status(500).json({ message: 'Error deleting job', error: error.message });
   }
 });
 
@@ -507,13 +523,27 @@ router.delete('/admin/:id', async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
+    const [job] = await pool.query('SELECT * FROM jobposts WHERE id = ?', [req.params.id]);
+    if (job.length === 0) {
+      return res.status(404).json({ message: 'Job post not found' });
+    }
+
+    // Xóa các bản ghi liên quan trong favorites
+    await pool.query('DELETE FROM favorites WHERE jobpost_id = ?', [req.params.id]);
+
+    // Sau đó xóa bài đăng
     const [result] = await pool.query('DELETE FROM jobposts WHERE id = ?', [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Job post not found' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Job post not found during deletion' });
+    }
 
     res.json({ message: 'Job post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting job post:', error);
-    res.status(500).json({ message: 'Error deleting job post' });
+    console.error('Error deleting job post ID:', req.params.id, 'Error:', error);
+    if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+      return res.status(500).json({ message: 'Cannot delete job post due to related records in other tables' });
+    }
+    res.status(500).json({ message: 'Error deleting job post', error: error.message });
   }
 });
 

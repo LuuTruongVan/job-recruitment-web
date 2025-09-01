@@ -1,0 +1,106 @@
+/* Toàn bộ trang */
+.manage-jobs {
+    padding: 24px;
+    background-color: #fff;
+    color: #222;
+    font-size: 16px; /* Font chữ to hơn mặc định */
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  /* Tiêu đề chính */
+  .manage-jobs h2 {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #111;
+    border-left: 5px solid #000;
+    padding-left: 10px;
+  }
+  
+  /* Bảng hiển thị công việc */
+  .manage-jobs table {
+    background-color: #fff;
+    border-radius: 8px;
+    border: 1px solid #eaeaea;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    font-size: 15px;
+  }
+  
+  .manage-jobs thead {
+    background-color: #f9f9f9;
+    color: #333;
+    font-weight: 600;
+  }
+  
+  .manage-jobs th,
+  .manage-jobs td {
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+  }
+  
+  /* Nút bấm */
+  .manage-jobs button {
+    font-size: 14px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: none;
+    transition: 0.2s ease-in-out;
+  }
+  
+  /* Nút Xem chi tiết */
+  .manage-jobs .btn-info {
+    background-color: #3c3c3c;
+    color: white;
+  }
+  
+  .manage-jobs .btn-info:hover {
+    background-color: #000;
+  }
+  
+  /* Nút Sửa */
+  .manage-jobs .btn-warning {
+    background-color: #666;
+    color: white;
+  }
+  
+  .manage-jobs .btn-warning:hover {
+    background-color: #444;
+  }
+  
+  /* Nút Xóa */
+  .manage-jobs .btn-danger {
+    background-color: #e74c3c;
+    color: white;
+  }
+  
+  .manage-jobs .btn-danger:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Nút Mở bảng hết hạn */
+  .manage-jobs .btn-open-expired {
+    background-color: #000;
+    color: #fff;
+    padding: 8px 18px;
+    font-weight: 600;
+    border-radius: 6px;
+    margin-top: 15px;
+  }
+  
+  .manage-jobs .btn-open-expired:hover {
+    background-color: #333;
+  }
+  
+  /* Badge trạng thái */
+  .manage-jobs .badge {
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  
+  /* Bảng hết hạn */
+  #expired-jobs {
+    margin-top: 15px;
+  }
+  
