@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Card, Button } from "react-bootstrap";
 
-const FavoriteCard = ({ job, navigate, toggleFavorite, handleApplyClick }) => {
+const FavoriteCard = ({ job, navigate, toggleFavorite, handleApplyClick, favorites }) => {
   const cardRef = useRef(null);
   const [isVisible, setIsVisible] = useState(false);
+  const isFavorited = favorites ? favorites.includes(job.id) : false;
 
   useEffect(() => {
-    const currentCard = cardRef.current; // ✅ Giải pháp fix warning
+    const currentCard = cardRef.current;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -24,13 +25,12 @@ const FavoriteCard = ({ job, navigate, toggleFavorite, handleApplyClick }) => {
       observer.observe(currentCard);
     }
 
-    // ✅ Dùng biến currentCard thay vì cardRef.current
     return () => {
       if (currentCard) {
         observer.unobserve(currentCard);
       }
     };
-  }, []); // Không cần thêm cardRef vào dependencies
+  }, []);
 
   return (
     <Card
@@ -45,21 +45,13 @@ const FavoriteCard = ({ job, navigate, toggleFavorite, handleApplyClick }) => {
           e.stopPropagation();
           toggleFavorite(job.id);
         }}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          cursor: "pointer",
-          color: "red",
-          background: "rgba(255,255,255,0.9)",
-          padding: "4px 8px",
-          borderRadius: "20px",
-          fontSize: "14px",
-          zIndex: 10,
-        }}
-        title="Bỏ yêu thích"
+        data-favorited={isFavorited}
+        title={isFavorited ? "Bỏ yêu thích" : "Thêm yêu thích"}
       >
-        <i className="bi bi-heart-fill"></i>
+        <i className={isFavorited ? "bi bi-heart-fill" : "bi bi-heart"}></i>
+        {job.favorite_count > 0 && (
+          <span className="favorite-count-badge">{job.favorite_count}</span>
+        )}
       </div>
 
       <Card.Body
@@ -68,14 +60,14 @@ const FavoriteCard = ({ job, navigate, toggleFavorite, handleApplyClick }) => {
       >
         <Card.Title className="text-center">{job.title}</Card.Title>
         <Card.Text className="job-description">
-          <strong>Vị trí công việc:</strong> {job.job_position}
+          <strong>Vị trí công việc:</strong> {job.job_position || "Chưa có"}
           <br />
           <strong>Trạng thái làm việc:</strong>{" "}
           {job.employment_type || "Chưa có"}
           <br />
           <strong>Tên công ty:</strong> {job.company_name || "Chưa có"}
           <br />
-          <strong>Địa chỉ:</strong> {job.location}
+          <strong>Địa chỉ:</strong> {job.location || "Chưa có"}
           <br />
           <strong>Mức lương:</strong>{" "}
           {job.salary

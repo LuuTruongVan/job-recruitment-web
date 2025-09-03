@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
 import { Navbar, Nav } from 'react-bootstrap';
 import ManageCandidates from './ManageCandidates';
@@ -12,6 +12,14 @@ import '../../assets/css/Admin.css';
 
 const AdminDashboard = () => {
   const [expanded, setExpanded] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  // Lắng nghe thay đổi kích thước màn hình
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleNavClick = () => {
     setExpanded(false);
@@ -19,46 +27,53 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <Navbar
-        bg="light"
-        expand="lg"
-        expanded={expanded}
-        className="admin-navbar"
-      >
+      <Navbar bg="light" expand="lg" className="admin-navbar">
         {/* Icon toggle cho mobile */}
-        <Navbar.Toggle
-          aria-controls="basic-navbar-nav"
-          onClick={() => setExpanded(expanded ? false : true)}
-          className="admin-toggle"
-        />
+        {isMobile && (
+          <button
+            className="admin-toggle"
+            onClick={() => setExpanded(true)}
+          >
+            ☰
+          </button>
+        )}
 
-        {/* Menu */}
-        <Navbar.Collapse id="basic-navbar-nav">
+        {/* Menu cho desktop */}
+        {!isMobile && (
           <Nav className="me-auto">
-            <Nav.Link as={NavLink} to="manage-users" onClick={handleNavClick}>
-              Quản lý người dùng
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="manage-candidates" onClick={handleNavClick}>
-              Quản lý ứng viên
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="manage-employers" onClick={handleNavClick}>
-              Quản lý nhà tuyển dụng
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="manage-job-posts" onClick={handleNavClick}>
-              Quản lý bài đăng
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="manage-applications" onClick={handleNavClick}>
-              Quản lý ứng tuyển
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="manage-job-categories" onClick={handleNavClick}>
-              Quản lý danh mục
-            </Nav.Link>
-            <Nav.Link as={NavLink} to="view-qualities" onClick={handleNavClick}>
-              Xem số liệu
-            </Nav.Link>
+            <Nav.Link as={NavLink} to="manage-users" onClick={handleNavClick}>Quản lý người dùng</Nav.Link>
+            <Nav.Link as={NavLink} to="manage-candidates" onClick={handleNavClick}>Quản lý ứng viên</Nav.Link>
+            <Nav.Link as={NavLink} to="manage-employers" onClick={handleNavClick}>Quản lý nhà tuyển dụng</Nav.Link>
+            <Nav.Link as={NavLink} to="manage-job-posts" onClick={handleNavClick}>Quản lý bài đăng</Nav.Link>
+            <Nav.Link as={NavLink} to="manage-applications" onClick={handleNavClick}>Quản lý ứng tuyển</Nav.Link>
+            <Nav.Link as={NavLink} to="manage-job-categories" onClick={handleNavClick}>Quản lý danh mục</Nav.Link>
+            <Nav.Link as={NavLink} to="view-qualities" onClick={handleNavClick}>Xem số liệu</Nav.Link>
           </Nav>
-        </Navbar.Collapse>
+        )}
       </Navbar>
+
+      {/* Modal cho mobile */}
+      {isMobile && expanded && (
+        <div className="mobile-menu-overlay" onClick={() => setExpanded(false)}>
+          <div
+            className="mobile-menu"
+            onClick={(e) => e.stopPropagation()} // Ngăn chặn đóng modal khi click bên trong
+          >
+            <button className="close-btn" onClick={() => setExpanded(false)}>
+              ✕
+            </button>
+            <Nav className="mobile-nav">
+              <Nav.Link as={NavLink} to="manage-users" onClick={handleNavClick}>Quản lý người dùng</Nav.Link>
+              <Nav.Link as={NavLink} to="manage-candidates" onClick={handleNavClick}>Quản lý ứng viên</Nav.Link>
+              <Nav.Link as={NavLink} to="manage-employers" onClick={handleNavClick}>Quản lý nhà tuyển dụng</Nav.Link>
+              <Nav.Link as={NavLink} to="manage-job-posts" onClick={handleNavClick}>Quản lý bài đăng</Nav.Link>
+              <Nav.Link as={NavLink} to="manage-applications" onClick={handleNavClick}>Quản lý ứng tuyển</Nav.Link>
+              <Nav.Link as={NavLink} to="manage-job-categories" onClick={handleNavClick}>Quản lý danh mục</Nav.Link>
+              <Nav.Link as={NavLink} to="view-qualities" onClick={handleNavClick}>Xem số liệu</Nav.Link>
+            </Nav>
+          </div>
+        </div>
+      )}
 
       <div className="content">
         <Routes>

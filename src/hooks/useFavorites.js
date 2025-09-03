@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   getFavorites,
   toggleFavorite as toggleFavoriteService,
@@ -25,6 +26,7 @@ export const useFavorites = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [favorites, setFavorites] = useState([]); // Thêm favorites để quản lý danh sách job id
 
   const navigate = useNavigate();
 
@@ -43,7 +45,7 @@ export const useFavorites = () => {
       const res = await getFavorites(token);
       const jobsData = res.data;
 
-      // Gán thông tin vị trí
+      // Gán thông tin vị trí và đổi tên count_favorite thành favorite_count
       const jobsWithPositions = await Promise.all(
         jobsData.map(async (job) => {
           if (job.job_position_id) {
@@ -56,10 +58,12 @@ export const useFavorites = () => {
           } else {
             job.job_position = "Chưa có vị trí";
           }
-          return job;
+          // Đổi tên count_favorite thành favorite_count
+          return { ...job, favorite_count: job.count_favorite || 0 };
         })
       );
 
+      setFavorites(jobsData.map((job) => job.id));
       setJobs(jobsWithPositions);
     } catch (err) {
       console.error("Error fetching favorites:", err);
@@ -89,16 +93,25 @@ export const useFavorites = () => {
     try {
       await toggleFavoriteService(jobId, token, isFavorite);
       if (isFavorite) {
+        setFavorites((prev) => prev.filter((id) => id !== jobId));
         setJobs((prev) => prev.filter((job) => job.id !== jobId));
       } else {
-        fetchFavorites();
+        // Gọi API để lấy favorite_count mới
+        const jobDetails = await axios.get(`/jobposts/${jobId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const newJob = {
+          ...jobDetails.data,
+          favorite_count: jobDetails.data.count_favorite || 0,
+        };
+        setFavorites((prev) => [...prev, jobId]);
+        setJobs((prev) => [...prev, newJob]);
       }
     } catch (err) {
       console.error("Error toggling favorite:", err);
       setError("Không thể cập nhật yêu thích.");
     }
   };
-  
 
   // Apply job
   const handleApplyClick = (job) => {
@@ -164,5 +177,6 @@ export const useFavorites = () => {
     handleFormChange,
     submitApplication,
     refreshFavorites: fetchFavorites,
+    favorites,
   };
 };

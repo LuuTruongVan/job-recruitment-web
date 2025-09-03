@@ -296,7 +296,7 @@ const Home = () => {
             ))
           ) : (
             <div className="carousel-item active">
-              <img src="https://via.placeholder.com/800x400" className="d-block w-100" alt="No jobs" />
+             
               <div className="carousel-caption">
                 <h5>Không có bài đăng</h5>
                 <p>Vui lòng thử lại sau.</p>
@@ -357,12 +357,13 @@ const Home = () => {
       className="col-md-4 mb-3 d-flex"
       key={job.id}
     >
-      <FavoriteCard
-        job={job}
-        navigate={navigate}
-        toggleFavorite={toggleFavorite}
-        handleApplyClick={handleApplyClick}
-      />
+     <FavoriteCard
+  job={job}
+  navigate={navigate}
+  toggleFavorite={toggleFavorite}
+  handleApplyClick={handleApplyClick}
+  favorites={favorites}
+/>
     </div>
   ))}
 </div>

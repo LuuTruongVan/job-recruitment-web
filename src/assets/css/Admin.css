@@ -10,6 +10,8 @@
   position: sticky;
   top: 74px;
   margin-top: 0;
+  margin-left:20px;
+  margin-right:20px;
 }
 
 /* Nội dung trong navbar */
@@ -23,13 +25,13 @@
   justify-content: center;
   flex-wrap: nowrap;
   gap: 8px;
-  background-color: transparent !important;
+  background-color: transparent ;
   max-width: 1200px;
   width: 100%;
 }
 
 .admin-navbar .nav-link {
-  color: white !important;
+  color: white ;
   font-weight: 500;
   font-size: 16px;
   padding: 10px 16px;
@@ -41,13 +43,13 @@
 
 .admin-navbar .nav-link:hover {
   background-color: #007bff;
-  color: #fff !important;
+  color: #fff ;
   transform: scale(1.05);
 }
 
 .admin-navbar .nav-link.active {
   background-color: #007bff;
-  color: #fff !important;
+  color: #fff ;
   font-weight: bold;
   border-color: #007bff;
 }
@@ -133,9 +135,9 @@
 }
 
 .btn-primary {
-  background-color: #000000 !important;
-  border-color: #0a0a0a !important;
-  color: white !important;
+  background-color: #ffc107 ;
+  border-color: #ffc107 ;
+  color: rgb(0, 0, 0) ;
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 6px;
@@ -143,15 +145,16 @@
 }
 
 .btn-primary:hover {
-  background-color: #373738 !important;
-  border-color: #2f2f2f !important;
+  background-color: #bf9106 ;
+  border-color: #bf9106 ;
   transform: scale(1.05);
+  color: white;
 }
 
 .btn-success {
   background-color: #28a745 ;
   border-color: #28a745 ;
-  color: white !important;
+  color: white ;
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 6px;
@@ -159,15 +162,15 @@
 }
 
 .btn-success:hover {
-  background-color: #218838 !important;
-  border-color: #218838 !important;
+  background-color: #218838 ;
+  border-color: #218838 ;
   transform: scale(1.05);
 }
 
 .btn-warning {
-  background-color: #ffc107 !important;
-  border-color: #ffc107 !important;
-  color: #000 !important;
+  background-color: #ffc107 ;
+  border-color: #ffc107 ;
+  color: #000 ;
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 6px;
@@ -175,15 +178,16 @@
 }
 
 .btn-warning:hover {
-  background-color: #e0a800 !important;
-  border-color: #e0a800 !important;
+  background-color: #e0a800 ;
+  border-color: #e0a800 ;
   transform: scale(1.05);
+  color:white;
 }
 
 .btn-secondary {
-  background-color: #6c757d !important;
-  border-color: #6c757d !important;
-  color: white !important;
+  background-color: #6c757d ;
+  border-color: #6c757d ;
+  color: white ;
   padding: 6px 12px;
   font-size: 14px;
   border-radius: 6px;
@@ -191,8 +195,8 @@
 }
 
 .btn-secondary:hover {
-  background-color: #5a6268 !important;
-  border-color: #5a6268 !important;
+  background-color: #5a6268 ;
+  border-color: #5a6268 ;
   transform: scale(1.05);
 }
 
@@ -416,4 +420,64 @@
     font-size: 16px;
     width: 50%;
   }
+}
+
+/* Overlay mờ */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2000;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Modal trượt từ phải sang */
+.mobile-menu {
+  background-color: rgb(51, 50, 50);
+  width: 250px;
+  height: 100%;
+  padding: 20px;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  transform: translateX(100%);
+  animation: slideIn 0.3s ease forwards;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Hiệu ứng trượt */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+/* Nút đóng modal */
+.close-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  margin-left: auto;
+  cursor: pointer;
+}
+
+/* Menu trong modal */
+.mobile-nav .nav-link {
+  color: white ;
+  font-size: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+
+.mobile-nav .nav-link:hover {
+  color: #007bff ;
 }

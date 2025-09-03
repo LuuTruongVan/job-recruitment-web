@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Form, Button, Alert } from "react-bootstrap";
 import logo from "../../assets/img/logo.png";
 import { useRegister } from "../../hooks/useRegister";
+import "../../assets/css/Register.css";
 
 const RegisterModal = ({ show, onHide, onSwitch }) => {
   const {
@@ -14,6 +15,12 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
     handleSubmit,
     handleVerifyOtp,
   } = useRegister(onSwitch);
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <Modal show={show} onHide={onHide} centered dialogClassName="small-register-modal">
@@ -51,15 +58,26 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
               />
             </Form.Group>
 
+            {/* Mật khẩu có icon con mắt */}
             <Form.Group className="mb-3">
               <Form.Label>Mật khẩu</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                value={userData.password}
-                onChange={handleChange}
-                required
-              />
+              <div className="password-container">
+                <Form.Control
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={userData.password}
+                  onChange={handleChange}
+                  required
+                  className="form-control password-input"
+                />
+                <button
+                  type="button"
+                  className="password-toggle-btn"
+                  onClick={togglePasswordVisibility}
+                >
+                  <i className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}></i>
+                </button>
+              </div>
             </Form.Group>
 
             <Form.Group className="mb-3">

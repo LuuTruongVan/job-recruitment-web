@@ -1,67 +1,101 @@
-/* src/components/Login.css */
+/* Form login tổng thể */
 .login-container {
-    background-color: #fff;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    max-width: 400px;
-    margin: 20px auto; /* Căn giữa form */
-  }
-  
-  .login-container h2 {
-    color: #333;
-    text-align: center;
-    margin-bottom: 20px;
-  }
-  
-  .login-container .alert-success {
-    color: #28a745; /* Màu xanh cho thành công */
-    background-color: #e9f5e9;
-    border-color: #c3e6cb;
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  
-  .login-container .alert-danger {
-    color: #dc3545; /* Màu đỏ cho lỗi */
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  
-  .login-container .form-group {
-    margin-bottom: 1.5rem;
-  }
-  
-  .login-container .form-label {
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .login-container .form-control {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px;
-    font-size: 1rem;
-  }
-  
-  .login-container .form-control:focus {
-    border-color: #000000;
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-  }
-  
-  .login-container .btn-primary {
-    background-color: #000000;
-    border-color: #000000;
-    padding: 10px 20px;
-    font-size: 1rem;
-    width: 100%; /* Nút chiếm toàn bộ chiều rộng */
-  }
-  
-  .login-container .btn-primary:hover {
-    background-color: #333333;
-    border-color: #333333;
-  }
+  background-color: #fff;
+  padding: 0;
+}
 
- 
+/* Tiêu đề */
+.login-container h2 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Alert */
+.login-container .alert-success {
+  color: #28a745;
+  background-color: #e9f5e9;
+  border-color: #c3e6cb;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.login-container .alert-danger {
+  color: #dc3545;
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+/* Input form */
+.login-container .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.login-container .form-label {
+  font-weight: bold;
+  color: #333;
+}
+
+.login-container .form-control {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.login-container .form-control:focus {
+  border-color: #000000;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Ô password */
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-input {
+  padding-right: 40px; /* chừa chỗ cho icon */
+}
+
+/* Nút icon mắt */
+.password-toggle-btn {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.password-toggle-btn:hover {
+  color: #000;
+}
+
+.password-toggle-btn i {
+  font-size: 1.2rem;
+}
+
+/* Nút chính */
+.login-container .btn-primary {
+  background-color: #ffc107;
+  border-color: #ffc107;
+  color:rgb(0, 0, 0);
+  padding: 10px 20px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.login-container .btn-primary:hover {
+  background-color: #bf9106;
+  border-color: #bf9106;
+  color:white;
+}
