@@ -40,5 +40,6 @@
 .card-animate.visible {
   opacity: 1;
   transform: translateY(0);
+  width:95%;
 }
 

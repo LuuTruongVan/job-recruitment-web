@@ -48,7 +48,7 @@
 .nav-link {
   color: #000000;
   text-decoration: none;
-  padding: 10px 15px;
+  padding: 6px 15px;
   font-size: 16px;
   white-space: nowrap;
   transition: color 0.3s, background-color 0.3s;
@@ -228,6 +228,7 @@
   justify-content: center;
   align-items: center;
   animation: fadeIn 0.3s ease-in-out;
+  border: #000000;
 }
 
 .notification-modal-content {
@@ -245,7 +246,8 @@
 
 .notification-dropdown-container {
   margin-top: 20px;
-  color: #ffffff;
+  color: #000000;
+  
 }
 
 /* Animation cho modal */

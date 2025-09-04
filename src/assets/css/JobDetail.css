@@ -1,3 +1,6 @@
+/* JobDetail.css */
+
+/* Container chính */
 .job-detail-container {
   max-width: 1150px;
   margin: 20px auto;
@@ -20,6 +23,7 @@
   position: relative;
   min-height: 180px;
   background-color: rgba(255, 255, 255, 0.9);
+  flex-wrap: wrap; /* Cho phép wrap trên mobile */
 }
 
 .company-header::before {
@@ -80,8 +84,9 @@
   text-decoration: underline;
 }
 
-/* Nút chat */
-.chat-btn {
+/* Nút chat và ứng tuyển */
+.chat-btn,
+.apply-now-btn {
   margin-top: 12px;
   background-color: #0c2491;
   border: none;
@@ -90,12 +95,16 @@
   border-radius: 8px;
   font-size: 15px;
   font-weight: 600;
-  transition: 0.25s ease;
+  transition: all 0.25s ease;
+  display: inline-block;
+  margin-right: 10px;
 }
 
-.chat-btn:hover {
+.chat-btn:hover,
+.apply-now-btn:hover {
   background-color: #076ba1;
   transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Nội dung công việc */
@@ -164,7 +173,6 @@
 }
 
 .job-detail-box p {
-  
   margin: 0;
   padding: 0;
   color: #000000;
@@ -172,23 +180,74 @@
   word-break: break-word;
 }
 
-/* Nút ứng tuyển ngay */
-.apply-now-btn {
-  margin-top: 10px;
-  margin-left: 8px;
-  background-color: #0c2491;
-  border: none;
-  color: white;
-  padding: 8px 18px;
-  border-radius: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  transition: all 0.25s ease;
-  display: inline-block;
+/* Responsive cho màn hình nhỏ hơn 768px */
+@media (max-width: 768px) {
+  .company-header {
+    flex-direction: column; /* Xếp dọc trên mobile */
+    align-items: flex-start;
+    padding: 15px;
+    min-height: 250px; /* Đảm bảo chiều cao đủ */
+  }
+
+  .company-avatar {
+    width: 80px; /* Giảm kích thước ảnh */
+    height: 80px;
+    margin: 0 auto 15px; /* Căn giữa và thêm khoảng cách */
+  }
+
+  .company-info {
+    text-align: center; /* Căn giữa nội dung */
+    width: 100%;
+  }
+
+  .company-info h3 {
+    font-size: 1.3rem; /* Giảm kích thước chữ */
+  }
+
+  .company-info p {
+    font-size: 0.85rem;
+  }
+
+  .chat-btn,
+  .apply-now-btn {
+    width: 100%; /* Nút bấm chiếm toàn chiều rộng */
+    margin: 8px 0; /* Xếp dọc với khoảng cách */
+  }
+
+  .company-header {
+    background-size: contain; /* Hình nền không kéo dãn */
+    background-position: top center;
+  }
+
+  .job-info-grid {
+    grid-template-columns: 1fr; /* Chuyển sang 1 cột */
+  }
 }
 
-.apply-now-btn:hover {
-  background-color: #076ba1;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+/* Responsive cho màn hình nhỏ hơn 480px */
+@media (max-width: 480px) {
+  .company-header {
+    padding: 10px;
+    min-height: 200px;
+  }
+
+  .company-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .company-info h3 {
+    font-size: 1.1rem;
+  }
+
+  .company-info p {
+    font-size: 0.75rem;
+  }
+
+  .job-detail-container {
+    padding: 10px;
+  }
+}
+.related-jobs-wrapper {
+  margin-top: 40px;
 }
