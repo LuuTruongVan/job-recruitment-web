@@ -14,6 +14,7 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
     handleChange,
     handleSubmit,
     handleVerifyOtp,
+    handleBack,
   } = useRegister(onSwitch);
 
   const [showPassword, setShowPassword] = useState(false);
@@ -58,7 +59,6 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
               />
             </Form.Group>
 
-            {/* Mật khẩu có icon con mắt */}
             <Form.Group className="mb-3">
               <Form.Label>Mật khẩu</Form.Label>
               <div className="password-container">
@@ -104,8 +104,15 @@ const RegisterModal = ({ show, onHide, onSwitch }) => {
                 required
               />
             </Form.Group>
-            <Button onClick={handleVerifyOtp} className="mt-3 w-100" variant="success">
+            <Button onClick={handleVerifyOtp} className="mt-3 w-100" variant="primary">
               Xác nhận OTP
+            </Button>
+            <Button
+              onClick={handleBack}
+              className="mt-2 w-100"
+              variant="outline-secondary"
+            >
+              Quay lại
             </Button>
           </div>
         )}

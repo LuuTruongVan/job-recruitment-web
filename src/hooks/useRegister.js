@@ -1,4 +1,3 @@
-// src/hooks/useRegister.js
 import { useState } from "react";
 import { registerUser, verifyRegisterOtp } from "../services/auth.service";
 
@@ -50,6 +49,12 @@ export const useRegister = (onSwitch) => {
     }
   };
 
+  const handleBack = () => {
+    setShowOtpForm(false);
+    setMessage("");
+    setOtp("");
+  };
+
   return {
     userData,
     message,
@@ -59,5 +64,6 @@ export const useRegister = (onSwitch) => {
     handleChange,
     handleSubmit,
     handleVerifyOtp,
+    handleBack,
   };
 };

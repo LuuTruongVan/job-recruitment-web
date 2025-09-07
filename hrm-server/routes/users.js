@@ -12,41 +12,104 @@ router.post('/add', async (req, res) => {
   // Tạo OTP 6 số
   const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
 
+  let connection;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const connection = await pool.getConnection();
+    connection = await pool.getConnection();
     await connection.beginTransaction();
 
-    // Thêm user, admin auto xác thực (is_verified = 1)
-    const [result] = await connection.execute(
-      'INSERT INTO users (name, email, password, role, is_verified) VALUES (?, ?, ?, ?, ?)',
-      [name, email, hashedPassword, role, role === 'admin' ? 1 : 0]
-    );
+    // Kiểm tra email tồn tại
+    const [existingUsers] = await connection.query('SELECT * FROM users WHERE email = ?', [email]);
 
-    const userId = result.insertId;
+    if (existingUsers.length > 0) {
+      const existingUser = existingUsers[0];
 
-    // Nếu là candidate hoặc employer → lưu OTP + tạo profile + gửi email
-    if (role !== 'admin') {
-      // Lưu OTP vào bảng otp_codes
+      // Nếu đã verified, báo lỗi
+      if (existingUser.is_verified === 1) {
+        await connection.rollback();
+        return res.status(409).json({ message: 'Email đã được sử dụng' });
+      }
+
+      // Đăng ký lại: Update user (name, password, role)
       await connection.execute(
-        'INSERT INTO otp_codes (user_id, token) VALUES (?, ?)',
-        [userId, otpCode]
+        'UPDATE users SET name = ?, password = ?, role = ? WHERE id = ?',
+        [name, hashedPassword, role, existingUser.id]
       );
 
+      // Xóa OTP cũ
+      await connection.execute('DELETE FROM otp_codes WHERE user_id = ?', [existingUser.id]);
+
+      // Insert OTP mới
+      await connection.execute(
+        'INSERT INTO otp_codes (user_id, token) VALUES (?, ?)',
+        [existingUser.id, otpCode]
+      );
+
+      // Xóa profile cũ (nếu có)
+      await connection.execute('DELETE FROM candidates WHERE user_id = ?', [existingUser.id]);
+      await connection.execute('DELETE FROM employers WHERE user_id = ?', [existingUser.id]);
+
+      // Tạo profile mới dựa trên role
       if (role === 'candidate') {
         await connection.execute(
           'INSERT INTO candidates (user_id, full_name, phone, address, skills) VALUES (?, ?, ?, ?, ?)',
-          [userId, name, '', '', '']
+          [existingUser.id, name, '', '', '']
         );
       } else if (role === 'employer') {
         await connection.execute(
           'INSERT INTO employers (user_id, name, address, email, website) VALUES (?, ?, ?, ?, ?)',
-          [userId, name, '', email, '']
+          [existingUser.id, name, '', email, '']
         );
       }
 
-      // Gửi OTP qua email
-      try {
+      // Gửi OTP mới qua email
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS
+        }
+      });
+
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Mã OTP xác thực tài khoản',
+        html: `<p>Mã OTP của bạn là: <b>${otpCode}</b></p><p>Mã này sẽ hết hạn sau 10 phút.</p>`
+      });
+
+      await connection.commit();
+      return res.status(201).json({
+        message: 'Đăng ký lại thành công! Vui lòng kiểm tra email để lấy mã OTP và xác thực.'
+      });
+    } else {
+      // Email không tồn tại: Insert mới
+      const [result] = await connection.execute(
+        'INSERT INTO users (name, email, password, role, is_verified) VALUES (?, ?, ?, ?, ?)',
+        [name, email, hashedPassword, role, role === 'admin' ? 1 : 0]
+      );
+
+      const userId = result.insertId;
+
+      if (role !== 'admin') {
+        await connection.execute(
+          'INSERT INTO otp_codes (user_id, token) VALUES (?, ?)',
+          [userId, otpCode]
+        );
+
+        if (role === 'candidate') {
+          await connection.execute(
+            'INSERT INTO candidates (user_id, full_name, phone, address, skills) VALUES (?, ?, ?, ?, ?)',
+            [userId, name, '', '', '']
+          );
+        } else if (role === 'employer') {
+          await connection.execute(
+            'INSERT INTO employers (user_id, name, address, email, website) VALUES (?, ?, ?, ?, ?)',
+            [userId, name, '', email, '']
+          );
+        }
+
+        // Gửi OTP
         const transporter = nodemailer.createTransport({
           service: 'gmail',
           auth: {
@@ -61,20 +124,21 @@ router.post('/add', async (req, res) => {
           subject: 'Mã OTP xác thực tài khoản',
           html: `<p>Mã OTP của bạn là: <b>${otpCode}</b></p><p>Mã này sẽ hết hạn sau 10 phút.</p>`
         });
-      } catch (emailError) {
-        console.error('Lỗi gửi email OTP:', emailError);
       }
-    }
 
-    await connection.commit();
-    res.status(201).json({
-      message: role === 'admin'
-        ? 'Thêm admin thành công!'
-        : 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP và xác thực.'
-    });
+      await connection.commit();
+      res.status(201).json({
+        message: role === 'admin'
+          ? 'Thêm admin thành công!'
+          : 'Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP và xác thực.'
+      });
+    }
   } catch (error) {
+    if (connection) await connection.rollback();
     console.error('Error in /users/add:', error);
-    res.status(500).json({ message: 'Error adding user' });
+    res.status(500).json({ message: 'Lỗi server khi đăng ký' });
+  } finally {
+    if (connection) connection.release();
   }
 });
 

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {  Form } from 'react-bootstrap';
+import { Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Select from 'react-select';
 import '../assets/css/Home.css';
 import ApplyModal from '../component/ApplyModal';
-import slide1 from '../assets/img/slide1.jpg'; // Import ảnh slide1
+import slide1 from '../assets/img/slide1.jpg';
 import FavoriteCard from '../component/favorites/FavoriteCard';
 
 const provinces = [
@@ -290,13 +290,11 @@ const Home = () => {
                 />
                 <div className="carousel-caption">
                   <h5>{job.title}</h5>
-                  <p className="job-position">{job.job_position || 'Chưa có vị trí'}</p>
                 </div>
               </div>
             ))
           ) : (
             <div className="carousel-item active">
-             
               <div className="carousel-caption">
                 <h5>Không có bài đăng</h5>
                 <p>Vui lòng thử lại sau.</p>
@@ -307,10 +305,12 @@ const Home = () => {
         {jobs.filter(job => job.job_image).length > 1 && (
           <>
             <button className="carousel-control-prev" onClick={handlePrevSlide}>
-              <span className="carousel-control-prev-icon" aria-hidden="true">&lt;</span>
+              <i className="bi bi-chevron-left"></i>
+              <span className="visually-hidden">Previous</span>
             </button>
             <button className="carousel-control-next" onClick={handleNextSlide}>
-              <span className="carousel-control-next-icon" aria-hidden="true">&gt;</span>
+              <i className="bi bi-chevron-right"></i>
+              <span className="visually-hidden">Next</span>
             </button>
           </>
         )}
@@ -351,23 +351,22 @@ const Home = () => {
 
       {/* Danh sách job */}
       <div className="home-job-listings row align-items-stretch">
-  {jobs.map((job, index) => (
-    <div
-      ref={(el) => (cardRefs.current[index] = el)}
-      className="col-md-4 mb-3 d-flex"
-      key={job.id}
-    >
-     <FavoriteCard
-  job={job}
-  navigate={navigate}
-  toggleFavorite={toggleFavorite}
-  handleApplyClick={handleApplyClick}
-  favorites={favorites}
-/>
-    </div>
-  ))}
-</div>
-
+        {jobs.map((job, index) => (
+          <div
+            ref={(el) => (cardRefs.current[index] = el)}
+            className="col-md-4 mb-3 d-flex"
+            key={job.id}
+          >
+            <FavoriteCard
+              job={job}
+              navigate={navigate}
+              toggleFavorite={toggleFavorite}
+              handleApplyClick={handleApplyClick}
+              favorites={favorites}
+            />
+          </div>
+        ))}
+      </div>
 
       <ApplyModal
         show={showApplyModal}
@@ -377,6 +376,49 @@ const Home = () => {
         submitApplication={submitApplication}
         applyMessage={applyMessage}
       />
+
+      <style>
+        {`
+          .carousel-control-prev,
+          .carousel-control-next {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.3s ease;
+          }
+          .carousel-control-prev:hover,
+          .carousel-control-next:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+          }
+          .carousel-control-prev i,
+          .carousel-control-next i {
+            font-size: 24px;
+            color: #fff;
+          }
+          .carousel-control-prev {
+            left: 10px;
+          }
+          .carousel-control-next {
+            right: 10px;
+          }
+          .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            border: 0;
+          }
+        `}
+      </style>
     </div>
   );
 };
