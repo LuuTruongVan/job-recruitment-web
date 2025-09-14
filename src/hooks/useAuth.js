@@ -1,6 +1,11 @@
 import { useState } from "react";
 import jwt from "jsonwebtoken";
-import { login, sendOtp, verifyOtp, resetPassword } from "../services/auth.service";
+import {
+  login,
+  sendOtp,           // Giữ tên cũ nhưng sẽ gọi sendResetOtp
+  verifyOtp,         // Giữ tên cũ nhưng sẽ gọi verifyResetOtp
+  resetPassword
+} from "../services/auth.service";
 
 export const useAuth = (onSuccess) => {
   const [mode, setMode] = useState("login"); // login | forgot | verifyOtp | resetPassword
@@ -16,6 +21,7 @@ export const useAuth = (onSuccess) => {
     }
   };
 
+  // Đăng nhập
   const handleSubmitLogin = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -44,6 +50,7 @@ export const useAuth = (onSuccess) => {
     }
   };
 
+  // Gửi OTP quên mật khẩu
   const handleSendOtp = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -56,6 +63,7 @@ export const useAuth = (onSuccess) => {
     }
   };
 
+  // Xác minh OTP quên mật khẩu
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setMessage("");
@@ -70,11 +78,15 @@ export const useAuth = (onSuccess) => {
     }
   };
 
+  // Đặt lại mật khẩu
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setMessage("");
     try {
-      const res = await resetPassword(otpData.email, otpData.newPassword);
+      const res = await resetPassword({
+        email: otpData.email,
+        newPassword: otpData.newPassword,
+      });
       setMessage(res.data.message);
       if (res.data.message.includes("thành công")) {
         setMode("login");
