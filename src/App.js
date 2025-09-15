@@ -52,7 +52,7 @@ function App() {
           const userData = response.data;
           setUser(userData);
 
-          // Kết nối socket ngay khi login
+          
           socket.emit("joinUser", userData.id);
 
           if (userData.role === "admin" && window.location.pathname !== "/admin") {

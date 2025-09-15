@@ -2,8 +2,8 @@
 .navbar {
   background-color: #646262;
   padding: 6px 0;
-  position: sticky; /* Hoặc fixed nếu muốn cố định */
-  top: 72px; /* Dính ngay dưới header (chiều cao header là 70px) */
+  position: sticky; 
+  top: 72px; 
   z-index: 900;
   margin-bottom: 64px;
   height:38px;
@@ -13,11 +13,11 @@
 
 .navbar .container-fluid {
   display: flex;
-  justify-content: flex-start; /* Lệch trái */
+  justify-content: flex-start; 
 }
 
 .breadcrumb-wrapper {
-  margin-left: 64px; /* Cách lề trái 64px cho đồng bộ với logo header */
+  margin-left: 64px; 
 }
 
 .breadcrumb-nav .breadcrumb {

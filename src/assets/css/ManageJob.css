@@ -3,11 +3,11 @@
     padding: 24px;
     background-color: #fff;
     color: #222;
-    font-size: 16px; /* Font chữ to hơn mặc định */
+    font-size: 16px; 
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   }
   
-  /* Tiêu đề chính */
+
   .manage-jobs h2 {
     font-size: 22px;
     font-weight: bold;
@@ -16,8 +16,7 @@
     border-left: 5px solid #000;
     padding-left: 10px;
   }
-  
-  /* Bảng hiển thị công việc */
+
   .manage-jobs table {
     background-color: #fff;
     border-radius: 8px;
@@ -39,7 +38,7 @@
     vertical-align: middle;
   }
   
-  /* Nút bấm */
+
   .manage-jobs button {
     font-size: 14px;
     padding: 6px 14px;
@@ -48,7 +47,7 @@
     transition: 0.2s ease-in-out;
   }
   
-  /* Nút Xem chi tiết */
+
   .manage-jobs .btn-info {
     background-color: #3c3c3c;
     color: white;
@@ -58,7 +57,7 @@
     background-color: #000;
   }
   
-  /* Nút Sửa */
+
   .manage-jobs .btn-warning {
     background-color: #666;
     color: white;
@@ -68,7 +67,7 @@
     background-color: #444;
   }
   
-  /* Nút Xóa */
+
   .manage-jobs .btn-danger {
     background-color: #e74c3c;
     color: white;
@@ -78,7 +77,7 @@
     background-color: #c0392b;
   }
   
-  /* Nút Mở bảng hết hạn */
+
   .manage-jobs .btn-open-expired {
     background-color: #000;
     color: #fff;
@@ -92,14 +91,13 @@
     background-color: #333;
   }
   
-  /* Badge trạng thái */
+ 
   .manage-jobs .badge {
     font-size: 13px;
     padding: 6px 10px;
     border-radius: 6px;
   }
-  
-  /* Bảng hết hạn */
+
   #expired-jobs {
     margin-top: 15px;
   }

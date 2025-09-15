@@ -114,7 +114,7 @@ const PostJob = () => {
     jobDataToSave.append('expiry_date', job.expiry_date || null);
     jobDataToSave.append('employmentType', job.employmentType || '');
     if (job.job_image) {
-      jobDataToSave.append('job_image', job.job_image); // Thêm ảnh vào FormData
+      jobDataToSave.append('job_image', job.job_image); 
     }
 
     try {
@@ -139,7 +139,7 @@ const PostJob = () => {
         category: '',
         expiry_date: '',
         employmentType: '',
-        job_image: null // Reset ảnh
+        job_image: null 
       });
     } catch (error) {
       setMessage('Lỗi khi đăng tin: ' + (error.response?.data?.message || error.message));

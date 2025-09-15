@@ -65,11 +65,11 @@ const Home = () => {
       const response = await axios.get('/jobposts', { params });
       let jobsData = response.data;
 
-      // Lọc bài đăng chưa hết hạn
+     
       const currentDate = new Date();
       jobsData = jobsData.filter(job => !job.expiry_date || new Date(job.expiry_date) > currentDate);
 
-      // Lọc bỏ bài đăng không có ảnh khỏi slide
+      
       jobsData = jobsData.map(job => ({
         ...job,
         job_image: job.job_image && job.job_image.trim() !== '' ? job.job_image : null
@@ -98,7 +98,7 @@ const Home = () => {
       );
 
       setJobs(jobsWithPositions);
-      setActiveIndex(0); // Reset slide về đầu khi load lại
+      setActiveIndex(0); 
     } catch (error) {
       console.error('Error fetching jobs:', error);
     }
@@ -131,7 +131,7 @@ const Home = () => {
     }
   }, [fetchJobs, fetchFavorites, token]);
 
-  // Tự động chuyển slide
+
   useEffect(() => {
     const jobsWithImages = jobs.filter(job => job.job_image);
     if (jobsWithImages.length <= 1) return;
@@ -240,7 +240,7 @@ const Home = () => {
     }
   };
 
-  // Thêm hiệu ứng scroll
+
   useEffect(() => {
     const elements = cardRefs.current;
     const observer = new IntersectionObserver(

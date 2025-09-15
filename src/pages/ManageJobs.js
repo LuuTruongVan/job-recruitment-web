@@ -39,7 +39,6 @@ const ManageJobs = () => {
           })
         );
 
-        // Lọc bài chưa hết hạn & bài đã hết hạn
         const validJobs = jobsWithPositions.filter(
           (job) =>
             !job.expiry_date ||
@@ -60,7 +59,7 @@ const ManageJobs = () => {
   }, []);
 
   const handleDelete = async (id) => {
-    // Thêm xác nhận trước khi xóa
+   
     if (!window.confirm('Bạn có chắc muốn xóa bài đăng này?')) return;
     const token = localStorage.getItem("employer_token");
     try {
@@ -83,7 +82,7 @@ const ManageJobs = () => {
     navigate(`/job-management-detail/${id}`);
   };
 
-  // Hiển thị trạng thái duyệt
+ 
   const renderStatus = (status) => {
     switch (status) {
       case "approved":

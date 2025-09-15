@@ -2,13 +2,13 @@ import { useState } from "react";
 import jwt from "jsonwebtoken";
 import {
   login,
-  sendOtp,           // Giữ tên cũ nhưng sẽ gọi sendResetOtp
-  verifyOtp,         // Giữ tên cũ nhưng sẽ gọi verifyResetOtp
+  sendOtp,          
+  verifyOtp,         
   resetPassword
 } from "../services/auth.service";
 
 export const useAuth = (onSuccess) => {
-  const [mode, setMode] = useState("login"); // login | forgot | verifyOtp | resetPassword
+  const [mode, setMode] = useState("login"); 
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [otpData, setOtpData] = useState({ email: "", otp: "", newPassword: "" });
   const [message, setMessage] = useState("");

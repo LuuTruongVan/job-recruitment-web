@@ -9,17 +9,17 @@
   flex-grow: 1;
 }
 
-/* Giới hạn số dòng mô tả giống Home */
+
 .job-description {
   flex-grow: 1;
   display: -webkit-box;
-  -webkit-line-clamp: 7; /* giống Home */
+  -webkit-line-clamp: 7; 
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Đồng bộ chiều cao tiêu đề */
+
 .card-title {
   min-height: 50px;
   display: flex;
@@ -28,9 +28,8 @@
   text-align: center;
 }
 
-/* Favorites.css */
 
-/* Animation hiện từ dưới lên */
+
 .card-animate {
   opacity: 0;
   transform: translateY(40px);

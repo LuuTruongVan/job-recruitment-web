@@ -5,7 +5,7 @@ const Breadcrumb = () => {
   const location = useLocation();
   const pathnames = location.pathname.split('/').filter((x) => x);
 
-  // Đặc biệt cho trang home, chỉ hiển thị "Trang chủ"
+
   if (location.pathname === '/home') {
     return (
       <nav className="breadcrumb-nav">
@@ -30,9 +30,9 @@ const Breadcrumb = () => {
           {pathnames.map((value, index) => {
             const to = `/${pathnames.slice(0, index + 1).join('/')}`;
             const isLast = index === pathnames.length - 1;
-            // Loại bỏ ID (giả định ID là số)
+     
             const isId = !isNaN(value) || value.match(/^\d+$/);
-            if (isId && isLast) return null; // Bỏ ID ở cuối
+            if (isId && isLast) return null; 
             const displayName = isId ? (isLast ? 'Chi tiết' : 'Job') : value
               .replace('-', ' ')
               .replace(/\b\w/g, (l) => l.toUpperCase());

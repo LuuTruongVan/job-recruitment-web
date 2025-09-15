@@ -486,10 +486,3 @@
   color: #007bff ;
 }
 
-.scale-on-hover {
-  transition: transform 0.2s;
-}
-
-.scale-on-hover:hover {
-  transform: scale(1.05);
-}

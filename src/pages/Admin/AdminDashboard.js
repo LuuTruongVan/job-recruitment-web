@@ -14,7 +14,7 @@ const AdminDashboard = () => {
   const [expanded, setExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Lắng nghe thay đổi kích thước màn hình
+  
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
@@ -57,7 +57,7 @@ const AdminDashboard = () => {
         <div className="mobile-menu-overlay" onClick={() => setExpanded(false)}>
           <div
             className="mobile-menu"
-            onClick={(e) => e.stopPropagation()} // Ngăn chặn đóng modal khi click bên trong
+            onClick={(e) => e.stopPropagation()} 
           >
             <button className="close-btn" onClick={() => setExpanded(false)}>
               ✕

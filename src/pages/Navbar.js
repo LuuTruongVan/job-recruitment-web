@@ -3,7 +3,7 @@ import '../assets/css/Navbar.css';
 import Breadcrumb from '../component/Breadcrumb';
 
 const Navbar = ({ user }) => {
-  // Nếu là admin thì không hiển thị Navbar
+  
   if (user?.role === 'admin') {
     return null;
   }

@@ -95,16 +95,16 @@ const EditJob = () => {
       emailContact: job.emailContact || '',
       expiry_date: job.expiry_date || null
     };
-    console.log('Sending job data for update:', jobDataToSave); // Debug dữ liệu gửi đi
+    console.log('Sending job data for update:', jobDataToSave); 
     try {
       const response = await axios.put(`/jobposts/${id}`, jobDataToSave, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      console.log('Server response:', response.data); // Debug phản hồi từ server
+      console.log('Server response:', response.data); 
       setMessage('Cập nhật tin thành công!');
       setTimeout(() => navigate('/manage-posts'), 1000);
     } catch (error) {
-      console.error('Update job error:', error.response?.data || error.message); // Debug lỗi
+      console.error('Update job error:', error.response?.data || error.message); 
       setMessage('Lỗi khi cập nhật tin: ' + (error.response?.data?.message || error.message));
     }
   };

@@ -24,7 +24,7 @@ const userController = {
 
         await userModel.updateUser(connection, name, hashedPassword, role, existingUser.id);
         await userModel.deleteOtpCode(connection, existingUser.id);
-        const otpCode = userService.generateOtp(); // Tạo OTP một lần
+        const otpCode = userService.generateOtp(); 
         await userModel.createOtpCode(connection, existingUser.id, otpCode);
         await userModel.deleteCandidateProfile(connection, existingUser.id);
         await userModel.deleteEmployerProfile(connection, existingUser.id);
@@ -35,7 +35,7 @@ const userController = {
           await userModel.createEmployerProfile(connection, existingUser.id, name, email);
         }
 
-        await userService.sendOtpEmail(email, otpCode); // Sử dụng OTP đã tạo
+        await userService.sendOtpEmail(email, otpCode); 
         await connection.commit();
         return res.status(201).json({
           message: 'Đăng ký lại thành công! Vui lòng kiểm tra email để lấy mã OTP và xác thực.'
@@ -43,14 +43,14 @@ const userController = {
       } else {
         const userId = await userModel.createUser(connection, name, email, hashedPassword, role);
         if (role !== 'admin') {
-          const otpCode = userService.generateOtp(); // Tạo OTP một lần
+          const otpCode = userService.generateOtp(); 
           await userModel.createOtpCode(connection, userId, otpCode);
           if (role === 'candidate') {
             await userModel.createCandidateProfile(connection, userId, name);
           } else if (role === 'employer') {
             await userModel.createEmployerProfile(connection, userId, name, email);
           }
-          await userService.sendOtpEmail(email, otpCode); // Sử dụng OTP đã tạo
+          await userService.sendOtpEmail(email, otpCode); 
         }
         await connection.commit();
         res.status(201).json({
@@ -310,7 +310,7 @@ const userController = {
 
   verifyOtp: async (req, res) => {
     const { email, otp } = req.body;
-    console.log('Verifying OTP for email:', email, 'with OTP:', otp); // Debug log
+    console.log('Verifying OTP for email:', email, 'with OTP:', otp); 
 
     try {
       const connection = await pool.getConnection();
@@ -322,10 +322,10 @@ const userController = {
       }
 
       const userId = users[0].id;
-      const connection2 = await pool.getConnection(); // Kết nối mới cho verify
-      const rows = await userModel.verifyOtp(connection2, userId, otp); // Sử dụng hàm verifyOtp
+      const connection2 = await pool.getConnection(); 
+      const rows = await userModel.verifyOtp(connection2, userId, otp); 
       connection2.release();
-      console.log('OTP rows from DB:', rows); // Debug log
+      console.log('OTP rows from DB:', rows); 
 
       if (rows.length === 0) {
         return res.status(400).json({ message: 'Mã OTP không đúng hoặc đã hết hạn' });
@@ -342,21 +342,21 @@ const userController = {
   forgotPassword: async (req, res) => {
     const { email } = req.body;
     try {
-      // Kiểm tra email có tồn tại không
+     
       const [users] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
       if (users.length === 0) {
         return res.status(404).json({ message: 'Email không tồn tại!' });
       }
 
-      // Tạo và lưu OTP
+  
       const otp = userService.generateOtp();
       const [result] = await pool.query(
         'INSERT INTO reset_password_tokens (email, otp, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))',
         [email, otp]
       );
-      console.log('Inserted reset token for email:', email, 'OTP:', otp, 'ID:', result.insertId); // Debug log
+      console.log('Inserted reset token for email:', email, 'OTP:', otp, 'ID:', result.insertId); 
 
-      // Gửi OTP qua email
+     
       await userService.sendOtpEmail(email, otp, 'Mã OTP đặt lại mật khẩu');
       res.json({ message: 'Đã gửi mã OTP tới email!' });
     } catch (error) {
@@ -372,7 +372,7 @@ const userController = {
         'SELECT * FROM reset_password_tokens WHERE email = ? AND otp = ? AND expires_at > NOW() ORDER BY id DESC LIMIT 1',
         [email, otp]
       );
-      console.log('Verify reset OTP request:', { email, otp }, 'Rows:', rows); // Debug log
+      console.log('Verify reset OTP request:', { email, otp }, 'Rows:', rows); 
       if (rows.length === 0) {
         return res.status(400).json({ message: 'OTP không hợp lệ hoặc đã hết hạn!' });
       }

@@ -12,7 +12,7 @@ import {
   Legend
 } from 'chart.js';
 
-// Đăng ký các thành phần Chart.js
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const ViewQualities = () => {
@@ -31,7 +31,7 @@ const ViewQualities = () => {
       axios.get('http://localhost:3001/candidates/count'),
       axios.get('http://localhost:3001/employers/count'),
       axios.get('http://localhost:3001/applications/count'),
-      axios.get('http://localhost:3001/categories/count') // Thêm ngành làm việc
+      axios.get('http://localhost:3001/categories/count') 
     ])
       .then(([jobPostsRes, candidatesRes, employersRes, applicationsRes, categoriesRes]) => {
         setStats({

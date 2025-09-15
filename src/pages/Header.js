@@ -400,7 +400,7 @@ const Header = ({ user, handleLogout, setShowChangePassword }) => {
               className="close-button"
               onClick={() => setShowNotificationModal(false)}
             >
-              <X size={40} padding="10px" color="#333" />
+              <X size={40}  color="#333" />
             </button>
             <div className="notification-dropdown-container">
               <NotificationDropdown

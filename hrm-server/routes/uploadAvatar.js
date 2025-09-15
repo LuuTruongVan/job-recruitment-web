@@ -6,13 +6,12 @@ const fs = require('fs');
 
 const router = express.Router();
 
-// Tạo thư mục lưu avatar nếu chưa tồn tại
+
 const uploadDir = path.join(__dirname, '../uploads/avt');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// Cấu hình multer lưu file avatar
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, uploadDir);
@@ -24,7 +23,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// API upload avatar
+
 router.post('/', upload.single('avatar'), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });

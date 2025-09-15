@@ -1,4 +1,4 @@
-// controllers/jobpostsController.js
+
 const pool = require("../db");
 
 const JobpostsService = require('../services/jobpostsService');
@@ -7,7 +7,7 @@ const jwt = require('jsonwebtoken');
 
 const JobpostsController = {
 
-  // Đếm số jobposts
+ 
   count: async (req, res) => {
     try {
       const count = await JobpostsModel.count();
@@ -17,7 +17,7 @@ const JobpostsController = {
     }
   },
 
-  // Lấy tất cả jobposts (có thể filter)
+
   getAll: async (req, res) => {
     try {
       const { category, location, salary, minFavorite } = req.query;
@@ -35,7 +35,7 @@ const JobpostsController = {
   },
   
 
-  // Lấy job theo ID
+  
   getById: async (req, res) => {
     try {
       const job = await JobpostsModel.getById(req.params.id);
@@ -66,7 +66,7 @@ const JobpostsController = {
   
       const employerId = employer[0].id;
   
-      // Lấy danh sách jobposts của employer này
+      
       const jobs = await JobpostsModel.getByEmployerId(employerId);
       res.json(jobs);
   
@@ -76,7 +76,7 @@ const JobpostsController = {
     }
   },
 
-  // Tạo job mới
+  
   create: async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -90,7 +90,7 @@ const JobpostsController = {
     }
   },
 
-  // Cập nhật job
+  
   update: async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -104,7 +104,7 @@ const JobpostsController = {
     }
   },
 
-  // Xóa job
+  
   delete: async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'No token provided' });
@@ -118,7 +118,7 @@ const JobpostsController = {
     }
   },
 
-  // Job positions
+  
   getJobPositions: async (req, res) => {
     try {
       const positions = await JobpostsModel.getJobPositions(req.query.category);
@@ -180,7 +180,7 @@ const JobpostsController = {
     }
   },
 
-  // Admin cập nhật trạng thái
+  
   adminUpdateStatus: async (req, res) => {
     try {
       const { status } = req.body;
@@ -192,7 +192,7 @@ const JobpostsController = {
     }
   },
 
-  // Admin xóa job
+  
   adminDelete: async (req, res) => {
     try {
       const result = await JobpostsModel.delete(req.params.id);

@@ -19,7 +19,7 @@ const Profile = () => {
       }).then(response => {
         const userData = response.data;
         setUser(userData);
-        setProfileData(userData); // Dùng trực tiếp dữ liệu từ get-profile
+        setProfileData(userData); 
       }).catch(error => {
         setError('Không thể tải thông tin hồ sơ.');
         console.error('Profile error:', error.response?.data || error.message);

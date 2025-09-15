@@ -10,7 +10,6 @@ const ManageApplications = () => {
   const navigate = useNavigate();
   const { applications, error, translateStatus, handleCancelApplication } = useApplications();
 
-  // Thêm xác nhận trước khi hủy ứng tuyển
   const handleCancelWithConfirm = (id) => {
     if (!window.confirm('Bạn có chắc muốn hủy ứng tuyển này?')) return;
     handleCancelApplication(id);
@@ -18,7 +17,7 @@ const ManageApplications = () => {
 
   return (
     <div
-      className="manage-applications" // Thay đổi class từ job-detail-container
+      className="manage-applications" 
       style={{ maxWidth: "100%", width: "1200px", margin: "0 auto" }}
     >
       <div className="applications-content">
@@ -29,7 +28,7 @@ const ManageApplications = () => {
           <ApplicationsTable
             applications={applications}
             translateStatus={translateStatus}
-            handleCancelApplication={handleCancelWithConfirm} // Sử dụng hàm có xác nhận
+            handleCancelApplication={handleCancelWithConfirm} 
           />
         ) : (
           <p>Bạn chưa ứng tuyển vào công việc nào.</p>

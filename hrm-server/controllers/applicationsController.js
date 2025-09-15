@@ -1,5 +1,4 @@
 const pool = require('../db');
-
 const jwt = require('jsonwebtoken');
 const ApplicationsModel = require('../models/applicationsModel');
 const ApplicationsServices = require('../services/applicationsService');

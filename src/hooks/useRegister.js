@@ -41,7 +41,7 @@ export const useRegister = (onSwitch) => {
       if ((res.data?.message || "").includes("thành công")) {
         setTimeout(() => {
           setShowOtpForm(false);
-          onSwitch && onSwitch(); // chuyển về màn đăng nhập
+          onSwitch && onSwitch(); 
         }, 2000);
       }
     } catch (error) {

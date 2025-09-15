@@ -48,19 +48,19 @@ const NotificationDropdown = ({ notifications, setNotifications, setUnread }) =>
   };
 
   const handleClick = async (n) => {
-    // đánh dấu đã đọc trước
+    
     await markAsRead(n.id);
 
-    // điều hướng theo vai trò + tiêu đề
+   
     if (role === "employer") {
-      // Employer: ứng tuyển mới / cập nhật bài đăng -> manage jobs
+      
       navigate("/manage-posts");
     } else if (role === "candidate") {
-      // Candidate: cập nhật trạng thái hồ sơ -> manage applications
+  
       navigate("/manage-applications");
     } else if (role === "admin") {
-      // Admin: điều hướng đến manage-job-posts trong AdminDashboard
-      navigate("/admin/manage-job-posts"); // Giả sử base path là /admin
+      
+      navigate("/admin/manage-job-posts"); 
     }
   };
 

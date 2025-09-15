@@ -1,8 +1,8 @@
-// controllers/conversationController.js
+
 const ConversationService = require('../services/conversationService');
 
 const ConversationController = {
-  // Lấy danh sách conversation theo userId
+
   getUserConversations: async (req, res) => {
     const { userId } = req.params;
     try {
@@ -14,7 +14,7 @@ const ConversationController = {
     }
   },
 
-  // Tạo conversation mới nếu chưa có
+
   createConversation: async (req, res) => {
     const { candidate_id, employer_id } = req.body;
     try {

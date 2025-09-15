@@ -17,7 +17,7 @@ const Favorites = () => {
     handleFormChange,
     submitApplication,
     applyMessage,
-    favorites, // Giả định useFavorites trả về favorites
+    favorites, 
   } = useFavorites();
 
   return (
@@ -35,7 +35,7 @@ const Favorites = () => {
                 navigate={navigate}
                 toggleFavorite={toggleFavorite}
                 handleApplyClick={handleApplyClick}
-                favorites={favorites || jobs.map((j) => j.id)} // Truyền favorites, hoặc dùng jobs.map để lấy id
+                favorites={favorites || jobs.map((j) => j.id)} 
               />
             </div>
           ))}

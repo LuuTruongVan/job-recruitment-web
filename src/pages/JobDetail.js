@@ -87,7 +87,7 @@ const JobDetail = () => {
 
         setJob(jobData);
 
-        // Fetch công việc liên quan
+       
         if (jobData.category) {
           const relatedResponse = await axios.get(
             `/jobposts?category=${jobData.category}`,

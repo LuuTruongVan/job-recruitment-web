@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../db");
 
-// Lấy messages theo conversation
+
 router.get("/:conversationId", async (req,res)=>{
   try{
     const [rows] = await pool.query(
@@ -16,7 +16,7 @@ router.get("/:conversationId", async (req,res)=>{
   }
 });
 
-// Lưu message mới
+
 router.post("/", async (req,res)=>{
   const { conversation_id, sender_id, receiver_id, message } = req.body;
   try{

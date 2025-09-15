@@ -26,7 +26,7 @@ export const useFavorites = () => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [favorites, setFavorites] = useState([]); // Thêm favorites để quản lý danh sách job id
+  const [favorites, setFavorites] = useState([]); 
 
   const navigate = useNavigate();
 
@@ -36,7 +36,7 @@ export const useFavorites = () => {
     localStorage.getItem("admin_token") ||
     "";
 
-  // Lấy danh sách jobs yêu thích
+  
   const fetchFavorites = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -45,7 +45,7 @@ export const useFavorites = () => {
       const res = await getFavorites(token);
       const jobsData = res.data;
 
-      // Gán thông tin vị trí và đổi tên count_favorite thành favorite_count
+      
       const jobsWithPositions = await Promise.all(
         jobsData.map(async (job) => {
           if (job.job_position_id) {
@@ -58,7 +58,7 @@ export const useFavorites = () => {
           } else {
             job.job_position = "Chưa có vị trí";
           }
-          // Đổi tên count_favorite thành favorite_count
+          
           return { ...job, favorite_count: job.count_favorite || 0 };
         })
       );
@@ -83,7 +83,7 @@ export const useFavorites = () => {
     fetchFavorites();
   }, [fetchFavorites, token]);
 
-  // Toggle favorite
+
   const toggleFavorite = async (jobId) => {
     if (!user) {
       navigate("/login");
@@ -96,7 +96,7 @@ export const useFavorites = () => {
         setFavorites((prev) => prev.filter((id) => id !== jobId));
         setJobs((prev) => prev.filter((job) => job.id !== jobId));
       } else {
-        // Gọi API để lấy favorite_count mới
+       
         const jobDetails = await axios.get(`/jobposts/${jobId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -113,7 +113,7 @@ export const useFavorites = () => {
     }
   };
 
-  // Apply job
+  
   const handleApplyClick = (job) => {
     if (!user) {
       navigate("/login");

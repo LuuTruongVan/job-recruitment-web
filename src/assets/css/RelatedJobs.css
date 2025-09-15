@@ -126,7 +126,6 @@
     }
   }
 
-  /* Box riêng cho phần công việc liên quan */
 .related-jobs-section {
     margin-top: 40px;
     padding: 20px;
@@ -148,14 +147,14 @@
     padding-bottom: 8px;
 }
 
-/* Grid 3 bài 1 hàng */
+
 .related-jobs-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
 }
 
-/* Mỗi job card */
+
 .related-job-item {
     display: flex;
     justify-content: center;

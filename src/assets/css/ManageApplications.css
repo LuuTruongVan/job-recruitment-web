@@ -35,26 +35,26 @@
   }
 }
 
-/* Toàn bộ trang */
+
 .manage-applications {
   padding: 24px;
   background-color: #fff;
-  color: #333; /* Màu chữ chính giữ nguyên, không ảnh hưởng đến bảng */
+  color: #333; 
   font-size: 16px;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Tiêu đề chính */
+
 .manage-applications h3 {
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 20px;
-  color: #000; /* Đổi thành đen cho tiêu đề */
+  color: #000; 
   border-left: 5px solid #000;
   padding-left: 10px;
 }
 
-/* Bảng hiển thị ứng tuyển */
+
 .manage-applications table {
   background-color: #fff;
   border-radius: 8px;
@@ -63,23 +63,23 @@
   font-size: 16px;
 }
 
-/* Đầu bảng */
+
 .manage-applications thead {
   background-color: #f9f9f9;
-  color: #000; /* Đổi thành đen cho tiêu đề bảng */
+  color: #000; 
   font-weight: 600;
 }
 
-/* Ô trong bảng */
+
 .manage-applications th,
 .manage-applications td {
   padding: 12px;
   text-align: center;
   vertical-align: middle;
-  color: #000; /* Đổi thành đen cho tất cả chữ trong bảng */
+  color: #000; 
 }
 
-/* Nút bấm */
+
 .manage-applications button {
   font-size: 14px;
   padding: 6px 14px;
@@ -88,20 +88,20 @@
   transition: 0.2s ease-in-out;
 }
 
-/* Nút Hủy ứng tuyển */
+
 .manage-applications .btn-danger {
   background-color: #e74c3c;
-  color: white; /* Giữ màu trắng cho nút */
+  color: white; 
 }
 
 .manage-applications .btn-danger:hover {
   background-color: #c0392b;
 }
 
-/* Nút Quay lại */
+
 .manage-applications .btn-secondary {
   background-color: #666;
-  color: white; /* Giữ màu trắng cho nút */
+  color: white; 
   padding: 8px 18px;
   font-weight: 600;
   border-radius: 6px;
@@ -112,18 +112,17 @@
   background-color: #444;
 }
 
-/* Badge trạng thái */
+
 .manage-applications .badge {
   font-size: 14px;
   padding: 6px 10px;
   border-radius: 6px;
-  color: #000; /* Đổi thành đen cho badge */
-}
+  color: #000; }
 
-/* Thông báo khi không có ứng tuyển */
+
 .manage-applications p {
   font-size: 16px;
-  color: #000; /* Đổi thành đen cho thông báo */
+  color: #000;
   text-align: center;
   margin-top: 20px;
 }

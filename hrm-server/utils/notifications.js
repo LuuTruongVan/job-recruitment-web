@@ -23,7 +23,7 @@ async function createNotification(userId, title, message, io) {
   return newNotification;
 }
 
-// Hàm riêng biệt nếu muốn tách “emit realtime + log”
+
 async function createAndEmitNotification(io, userId, title, message) {
   const newNotification = await createNotification(userId, title, message, io);
   return newNotification;

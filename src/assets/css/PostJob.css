@@ -5,7 +5,7 @@
     border: 1px solid #ccc;
     border-radius: 5px;
     max-width: 600px;
-    margin: 20px auto; /* Căn giữa form */
+    margin: 20px auto; 
   }
   
   .post-job h2 {
@@ -15,13 +15,13 @@
   }
   
   .success-message {
-    color: #28a745; /* Màu xanh cho thành công */
+    color: #28a745; 
     text-align: center;
     margin-bottom: 15px;
   }
   
   .error-message {
-    color: #dc3545; /* Màu đỏ cho lỗi */
+    color: #dc3545; 
     text-align: center;
     margin-bottom: 15px;
   }
@@ -43,12 +43,12 @@
   }
   
   .post-job .form-control:focus {
-    border-color: #000000; /* Màu viền khi focus */
+    border-color: #000000; 
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   }
   
   .post-job textarea.form-control {
-    min-height: 100px; /* Chiều cao tối thiểu cho textarea */
+    min-height: 100px; 
   }
   
   .post-job .btn-primary {

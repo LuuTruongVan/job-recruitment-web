@@ -1,9 +1,9 @@
-// controllers/favoritesController.js
+
 const jwt = require("jsonwebtoken");
 const FavoritesService = require("../services/favoritesService");
 
 const FavoritesController = {
-  // Lấy danh sách job yêu thích
+  
   getUserFavorites: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
@@ -19,7 +19,7 @@ const FavoritesController = {
     }
   },
 
-  // Thêm job vào favorites
+ 
   addFavorite: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
@@ -40,7 +40,7 @@ const FavoritesController = {
     }
   },
 
-  // Xóa job khỏi favorites
+  
   removeFavorite: async (req, res) => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
@@ -57,7 +57,7 @@ const FavoritesController = {
     }
   },
 
-  // Đếm số lượng favorites của một job
+
   countFavorites: async (req, res) => {
     try {
       const { jobId } = req.params;

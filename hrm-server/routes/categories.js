@@ -1,9 +1,9 @@
-// routes/category.js
+
 const express = require('express');
 const router = express.Router();
 const CategoryController = require('../controllers/categoryController');
 
-// Public routes
+
 router.get('/', CategoryController.getCategories);
 router.get('/count', CategoryController.getCategoriesCount);
 router.delete('/:id', CategoryController.delete);
