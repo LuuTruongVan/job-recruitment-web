@@ -80,15 +80,27 @@ const JobpostsController = {
   create: async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) return res.status(401).json({ message: 'No token provided' });
-
+  
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const insertId = await JobpostsService.createJobPost(req.body, decoded.id, req.app.get('io'));
+  
+      
+      if (req.file) {
+        req.body.jobImagePath = `/uploads/job_images/${req.file.filename}`;
+      }
+  
+      const insertId = await JobpostsService.createJobPost(
+        req.body,
+        decoded.id,
+        req.app.get('io')
+      );
+  
       res.status(201).json({ message: 'Job posted successfully', insertId });
     } catch (error) {
       res.status(500).json({ message: error.message || 'Error posting job' });
     }
   },
+  
 
   
   update: async (req, res) => {

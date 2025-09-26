@@ -288,9 +288,7 @@ const Home = () => {
                   className="d-block w-100"
                   alt={job.title}
                 />
-                <div className="carousel-caption">
-                  <h5>{job.title}</h5>
-                </div>
+               
               </div>
             ))
           ) : (
